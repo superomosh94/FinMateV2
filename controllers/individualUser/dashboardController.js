@@ -1,81 +1,116 @@
+// controllers/individualUser/dashboardController.js
 const db = require('../../config/db');
 
-const dashboardController = {
-  getDashboard: async (req, res) => {
-    try {
-      const userId = req.user.id;
+const getDashboard = async (req, res) => {
+  try {
+    console.log('👤 Individual user dashboard accessed by:', req.user.email);
+    
+    // Get dashboard statistics
+    const [monthlyExpenses] = await db.pool.execute(`
+      SELECT COALESCE(SUM(amount), 0) as total 
+      FROM expenses 
+      WHERE user_id = ? 
+      AND MONTH(date) = MONTH(CURRENT_DATE()) 
+      AND YEAR(date) = YEAR(CURRENT_DATE())
+    `, [req.user.id]);
+    
+    const [totalSavings] = await db.pool.execute(`
+      SELECT COALESCE(SUM(current_amount), 0) as total 
+      FROM savings 
+      WHERE user_id = ? AND is_active = TRUE
+    `, [req.user.id]);
+    
+    const [activeBudgetsCount] = await db.pool.execute(`
+      SELECT COUNT(*) as count 
+      FROM budgets 
+      WHERE user_id = ? AND is_active = TRUE
+    `, [req.user.id]);
+    
+    const [plannedExpensesCount] = await db.pool.execute(`
+      SELECT COUNT(*) as count 
+      FROM planned_expenses 
+      WHERE user_id = ? AND status != 'completed'
+    `, [req.user.id]);
+    
+    const [unreadNotifications] = await db.pool.execute(`
+      SELECT COUNT(*) as count 
+      FROM notifications 
+      WHERE user_id = ? AND is_read = FALSE
+    `, [req.user.id]);
+    
+    // Get active budgets with progress
+    const [activeBudgets] = await db.pool.execute(`
+      SELECT b.*, 
+             COALESCE(SUM(e.amount), 0) as spent
+      FROM budgets b
+      LEFT JOIN expenses e ON b.id = e.budget_id 
+      WHERE b.user_id = ? AND b.is_active = TRUE
+      GROUP BY b.id
+      ORDER BY b.created_at DESC
+      LIMIT 5
+    `, [req.user.id]);
+    
+    // Get savings goals
+    const [savingsGoals] = await db.pool.execute(`
+      SELECT * FROM savings 
+      WHERE user_id = ? AND is_active = TRUE
+      ORDER BY target_date ASC
+      LIMIT 6
+    `, [req.user.id]);
+    
+    // Get recent expenses
+    const [recentExpenses] = await db.pool.execute(`
+      SELECT * FROM expenses 
+      WHERE user_id = ? 
+      ORDER BY date DESC 
+      LIMIT 5
+    `, [req.user.id]);
+    
+    // Get upcoming planned expenses
+    const [upcomingPlannedExpenses] = await db.pool.execute(`
+      SELECT * FROM planned_expenses 
+      WHERE user_id = ? 
+      AND status != 'completed'
+      AND planned_date >= CURDATE()
+      ORDER BY planned_date ASC 
+      LIMIT 5
+    `, [req.user.id]);
 
-      // Get personal statistics
-      const [expenseCount] = await db.pool.execute(
-        'SELECT COUNT(*) as count FROM expenses WHERE user_id = ?',
-        [userId]
-      );
-
-      const [totalExpenses] = await db.pool.execute(
-        'SELECT SUM(amount) as total FROM expenses WHERE user_id = ? AND status = "approved"',
-        [userId]
-      );
-
-      const [budgetCount] = await db.pool.execute(
-        'SELECT COUNT(*) as count FROM budgets WHERE user_id = ?',
-        [userId]
-      );
-
-      const [savingsCount] = await db.pool.execute(
-        'SELECT COUNT(*) as count FROM savings WHERE user_id = ?',
-        [userId]
-      );
-
-      const [savingsTotal] = await db.pool.execute(
-        'SELECT SUM(current_amount) as total FROM savings WHERE user_id = ?',
-        [userId]
-      );
-
-      // Get recent expenses
-      const [recentExpenses] = await db.pool.execute(
-        `SELECT e.* 
-         FROM expenses e 
-         WHERE e.user_id = ? 
-         ORDER BY e.created_at DESC 
-         LIMIT 5`,
-        [userId]
-      );
-
-      // Get expense summary by category
-      const [expenseSummary] = await db.pool.execute(
-        `SELECT category, SUM(amount) as total, COUNT(*) as count 
-         FROM expenses 
-         WHERE user_id = ? AND status = 'approved'
-         GROUP BY category 
-         ORDER BY total DESC 
-         LIMIT 5`,
-        [userId]
-      );
-
-      res.render('individualUser/dashboard', {
-        title: 'Dashboard - FinMate',
-        user: req.user,
-        stats: {
-          totalExpenses: expenseCount[0].count,
-          totalSpent: totalExpenses[0].total || 0,
-          budgets: budgetCount[0].count,
-          savingsGoals: savingsCount[0].count,
-          totalSavings: savingsTotal[0].total || 0
-        },
-        recentExpenses,
-        expenseSummary
-      });
-    } catch (error) {
-      console.error('Individual user dashboard error:', error);
-      res.render('individualUser/dashboard', {
-        title: 'Dashboard - FinMate',
-        user: req.user,
-        stats: {},
-        recentExpenses: [],
-        expenseSummary: []
-      });
-    }
+    res.render('individualUser/dashboard', {
+      title: 'Personal Dashboard - FinMate',
+      user: req.user,
+      stats: {
+        monthlyExpenses: monthlyExpenses[0].total,
+        totalSavings: totalSavings[0].total,
+        activeBudgets: activeBudgetsCount[0].count,
+        plannedExpenses: plannedExpensesCount[0].count,
+        unreadNotifications: unreadNotifications[0].count
+      },
+      activeBudgets: activeBudgets,
+      savingsGoals: savingsGoals,
+      recentExpenses: recentExpenses,
+      upcomingPlannedExpenses: upcomingPlannedExpenses
+    });
+  } catch (error) {
+    console.error('💥 Individual user dashboard error:', error);
+    res.render('individualUser/dashboard', {
+      title: 'Personal Dashboard - FinMate',
+      user: req.user,
+      stats: {
+        monthlyExpenses: 0,
+        totalSavings: 0,
+        activeBudgets: 0,
+        plannedExpenses: 0,
+        unreadNotifications: 0
+      },
+      activeBudgets: [],
+      savingsGoals: [],
+      recentExpenses: [],
+      upcomingPlannedExpenses: []
+    });
   }
 };
 
-module.exports = dashboardController;
+module.exports = {
+  getDashboard
+};

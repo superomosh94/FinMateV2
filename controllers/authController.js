@@ -134,16 +134,16 @@ const authController = {
 
       console.log('✅ Login successful for user:', user.email);
 
+      // FIXED: Use correct redirect paths that actually exist
       const redirectPaths = {
         'super_admin': '/super-admin/dashboard',
         'admin': '/admin/dashboard',
         'team_leader': '/team-leader/dashboard',
         'team_member': '/team-member/dashboard',
-        'individual_user': '/user/dashboard',
-        'default': '/dashboard'
+        'individual_user': '/user/dashboard'
       };
 
-      const redirectPath = redirectPaths[roleName] || redirectPaths.default;
+      const redirectPath = redirectPaths[roleName] || '/user/dashboard';
       console.log('🔄 Redirecting to:', redirectPath);
 
       return res.redirect(redirectPath);
@@ -303,18 +303,18 @@ const authController = {
     }
   },
 
-logout: async (req, res) => {
-  try {
-    console.log('🚪 Logging out user');
+  logout: (req, res) => {
+    console.log('🚪 POST /auth/logout - Clearing token');
+    // FIXED: Clear the correct cookie name (using 'token' instead of 'accessToken'/'refreshToken')
+    res.clearCookie('token');
+    
+    // Also clear any other potential cookies
     res.clearCookie('accessToken');
     res.clearCookie('refreshToken');
+    
+    console.log('🔄 Redirecting to login page');
     res.redirect('/auth/login');
-  } catch (error) {
-    console.error('💥 Logout error:', error);
-    res.status(500).send('Logout failed');
-  }
-}
-,
+  },
 
   getProfile: (req, res) => {
     console.log('👤 GET /auth/profile');

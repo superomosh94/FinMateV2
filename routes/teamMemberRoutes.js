@@ -1,30 +1,60 @@
+// routes/teamMemberRoutes.js
 const express = require('express');
-const { authenticate, requireRole } = require('../middlewares/authMiddleware');
-const dashboardController = require('../controllers/teamMember/dashboardController');
-const expenseController = require('../controllers/teamMember/expenseController');
-const plannedExpenseController = require('../controllers/teamMember/plannedExpenseController');
-
 const router = express.Router();
 
-router.use(authenticate, requireRole(['team_member']));
+console.log('🔍 teamMemberRoutes.js - LOADING');
 
-// Dashboard
-router.get('/dashboard', dashboardController.getDashboard);
+// Apply authentication and role check
+const { authenticate, requireRole } = require('../middlewares/authMiddleware');
+router.use(authenticate);
+router.use(requireRole('team_member'));
 
-// Expense Management
-router.get('/expenses', expenseController.getExpenses);
-router.get('/expenses/add', expenseController.getAddExpense);
-router.post('/expenses/add', expenseController.postAddExpense);
-router.get('/expenses/edit/:id', expenseController.getEditExpense);
-router.post('/expenses/edit/:id', expenseController.postEditExpense);
-router.post('/expenses/delete/:id', expenseController.deleteExpense);
+// Test route (keep as JSON)
+router.get('/test', (req, res) => {
+  res.json({ 
+    message: 'Team Member Routes - WORKING!',
+    user: req.user,
+    timestamp: new Date().toISOString()
+  });
+});
 
-// Planned Expenses
-router.get('/planned-expenses', plannedExpenseController.getPlannedExpenses);
-router.get('/planned-expenses/add', plannedExpenseController.getAddPlannedExpense);
-router.post('/planned-expenses/add', plannedExpenseController.postAddPlannedExpense);
-router.get('/planned-expenses/edit/:id', plannedExpenseController.getEditPlannedExpense);
-router.post('/planned-expenses/edit/:id', plannedExpenseController.postEditPlannedExpense);
-router.post('/planned-expenses/delete/:id', plannedExpenseController.deletePlannedExpense);
+// Dashboard - RENDER EJS TEMPLATE
+router.get('/dashboard', (req, res) => {
+  res.render('teamMember/dashboard', {
+    title: 'Team Member Dashboard - FinMate',
+    user: req.user
+  });
+});
+
+// Expenses - RENDER EJS TEMPLATE (you'll need to create this view later)
+router.get('/expenses', (req, res) => {
+  res.render('teamMember/expenses', {
+    title: 'My Expenses - FinMate',
+    user: req.user
+  });
+});
+
+// Keep other routes as JSON for now, or update them to render EJS templates
+router.get('/expenses/add', (req, res) => {
+  res.json({ message: 'Add Expense Form' });
+});
+
+router.post('/expenses/add', (req, res) => {
+  res.json({ message: 'Expense Added' });
+});
+
+router.get('/planned-expenses', (req, res) => {
+  res.json({ message: 'Planned Expenses' });
+});
+
+router.get('/planned-expenses/add', (req, res) => {
+  res.json({ message: 'Add Planned Expense Form' });
+});
+
+router.post('/planned-expenses/add', (req, res) => {
+  res.json({ message: 'Planned Expense Added' });
+});
+
+console.log('🔍 teamMemberRoutes.js - LOADED SUCCESSFULLY');
 
 module.exports = router;

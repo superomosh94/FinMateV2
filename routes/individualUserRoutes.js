@@ -9,7 +9,7 @@ const notificationController = require('../controllers/individualUser/notificati
 
 const router = express.Router();
 
-router.use(authenticate, requireRole(['individual_user']));
+router.use(authenticate, requireRole('individual_user')); // ✅ CORRECT - string
 
 // Dashboard
 router.get('/dashboard', dashboardController.getDashboard);

@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .sidebar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .sidebar .nav-link {
+            color: #fff;
+            padding: 12px 20px;
+            margin: 4px 0;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        .sidebar .nav-link:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateX(5px);
+        }
+        .sidebar .nav-link.active {
+            background: rgba(255,255,255,0.2);
+            font-weight: bold;
+        }
+        .stat-card {
+            border-radius: 10px;
+            transition: transform 0.3s;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        .border-left-primary { border-left: 4px solid #4e73df !important; }
+        .border-left-success { border-left: 4px solid #1cc88a !important; }
+        .border-left-warning { border-left: 4px solid #f6c23e !important; }
+        .border-left-info { border-left: 4px solid #36b9cc !important; }
+        .border-left-danger { border-left: 4px solid #e74a3b !important; }
+        .progress {
+            height: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <h4 class="text-white text-center mb-4">
+                        <i class="fas fa-user me-2"></i>
+                        FinMate Personal
+                    </h4>
+                    <ul class="nav flex-column">
+                        <!-- Dashboard -->
+                        <li class="nav-item">
+                            <a class="nav-link active" href="/user/dashboard">
+                                <i class="fas fa-tachometer-alt me-2"></i>
+                                Dashboard
+                            </a>
+                        </li>
+
+                        <!-- Expense Management -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="expensesDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-money-bill-wave me-2"></i>
+                                Expenses
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="/user/expenses">My Expenses</a></li>
+                                <li><a class="dropdown-item" href="/user/expenses/add">Add Expense</a></li>
+                            </ul>
+                        </li>
+
+                        <!-- Planned Expenses -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="plannedExpensesDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-calendar-alt me-2"></i>
+                                Planned Expenses
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="/user/planned-expenses">My Planned Expenses</a></li>
+                                <li><a class="dropdown-item" href="/user/planned-expenses/add">Plan New Expense</a></li>
+                            </ul>
+                        </li>
+
+                        <!-- Budget Management -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="budgetsDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-wallet me-2"></i>
+                                Budgets
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="/user/budgets">My Budgets</a></li>
+                                <li><a class="dropdown-item" href="/user/budgets/add">Create Budget</a></li>
+                            </ul>
+                        </li>
+
+                        <!-- Savings Management -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="savingsDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-piggy-bank me-2"></i>
+                                Savings
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="/user/savings">My Savings</a></li>
+                                <li><a class="dropdown-item" href="/user/savings/add">Add Savings Goal</a></li>
+                            </ul>
+                        </li>
+
+                        <!-- Notifications -->
+                        <li class="nav-item">
+                            <a class="nav-link" href="/user/notifications">
+                                <i class="fas fa-bell me-2"></i>
+                                Notifications
+                                <% if (stats.unreadNotifications > 0) { %>
+                                    <span class="badge bg-danger float-end"><%= stats.unreadNotifications %></span>
+                                <% } %>
+                            </a>
+                        </li>
+
+                        <!-- Profile & Logout -->
+                        <li class="nav-item mt-4">
+                            <a class="nav-link" href="/auth/profile">
+                                <i class="fas fa-user me-2"></i>
+                                My Profile
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/auth/logout" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                <i class="fas fa-sign-out-alt me-2"></i>
+                                Logout
+                            </a>
+                            <form id="logout-form" action="/auth/logout" method="POST" style="display: none;"></form>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Main content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">
+                        <i class="fas fa-tachometer-alt me-2 text-primary"></i>
+                        Personal Dashboard
+                    </h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <span class="me-2 badge bg-primary">
+                            <i class="fas fa-user me-1"></i>
+                            <%= user.first_name %> <%= user.last_name %>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Welcome Alert -->
+                <div class="alert alert-info mb-4">
+                    <h5><i class="fas fa-info-circle me-2"></i>Welcome to Your Personal Finance Dashboard</h5>
+                    <p class="mb-0">Track your expenses, manage budgets, and achieve your savings goals all in one place.</p>
+                </div>
+
+                <!-- Financial Overview Cards -->
+                <div class="row mb-4">
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card border-left-primary shadow h-100 py-2 stat-card">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                            Total Expenses (Month)</div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                            $<%= (stats.monthlyExpenses || 0).toFixed(2) %>
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-money-bill-wave fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card border-left-success shadow h-100 py-2 stat-card">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                            Total Savings</div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                            $<%= (stats.totalSavings || 0).toFixed(2) %>
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-piggy-bank fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card border-left-warning shadow h-100 py-2 stat-card">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                            Active Budgets</div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                            <%= stats.activeBudgets || 0 %>
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-wallet fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card border-left-info shadow h-100 py-2 stat-card">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                            Planned Expenses</div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                            <%= stats.plannedExpenses || 0 %>
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-calendar-alt fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card shadow">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-bolt me-2"></i>Quick Actions
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row text-center">
+                                    <div class="col-md-3 col-sm-6 mb-3">
+                                        <a href="/user/expenses/add" class="btn btn-primary btn-lg w-100">
+                                            <i class="fas fa-plus-circle fa-2x mb-2"></i><br>
+                                            Add Expense
+                                        </a>
+                                    </div>
+                                    <div class="col-md-3 col-sm-6 mb-3">
+                                        <a href="/user/planned-expenses/add" class="btn btn-success btn-lg w-100">
+                                            <i class="fas fa-calendar-plus fa-2x mb-2"></i><br>
+                                            Plan Expense
+                                        </a>
+                                    </div>
+                                    <div class="col-md-3 col-sm-6 mb-3">
+                                        <a href="/user/budgets/add" class="btn btn-warning btn-lg w-100">
+                                            <i class="fas fa-wallet fa-2x mb-2"></i><br>
+                                            Create Budget
+                                        </a>
+                                    </div>
+                                    <div class="col-md-3 col-sm-6 mb-3">
+                                        <a href="/user/savings/add" class="btn btn-info btn-lg w-100">
+                                            <i class="fas fa-bullseye fa-2x mb-2"></i><br>
+                                            Savings Goal
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Budget Progress -->
+                <% if (activeBudgets && activeBudgets.length > 0) { %>
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card shadow">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-chart-pie me-2"></i>Budget Progress
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <% activeBudgets.forEach(budget => { 
+                                    const progress = Math.min((budget.spent / budget.amount) * 100, 100);
+                                    const progressClass = progress >= 90 ? 'bg-danger' : progress >= 75 ? 'bg-warning' : 'bg-success';
+                                %>
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between mb-1">
+                                            <span><%= budget.name %></span>
+                                            <span>$<%= budget.spent.toFixed(2) %> / $<%= budget.amount.toFixed(2) %></span>
+                                        </div>
+                                        <div class="progress">
+                                            <div class="progress-bar <%= progressClass %>" 
+                                                 role="progressbar" 
+                                                 style="width: <%= progress %>%"
+                                                 aria-valuenow="<%= progress %>" 
+                                                 aria-valuemin="0" 
+                                                 aria-valuemax="100">
+                                                <%= progress.toFixed(1) %>%
+                                            </div>
+                                        </div>
+                                        <small class="text-muted">Category: <%= budget.category %></small>
+                                    </div>
+                                <% }); %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <% } %>
+
+                <!-- Savings Goals -->
+                <% if (savingsGoals && savingsGoals.length > 0) { %>
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card shadow">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-bullseye me-2"></i>Savings Goals
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <% savingsGoals.forEach(goal => { 
+                                        const progress = (goal.current_amount / goal.target_amount) * 100;
+                                    %>
+                                        <div class="col-md-4 mb-3">
+                                            <div class="card h-100">
+                                                <div class="card-body text-center">
+                                                    <h6 class="card-title"><%= goal.name %></h6>
+                                                    <div class="progress mb-2">
+                                                        <div class="progress-bar bg-success" 
+                                                             role="progressbar" 
+                                                             style="width: <%= progress %>%"
+                                                             aria-valuenow="<%= progress %>" 
+                                                             aria-valuemin="0" 
+                                                             aria-valuemax="100">
+                                                            <%= progress.toFixed(1) %>%
+                                                        </div>
+                                                    </div>
+                                                    <p class="card-text">
+                                                        <small>$<%= goal.current_amount.toFixed(2) %> of $<%= goal.target_amount.toFixed(2) %></small>
+                                                    </p>
+                                                    <a href="/user/savings/add-amount/<%= goal.id %>" class="btn btn-sm btn-outline-primary">
+                                                        Add Money
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    <% }); %>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <% } %>
+
+                <!-- Recent Activity -->
+                <div class="row">
+                    <!-- Recent Expenses -->
+                    <div class="col-lg-6 mb-4">
+                        <div class="card shadow">
+                            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                                <h6 class="m-0 font-weight-bold text-primary">Recent Expenses</h6>
+                                <a href="/user/expenses" class="btn btn-sm btn-outline-primary">View All</a>
+                            </div>
+                            <div class="card-body">
+                                <% if (recentExpenses && recentExpenses.length > 0) { %>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Description</th>
+                                                    <th>Amount</th>
+                                                    <th>Category</th>
+                                                    <th>Date</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <% recentExpenses.forEach(expense => { %>
+                                                    <tr>
+                                                        <td class="text-truncate" style="max-width: 150px;" title="<%= expense.description %>">
+                                                            <%= expense.description %>
+                                                        </td>
+                                                        <td class="text-<%= expense.amount > 0 ? 'danger' : 'success' %>">
+                                                            $<%= Math.abs(expense.amount).toFixed(2) %>
+                                                        </td>
+                                                        <td>
+                                                            <span class="badge bg-secondary"><%= expense.category %></span>
+                                                        </td>
+                                                        <td><%= new Date(expense.date).toLocaleDateString() %></td>
+                                                    </tr>
+                                                <% }); %>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                <% } else { %>
+                                    <p class="text-muted text-center py-3">No expenses recorded yet.</p>
+                                    <div class="text-center">
+                                        <a href="/user/expenses/add" class="btn btn-primary">Add Your First Expense</a>
+                                    </div>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Upcoming Planned Expenses -->
+                    <div class="col-lg-6 mb-4">
+                        <div class="card shadow">
+                            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                                <h6 class="m-0 font-weight-bold text-primary">Upcoming Planned Expenses</h6>
+                                <a href="/user/planned-expenses" class="btn btn-sm btn-outline-primary">View All</a>
+                            </div>
+                            <div class="card-body">
+                                <% if (upcomingPlannedExpenses && upcomingPlannedExpenses.length > 0) { %>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Description</th>
+                                                    <th>Amount</th>
+                                                    <th>Due Date</th>
+                                                    <th>Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <% upcomingPlannedExpenses.forEach(expense => { %>
+                                                    <tr>
+                                                        <td class="text-truncate" style="max-width: 150px;" title="<%= expense.description %>">
+                                                            <%= expense.description %>
+                                                        </td>
+                                                        <td>$<%= expense.estimated_amount.toFixed(2) %></td>
+                                                        <td>
+                                                            <%= new Date(expense.planned_date).toLocaleDateString() %>
+                                                            <% 
+                                                                const today = new Date();
+                                                                const dueDate = new Date(expense.planned_date);
+                                                                const diffTime = dueDate - today;
+                                                                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                                                            %>
+                                                            <% if (diffDays <= 7 && diffDays > 0) { %>
+                                                                <span class="badge bg-warning">in <%= diffDays %> days</span>
+                                                            <% } else if (diffDays <= 0) { %>
+                                                                <span class="badge bg-danger">overdue</span>
+                                                            <% } %>
+                                                        </td>
+                                                        <td>
+                                                            <span class="badge bg-<%= expense.status === 'completed' ? 'success' : 'warning' %>">
+                                                                <%= expense.status %>
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                <% }); %>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                <% } else { %>
+                                    <p class="text-muted text-center py-3">No upcoming planned expenses.</p>
+                                    <div class="text-center">
+                                        <a href="/user/planned-expenses/add" class="btn btn-success">Plan Your First Expense</a>
+                                    </div>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Initialize dropdowns
+        var dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'))
+        var dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
+            return new bootstrap.Dropdown(dropdownToggleEl)
+        });
+    </script>
+</body>
+</html>
