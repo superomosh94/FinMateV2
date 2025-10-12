@@ -1,0 +1,42 @@
+<%
+    layout = 'layouts/main';
+    title = 'Add Savings Goal';
+    currentPage = 'savings';
+%>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Add Savings Goal</h5>
+            </div>
+            <div class="card-body">
+                <form action="/user/savings/add" method="POST">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Goal Name</label>
+                        <input type="text" class="form-control" id="name" name="name" 
+                               placeholder="e.g., New Car, Vacation, Emergency Fund" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="target_amount" class="form-label">Target Amount</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" step="0.01" class="form-control" id="target_amount" name="target_amount" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="/user/savings" class="btn btn-secondary me-md-2">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Add Savings Goal</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

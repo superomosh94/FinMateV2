@@ -6,16 +6,14 @@ const session = require('express-session');
 const morgan = require('morgan');
 const helmet = require('helmet');
 const cors = require('cors');
+const db = require('./config/db');
 
 const app = express();
-
-// Database connection
-const db = require('./config/db');
 
 // Middleware
 app.use(helmet());
 app.use(cors());
-app.use(morgan('combined'));
+app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -29,7 +27,7 @@ app.use(session({
 // Static files
 app.use(express.static(path.join(__dirname, 'public')));
 
-// View engine setup
+// View engine
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
@@ -40,168 +38,71 @@ app.use((req, res, next) => {
   next();
 });
 
-console.log('🔄 Loading routes...');
-
-// Enhanced route loading with detailed debugging
+// Route loader
 const loadRoute = (routePath, routeName) => {
   try {
-    console.log(`\n🔍 Loading: ${routeName} from ${routePath}`);
-    
-    // Clear the require cache to ensure fresh load
     delete require.cache[require.resolve(routePath)];
-    
     const route = require(routePath);
-    
-    console.log(`📦 ${routeName} - Type: ${typeof route}`);
-    console.log(`📦 ${routeName} - Is function: ${typeof route === 'function'}`);
-    console.log(`📦 ${routeName} - Constructor: ${route?.constructor?.name}`);
-    
-    if (typeof route !== 'function') {
-      console.error(`❌ ${routeName} is NOT a function!`);
-      console.error(`❌ Actual value:`, JSON.stringify(route, null, 2).substring(0, 200));
-      throw new Error(`Route must export a router function but got ${typeof route}`);
-    }
-    
-    console.log(`✅ ${routeName} loaded successfully as function`);
+    console.log(`✅ ${routeName} loaded`);
     return route;
-    
   } catch (error) {
-    console.error(`💥 CRITICAL ERROR loading ${routeName}:`, error.message);
-    console.error(error.stack);
-    
-    // Create emergency router
+    console.error(`❌ Failed to load ${routeName}:`, error.message);
     const express = require('express');
-    const emergencyRouter = express.Router();
-    emergencyRouter.get('*', (req, res) => {
-      res.status(500).json({
-        error: 'Route loading failed',
-        route: routeName,
-        message: error.message
-      });
-    });
-    return emergencyRouter;
+    const fallback = express.Router();
+    fallback.get('*', (req, res) => res.status(500).json({ error: `Route ${routeName} failed`, message: error.message }));
+    return fallback;
   }
 };
 
-// Load and validate each route individually
-console.log('\n=== LOADING INDIVIDUAL ROUTES ===');
+// Load routes
+const authRoutes = loadRoute('./routes/authRoutes', 'Auth');
+const superAdminRoutes = loadRoute('./routes/superAdminRoutes', 'Super Admin');
+const adminRoutes = loadRoute('./routes/adminRoutes', 'Admin');
+const teamLeaderRoutes = loadRoute('./routes/teamLeaderRoutes', 'Team Leader');
+const teamMemberRoutes = loadRoute('./routes/teamMemberRoutes', 'Team Member');
+const individualUserRoutes = loadRoute('./routes/individualUserRoutes', 'Individual User');
+const dashboardRoutes = loadRoute('./routes/dashboardRoutes', 'dashboardRoutes');
 
-const authRoutes = loadRoute('./routes/authRoutes', 'Auth Routes');
-const superAdminRoutes = loadRoute('./routes/superAdminRoutes', 'Super Admin Routes');
-const adminRoutes = loadRoute('./routes/adminRoutes', 'Admin Routes');
-const teamLeaderRoutes = loadRoute('./routes/teamLeaderRoutes', 'Team Leader Routes');
-const teamMemberRoutes = loadRoute('./routes/teamMemberRoutes', 'Team Member Routes');
-const individualUserRoutes = loadRoute('./routes/individualUserRoutes', 'Individual User Routes');
+// Mount routes
+app.use('/auth', authRoutes);
+app.use('/super-admin', superAdminRoutes);
+app.use('/admin', adminRoutes);
+app.use('/team-leader', teamLeaderRoutes);
+app.use('/team-member', teamMemberRoutes);
+app.use('/user', individualUserRoutes);
+app.use('/', dashboardRoutes);
 
-console.log('\n=== MOUNTING ROUTES ===');
+// Routes
+app.get('/', (req, res) => res.render('index', { title: 'Welcome to FinMate' }));
 
-// Mount routes with try-catch for each one
-try {
-  console.log('🔄 Mounting /auth');
-  app.use('/auth', authRoutes);
-  console.log('✅ /auth mounted');
-} catch (error) {
-  console.error('❌ Failed to mount /auth:', error.message);
-}
+app.get('/health', (req, res) => res.json({
+  status: 'OK',
+  timestamp: new Date().toISOString(),
+  message: 'Server is running correctly'
+}));
 
-try {
-  console.log('🔄 Mounting /super-admin');
-  app.use('/super-admin', superAdminRoutes);
-  console.log('✅ /super-admin mounted');
-} catch (error) {
-  console.error('❌ Failed to mount /super-admin:', error.message);
-}
-
-try {
-  console.log('🔄 Mounting /admin');
-  app.use('/admin', adminRoutes);
-  console.log('✅ /admin mounted');
-} catch (error) {
-  console.error('❌ Failed to mount /admin:', error.message);
-}
-
-try {
-  console.log('🔄 Mounting /team-leader');
-  app.use('/team-leader', teamLeaderRoutes);
-  console.log('✅ /team-leader mounted');
-} catch (error) {
-  console.error('❌ Failed to mount /team-leader:', error.message);
-}
-
-try {
-  console.log('🔄 Mounting /team-member');
-  app.use('/team-member', teamMemberRoutes);
-  console.log('✅ /team-member mounted');
-} catch (error) {
-  console.error('❌ Failed to mount /team-member:', error.message);
-}
-
-try {
-  console.log('🔄 Mounting /user');
-  app.use('/user', individualUserRoutes);
-  console.log('✅ /user mounted');
-} catch (error) {
-  console.error('❌ Failed to mount /user:', error.message);
-  // Create emergency user routes
-  const express = require('express');
-  const emergencyUserRouter = express.Router();
-  emergencyUserRouter.get('*', (req, res) => {
-    res.json({ message: 'User routes - emergency fallback' });
-  });
-  app.use('/user', emergencyUserRouter);
-  console.log('✅ Emergency /user routes mounted');
-}
-
-console.log('\n=== ALL ROUTES MOUNTED ===');
-
-// Home route
-app.get('/', (req, res) => {
-  res.render('index', { title: 'Welcome to FinMate' });
-});
-
-// Test route to verify server is working
-app.get('/health', (req, res) => {
-  res.json({ 
-    status: 'OK', 
-    timestamp: new Date().toISOString(),
-    message: 'Server is running correctly'
-  });
-});
-
-// Error handling middleware
-try {
-  const { errorHandler, notFound } = require('./middlewares/errorMiddleware');
-  app.use(notFound);
-  app.use(errorHandler);
-} catch (error) {
-  console.error('Error middleware failed:', error.message);
-}
-
-// 404 handler - fallback
+// 404 fallback
 app.use((req, res) => {
-  res.status(404).render('404', { title: 'Page Not Found' });
+  console.warn('404:', req.method, req.url);
+  res.status(404).render('404', { title: 'Page Not Found', requestedUrl: req.url });
 });
 
 const PORT = process.env.PORT || 3000;
 
-// Test database connection and start server
+// Server start
 db.getConnection()
   .then(() => {
-    console.log('✅ Database connected successfully');
-    
-    // Initialize database tables
-    db.initDatabase().then(() => {
-      console.log('✅ Database tables initialized');
-    });
-
+    console.log('✅ Database connected');
+    return db.initDatabase();
+  })
+  .then(() => {
+    console.log('✅ Database initialized');
     app.listen(PORT, () => {
-      console.log(`🚀 Server running on port ${PORT}`);
-      console.log(`📱 App URL: http://localhost:${PORT}`);
-      console.log(`❤️  Health check: http://localhost:${PORT}/health`);
+      console.log(`🚀 Server running at http://localhost:${PORT}`);
     });
   })
   .catch(err => {
-    console.error('❌ Database connection failed:', err);
+    console.error('❌ Database connection failed:', err.message);
     process.exit(1);
   });
 

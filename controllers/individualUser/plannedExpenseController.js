@@ -1,136 +1,140 @@
-const db = require('../../config/db');
+const pool = require('../../config/db');
 
-const plannedExpenseController = {
-  getPlannedExpenses: async (req, res) => {
-    try {
-      const userId = req.user.id;
-
-      const [plannedExpenses] = await db.pool.execute(
-        `SELECT pe.* 
-         FROM planned_expenses pe 
-         WHERE pe.user_id = ? 
-         ORDER BY pe.planned_date DESC`,
-        [userId]
-      );
-
-      res.render('individualUser/plannedExpenses/index', {
-        title: 'My Planned Expenses - FinMate',
-        plannedExpenses,
-        user: req.user,
-        categories: require('../../config/appConfig').EXPENSE_CATEGORIES,
-        statusOptions: require('../../config/appConfig').PLANNED_EXPENSE_STATUS
-      });
-    } catch (error) {
-      console.error('Get planned expenses error:', error);
-      res.render('individualUser/plannedExpenses/index', {
-        title: 'My Planned Expenses - FinMate',
-        plannedExpenses: [],
-        user: req.user,
-        categories: require('../../config/appConfig').EXPENSE_CATEGORIES,
-        statusOptions: require('../../config/appConfig').PLANNED_EXPENSE_STATUS
-      });
-    }
-  },
-
-  getAddPlannedExpense: (req, res) => {
-    res.render('individualUser/plannedExpenses/add', {
-      title: 'Add Planned Expense - FinMate',
+const getPlannedExpenses = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const query = `
+      SELECT * FROM planned_expenses 
+      WHERE user_id = ? 
+      ORDER BY planned_date ASC
+    `;
+    const [plannedExpenses] = await pool.execute(query, [userId]);
+    
+    res.render('individualUser/planned-expenses/list', { // ✅ FIXED: hyphen
+      title: 'Planned Expenses',
+      currentPage: 'planned-expenses',
       user: req.user,
-      categories: require('../../config/appConfig').EXPENSE_CATEGORIES
+      plannedExpenses: plannedExpenses
     });
-  },
-
-  postAddPlannedExpense: async (req, res) => {
-    try {
-      const userId = req.user.id;
-      const { amount, description, category, planned_date, status } = req.body;
-
-      await db.pool.execute(
-        `INSERT INTO planned_expenses (user_id, amount, description, category, planned_date, status) 
-         VALUES (?, ?, ?, ?, ?, ?)`,
-        [userId, amount, description, category, planned_date, status || 'planned']
-      );
-
-      res.redirect('/user/planned-expenses');
-    } catch (error) {
-      console.error('Add planned expense error:', error);
-      res.render('individualUser/plannedExpenses/add', {
-        title: 'Add Planned Expense - FinMate',
-        user: req.user,
-        categories: require('../../config/appConfig').EXPENSE_CATEGORIES,
-        error: 'An error occurred while adding planned expense'
-      });
-    }
-  },
-
-  getEditPlannedExpense: async (req, res) => {
-    try {
-      const plannedExpenseId = req.params.id;
-      const userId = req.user.id;
-
-      const [plannedExpenses] = await db.pool.execute(
-        'SELECT * FROM planned_expenses WHERE id = ? AND user_id = ?',
-        [plannedExpenseId, userId]
-      );
-
-      if (plannedExpenses.length === 0) {
-        return res.redirect('/user/planned-expenses');
-      }
-
-      res.render('individualUser/plannedExpenses/edit', {
-        title: 'Edit Planned Expense - FinMate',
-        plannedExpense: plannedExpenses[0],
-        user: req.user,
-        categories: require('../../config/appConfig').EXPENSE_CATEGORIES,
-        statusOptions: require('../../config/appConfig').PLANNED_EXPENSE_STATUS
-      });
-    } catch (error) {
-      console.error('Get edit planned expense error:', error);
-      res.redirect('/user/planned-expenses');
-    }
-  },
-
-  postEditPlannedExpense: async (req, res) => {
-    try {
-      const plannedExpenseId = req.params.id;
-      const userId = req.user.id;
-      const { amount, description, category, planned_date, status } = req.body;
-
-      await db.pool.execute(
-        `UPDATE planned_expenses SET amount = ?, description = ?, category = ?, planned_date = ?, status = ? 
-         WHERE id = ? AND user_id = ?`,
-        [amount, description, category, planned_date, status, plannedExpenseId, userId]
-      );
-
-      res.redirect('/user/planned-expenses');
-    } catch (error) {
-      console.error('Edit planned expense error:', error);
-      res.redirect('/user/planned-expenses');
-    }
-  },
-
-  deletePlannedExpense: async (req, res) => {
-    try {
-      const plannedExpenseId = req.params.id;
-      const userId = req.user.id;
-
-      await db.pool.execute('DELETE FROM planned_expenses WHERE id = ? AND user_id = ?', [plannedExpenseId, userId]);
-      
-      if (req.xhr || req.headers.accept?.includes('application/json')) {
-        return res.json({ success: true, message: 'Planned expense deleted successfully' });
-      }
-      
-      res.redirect('/user/planned-expenses');
-    } catch (error) {
-      console.error('Delete planned expense error:', error);
-      
-      if (req.xhr || req.headers.accept?.includes('application/json')) {
-        return res.status(500).json({ success: false, message: 'Error deleting planned expense' });
-      }
-      
-      res.redirect('/user/planned-expenses');
-    }
+  } catch (error) {
+    console.error('Get planned expenses error:', error);
+    res.status(500).render('individualUser/planned-expenses/list', { // ✅ FIXED: hyphen
+      title: 'Planned Expenses',
+      currentPage: 'planned-expenses',
+      user: req.user,
+      error: 'Failed to load planned expenses'
+    });
   }
 };
 
-module.exports = plannedExpenseController;
+const getAddPlannedExpense = async (req, res) => {
+  res.render('individualUser/planned-expenses/add', { // ✅ FIXED: hyphen
+    title: 'Add Planned Expense',
+    currentPage: 'planned-expenses',
+    user: req.user
+  });
+};
+
+const postAddPlannedExpense = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { amount, description, category, planned_date, recurrence } = req.body;
+    
+    const query = `
+      INSERT INTO planned_expenses (user_id, amount, description, category, planned_date, recurrence) 
+      VALUES (?, ?, ?, ?, ?, ?)
+    `;
+    await pool.execute(query, [userId, amount, description, category, planned_date, recurrence]);
+    
+    res.redirect('/user/planned-expenses?success=true&message=Planned expense added successfully');
+  } catch (error) {
+    console.error('Add planned expense error:', error);
+    res.render('individualUser/planned-expenses/add', { // ✅ FIXED: hyphen
+      title: 'Add Planned Expense',
+      currentPage: 'planned-expenses',
+      user: req.user,
+      error: 'Failed to add planned expense'
+    });
+  }
+};
+
+const getEditPlannedExpense = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+    
+    const query = 'SELECT * FROM planned_expenses WHERE id = ? AND user_id = ?';
+    const [plannedExpenses] = await pool.execute(query, [id, userId]);
+    
+    if (plannedExpenses.length === 0) {
+      return res.status(404).render('error', { 
+        title: 'Not Found',
+        error: 'Planned expense not found' 
+      });
+    }
+    
+    res.render('individualUser/planned-expenses/edit', { // ✅ FIXED: hyphen
+      title: 'Edit Planned Expense',
+      currentPage: 'planned-expenses',
+      user: req.user,
+      expense: plannedExpenses[0]
+    });
+  } catch (error) {
+    console.error('Get edit planned expense error:', error);
+    res.status(500).render('individualUser/planned-expenses/edit', { // ✅ FIXED: hyphen
+      title: 'Edit Planned Expense',
+      currentPage: 'planned-expenses',
+      user: req.user,
+      error: 'Failed to load planned expense'
+    });
+  }
+};
+
+const postEditPlannedExpense = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+    const { amount, description, category, planned_date, recurrence } = req.body;
+    
+    const query = `
+      UPDATE planned_expenses 
+      SET amount = ?, description = ?, category = ?, planned_date = ?, recurrence = ? 
+      WHERE id = ? AND user_id = ?
+    `;
+    await pool.execute(query, [amount, description, category, planned_date, recurrence, id, userId]);
+    
+    res.redirect('/user/planned-expenses?success=true&message=Planned expense updated successfully');
+  } catch (error) {
+    console.error('Edit planned expense error:', error);
+    res.render('individualUser/planned-expenses/edit', { // ✅ FIXED: hyphen
+      title: 'Edit Planned Expense',
+      currentPage: 'planned-expenses',
+      user: req.user,
+      error: 'Failed to update planned expense'
+    });
+  }
+};
+
+const deletePlannedExpense = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+    
+    const query = 'DELETE FROM planned_expenses WHERE id = ? AND user_id = ?';
+    await pool.execute(query, [id, userId]);
+    
+    res.redirect('/user/planned-expenses?success=true&message=Planned expense deleted successfully');
+  } catch (error) {
+    console.error('Delete planned expense error:', error);
+    res.redirect('/user/planned-expenses?error=Failed to delete planned expense');
+  }
+};
+
+module.exports = {
+  getPlannedExpenses,
+  getAddPlannedExpense,
+  postAddPlannedExpense,
+  getEditPlannedExpense,
+  postEditPlannedExpense,
+  deletePlannedExpense
+};

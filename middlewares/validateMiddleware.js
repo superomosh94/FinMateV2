@@ -29,8 +29,38 @@ const validate = (validations) => {
     handleValidationErrors(req, res, next);
   };
 };
+function validateExpense(req, res, next) {
+  const { amount, description, category } = req.body;
+  
+  if (!amount || !description || !category) {
+    return res.render('individualUser/expenses/add', {
+      title: 'Add Expense',
+      user: req.user,
+      currentPage: 'expenses',
+      formData: req.body,
+      error: 'Amount, description, and category are required fields'
+    });
+  }
+
+  const amountNum = parseFloat(amount);
+  if (isNaN(amountNum) || amountNum <= 0) {
+    return res.render('individualUser/expenses/add', {
+      title: 'Add Expense',
+      user: req.user,
+      currentPage: 'expenses',
+      formData: req.body,
+      error: 'Amount must be a positive number'
+    });
+  }
+
+  next();
+}
+
+module.exports = { validateExpense };
 
 module.exports = {
   handleValidationErrors,
-  validate
+  validate,
+  validateExpense
 };
+
