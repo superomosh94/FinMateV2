@@ -3,29 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= title %></title>
+    <title>Edit Expense</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
+        :root {
+            --primary: #4e73df;
+            --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        body {
+            background-color: #f8f9fc;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
         .sidebar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--gradient);
             min-height: 100vh;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
         }
+        
         .sidebar .nav-link {
-            color: #fff;
+            color: rgba(255,255,255,0.9);
             padding: 12px 20px;
-            margin: 4px 0;
+            margin: 2px 0;
             border-radius: 8px;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
+            position: relative;
+            font-weight: 500;
         }
+        
         .sidebar .nav-link:hover {
-            background: rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.15);
             transform: translateX(5px);
+            color: #fff;
         }
+        
         .sidebar .nav-link.active {
             background: rgba(255,255,255,0.2);
-            font-weight: bold;
+            color: #fff;
+            font-weight: 600;
+        }
+        
+        .page-header {
+            background: #fff;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+        }
+        
+        .form-card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+        }
+        
+        .btn {
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 1px solid #e3e6f0;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
         }
     </style>
 </head>
@@ -33,84 +79,213 @@
     <div class="container-fluid">
         <div class="row">
             <!-- Sidebar -->
-            <%- include('../../partials/sidebar') %>
-            
+            <%- include('../../partials/sidebar', { activePage: 'expenses' }) %>
+
             <!-- Main content -->
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <!-- Page Header -->
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 page-header">
                     <h1 class="h2">
                         <i class="fas fa-edit me-2 text-primary"></i>
                         Edit Expense
                     </h1>
-                    <a href="/user/expenses" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left me-2"></i>Back to List
+                    <a href="/user/expenses" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Expenses
                     </a>
                 </div>
 
-                <!-- Alerts -->
-                <% if (typeof error !== 'undefined' && error) { %>
+                <!-- Error Message -->
+                <% if (error) { %>
                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle me-2"></i>
                         <%= error %>
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                 <% } %>
 
-                <div class="row justify-content-center">
-                    <div class="col-lg-8">
-                        <div class="card shadow">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">Edit Expense</h5>
-                            </div>
-                            <div class="card-body">
-                                <form action="/user/expenses/edit/<%= expense.id %>" method="POST">
-                                    <div class="mb-3">
-                                        <label for="amount" class="form-label">Amount</label>
-                                        <div class="input-group">
-                                            <span class="input-group-text">$</span>
-                                            <input type="number" step="0.01" class="form-control" id="amount" name="amount" 
-                                                   value="<%= expense.amount %>" required>
+                <!-- Check if expense exists -->
+                <% if (typeof expense === 'undefined' || !expense) { %>
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Expense not found or you don't have permission to edit it.
+                    </div>
+                    <div class="text-center mt-4">
+                        <a href="/user/expenses" class="btn btn-primary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Expenses
+                        </a>
+                    </div>
+                <% } else { %>
+                    <!-- Expense Form -->
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <div class="card form-card">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">
+                                        <i class="fas fa-edit me-2"></i>Edit Expense Details
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <form action="/user/expenses/edit/<%= expense.id %>" method="POST">
+                                        <div class="mb-3">
+                                            <label for="amount" class="form-label">Amount</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text">Ksh</span>
+                                                <input type="number" class="form-control" id="amount" name="amount" 
+                                                       step="0.01" min="0.01" 
+                                                       value="<%= parseFloat(expense.amount).toFixed(2) %>" required
+                                                       placeholder="Enter amount">
+                                            </div>
                                         </div>
-                                    </div>
 
+                                        <div class="mb-3">
+                                            <label for="description" class="form-label">Description</label>
+                                            <input type="text" class="form-control" id="description" name="description" 
+                                                   value="<%= expense.description || '' %>" 
+                                                   placeholder="Enter description" required>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="category" class="form-label">Category</label>
+                                            <select class="form-select" id="category" name="category" required>
+                                                <option value="">Select a category</option>
+                                                <option value="Food & Dining" <%= expense.category === 'Food & Dining' ? 'selected' : '' %>>Food & Dining</option>
+                                                <option value="Transportation" <%= expense.category === 'Transportation' ? 'selected' : '' %>>Transportation</option>
+                                                <option value="Entertainment" <%= expense.category === 'Entertainment' ? 'selected' : '' %>>Entertainment</option>
+                                                <option value="Utilities" <%= expense.category === 'Utilities' ? 'selected' : '' %>>Utilities</option>
+                                                <option value="Shopping" <%= expense.category === 'Shopping' ? 'selected' : '' %>>Shopping</option>
+                                                <option value="Healthcare" <%= expense.category === 'Healthcare' ? 'selected' : '' %>>Healthcare</option>
+                                                <option value="Education" <%= expense.category === 'Education' ? 'selected' : '' %>>Education</option>
+                                                <option value="Travel" <%= expense.category === 'Travel' ? 'selected' : '' %>>Travel</option>
+                                                <option value="Personal Care" <%= expense.category === 'Personal Care' ? 'selected' : '' %>>Personal Care</option>
+                                                <option value="Other" <%= expense.category === 'Other' ? 'selected' : '' %>>Other</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="date" class="form-label">Date</label>
+                                            <input type="date" class="form-control" id="date" name="date" 
+                                                   value="<%= expense.date ? new Date(expense.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0] %>" required>
+                                        </div>
+
+                                        <div class="d-flex gap-2 mt-4">
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fas fa-save me-2"></i>Update Expense
+                                            </button>
+                                            <a href="/user/expenses" class="btn btn-outline-secondary">Cancel</a>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-4">
+                            <!-- Expense Info Card -->
+                            <div class="card form-card">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">
+                                        <i class="fas fa-info-circle me-2 text-info"></i>Expense Information
+                                    </h5>
+                                </div>
+                                <div class="card-body">
                                     <div class="mb-3">
-                                        <label for="description" class="form-label">Description</label>
-                                        <input type="text" class="form-control" id="description" name="description" 
-                                               value="<%= expense.description %>" required>
+                                        <small class="text-muted d-block">Created</small>
+                                        <strong>
+                                            <%= expense.created_at ? new Date(expense.created_at).toLocaleDateString('en-US', { 
+                                                year: 'numeric', 
+                                                month: 'long', 
+                                                day: 'numeric' 
+                                            }) : 'Unknown' %>
+                                        </strong>
                                     </div>
-
+                                    
+                                    <% if (expense.updated_at && expense.updated_at !== expense.created_at) { %>
                                     <div class="mb-3">
-                                        <label for="category" class="form-label">Category</label>
-                                        <select class="form-select" id="category" name="category" required>
-                                            <option value="">Select Category</option>
-                                            <option value="Food" <%= expense.category === 'Food' ? 'selected' : '' %>>Food</option>
-                                            <option value="Transportation" <%= expense.category === 'Transportation' ? 'selected' : '' %>>Transportation</option>
-                                            <option value="Entertainment" <%= expense.category === 'Entertainment' ? 'selected' : '' %>>Entertainment</option>
-                                            <option value="Utilities" <%= expense.category === 'Utilities' ? 'selected' : '' %>>Utilities</option>
-                                            <option value="Healthcare" <%= expense.category === 'Healthcare' ? 'selected' : '' %>>Healthcare</option>
-                                            <option value="Shopping" <%= expense.category === 'Shopping' ? 'selected' : '' %>>Shopping</option>
-                                            <option value="Other" <%= expense.category === 'Other' ? 'selected' : '' %>>Other</option>
-                                        </select>
+                                        <small class="text-muted d-block">Last Updated</small>
+                                        <strong>
+                                            <%= new Date(expense.updated_at).toLocaleDateString('en-US', { 
+                                                year: 'numeric', 
+                                                month: 'long', 
+                                                day: 'numeric' 
+                                            }) %>
+                                        </strong>
                                     </div>
+                                    <% } %>
+                                    
+                                    <div class="alert alert-info mt-3">
+                                        <small>
+                                            <i class="fas fa-lightbulb me-1"></i>
+                                            Make sure to update all relevant information accurately.
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
 
-                                    <div class="mb-3">
-                                        <label for="date" class="form-label">Date</label>
-                                        <input type="date" class="form-control" id="date" name="date" 
-                                               value="<%= new Date(expense.expense_date).toISOString().split('T')[0] %>" required>
+                            <!-- Quick Actions -->
+                            <div class="card form-card mt-4">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">
+                                        <i class="fas fa-bolt me-2 text-warning"></i>Quick Actions
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="d-grid gap-2">
+                                        <a href="/user/expenses/add" class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-plus me-2"></i>Add New Expense
+                                        </a>
+                                        <a href="/user/budgets" class="btn btn-outline-success btn-sm">
+                                            <i class="fas fa-wallet me-2"></i>View Budgets
+                                        </a>
                                     </div>
-
-                                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                                        <a href="/user/expenses" class="btn btn-secondary me-md-2">Cancel</a>
-                                        <button type="submit" class="btn btn-primary">Update Expense</button>
-                                    </div>
-                                </form>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                <% } %>
             </main>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Form validation
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('form');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    const amount = document.getElementById('amount').value;
+                    if (amount <= 0) {
+                        e.preventDefault();
+                        alert('Amount must be greater than 0');
+                        return false;
+                    }
+                    
+                    const description = document.getElementById('description').value;
+                    if (!description.trim()) {
+                        e.preventDefault();
+                        alert('Description is required');
+                        return false;
+                    }
+                    
+                    const category = document.getElementById('category').value;
+                    if (!category) {
+                        e.preventDefault();
+                        alert('Please select a category');
+                        return false;
+                    }
+                });
+
+                // Auto-format amount on blur
+                const amountInput = document.getElementById('amount');
+                if (amountInput) {
+                    amountInput.addEventListener('blur', function() {
+                        const value = parseFloat(this.value);
+                        if (!isNaN(value)) {
+                            this.value = value.toFixed(2);
+                        }
+                    });
+                }
+            }
+        });
+    </script>
 </body>
 </html>

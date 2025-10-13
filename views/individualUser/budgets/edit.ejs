@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Savings Goals Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4e73df;
+            --success: #1cc88a;
+            --warning: #f6c23e;
+            --info: #36b9cc;
+            --danger: #e74a3b;
+            --dark: #5a5c69;
+            --light: #f8f9fc;
+            --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        body {
+            background-color: #f8f9fc;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .sidebar {
+            background: var(--gradient);
+            min-height: 100vh;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.9);
+            padding: 12px 20px;
+            margin: 2px 0;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+            font-weight: 500;
+        }
+        
+        .sidebar .nav-link:hover {
+            background: rgba(255,255,255,0.15);
+            transform: translateX(5px);
+            color: #fff;
+        }
+        
+        .sidebar .nav-link.active {
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .sidebar .nav-link.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 60%;
+            background: #fff;
+            border-radius: 0 2px 2px 0;
+        }
+        
+        .page-header {
+            background: #fff;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+        }
+        
+        .stat-card {
+            border-radius: 10px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: none;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            overflow: hidden;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0.5rem 2rem 0 rgba(58, 59, 69, 0.2);
+        }
+        
+        .border-left-primary { border-left: 4px solid var(--primary) !important; }
+        .border-left-success { border-left: 4px solid var(--success) !important; }
+        .border-left-warning { border-left: 4px solid var(--warning) !important; }
+        .border-left-info { border-left: 4px solid var(--info) !important; }
+        .border-left-danger { border-left: 4px solid var(--danger) !important; }
+        
+        .savings-card {
+            transition: transform 0.3s, box-shadow 0.3s;
+            height: 100%;
+            border: none;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+        }
+        
+        .savings-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 0.5rem 2rem 0 rgba(58, 59, 69, 0.2);
+        }
+        
+        .savings-card .card-header {
+            background: #fff;
+            border-bottom: 1px solid #e3e6f0;
+            font-weight: 600;
+            padding: 1rem 1.25rem;
+        }
+        
+        .savings-card .card-body {
+            padding: 1.25rem;
+        }
+        
+        .savings-card .card-footer {
+            background: rgba(248, 249, 252, 0.8);
+            border-top: 1px solid #e3e6f0;
+            padding: 1rem 1.25rem;
+        }
+        
+        .progress {
+            height: 10px;
+            border-radius: 5px;
+        }
+        
+        .progress-bar {
+            border-radius: 5px;
+        }
+        
+        .btn {
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+        
+        .btn-success {
+            background: var(--success);
+            border-color: var(--success);
+        }
+        
+        .btn-warning {
+            background: var(--warning);
+            border-color: var(--warning);
+        }
+        
+        .btn-info {
+            background: var(--info);
+            border-color: var(--info);
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+            border-color: var(--danger);
+        }
+        
+        .empty-state {
+            padding: 3rem 1rem;
+            text-align: center;
+            color: #6c757d;
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+        
+        .badge {
+            font-size: 0.7em;
+            padding: 4px 8px;
+        }
+        
+        .text-xs {
+            font-size: 0.75rem;
+        }
+        
+        .text-gray-800 {
+            color: var(--dark) !important;
+        }
+        
+        .text-gray-300 {
+            color: #dddfeb !important;
+        }
+        
+        .font-weight-bold {
+            font-weight: 700 !important;
+        }
+        
+        .quick-action-card {
+            transition: all 0.3s;
+            border-radius: 10px;
+            border: none;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+            height: 100%;
+        }
+        
+        .quick-action-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0.5rem 2rem 0 rgba(58, 59, 69, 0.2);
+        }
+        
+        .quick-action-card .card-body {
+            padding: 2rem 1rem;
+        }
+        
+        .quick-action-card i {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .sidebar {
+                min-height: auto;
+                position: fixed;
+                top: 0;
+                left: -100%;
+                width: 280px;
+                z-index: 1000;
+                transition: left 0.3s ease;
+            }
+            
+            .sidebar.show {
+                left: 0;
+            }
+            
+            .sidebar .nav-link {
+                padding: 15px 20px;
+            }
+            
+            .savings-card {
+                margin-bottom: 1.5rem;
+            }
+        }
+        
+        /* Animation for cards */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .fade-in-up {
+            animation: fadeInUp 0.5s ease-out;
+        }
+        
+        .currency-ksh {
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .goal-completed {
+            border: 2px solid var(--success);
+        }
+        
+        .goal-completed .card-header {
+            background: linear-gradient(135deg, var(--success), #17a673) !important;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <%- include('../../partials/sidebar', { activePage: 'savings' }) %>
+
+            <!-- Main content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <!-- Mobile Header with Menu Toggle -->
+                <div class="d-md-none d-flex align-items-center py-3 border-bottom bg-white">
+                    <button class="btn btn-primary me-3" type="button" data-bs-toggle="collapse" data-bs-target=".sidebar">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h5 class="mb-0">Savings Goals</h5>
+                </div>
+
+                <!-- Page Header -->
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 page-header">
+                    <div>
+                        <h1 class="h2">
+                            <i class="fas fa-piggy-bank me-2 text-primary"></i>
+                            Savings Goals
+                        </h1>
+                        <p class="text-muted mb-0">Track and achieve your financial dreams</p>
+                    </div>
+                    <a href="/user/savings/add" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Add Savings Goal
+                    </a>
+                </div>
+
+                <!-- Success/Error Messages -->
+                <% if (success && message) { %>
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-check-circle me-2"></i>
+                        <%= message %>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                <% } %>
+                
+                <% if (error) { %>
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        <%= error %>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                <% } %>
+
+                <!-- Summary Cards -->
+                <div class="row mb-4">
+                    <div class="col-xl-3 col-md-6 mb-4 fade-in-up">
+                        <div class="card border-left-primary shadow h-100 py-2 stat-card">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                            Total Goals</div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                            <%= savings ? savings.length : 0 %>
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-bullseye fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-3 col-md-6 mb-4 fade-in-up">
+                        <div class="card border-left-success shadow h-100 py-2 stat-card">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                            Total Saved</div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                            <%
+                                                const totalSaved = savings ? savings.reduce((sum, saving) => sum + saving.current_amount, 0) : 0;
+                                            %>
+                                            Ksh <%= totalSaved.toFixed(2) %>
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-piggy-bank fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-3 col-md-6 mb-4 fade-in-up">
+                        <div class="card border-left-info shadow h-100 py-2 stat-card">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                            Total Target</div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                            <%
+                                                const totalTarget = savings ? savings.reduce((sum, saving) => sum + saving.target_amount, 0) : 0;
+                                            %>
+                                            Ksh <%= totalTarget.toFixed(2) %>
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-flag fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-3 col-md-6 mb-4 fade-in-up">
+                        <div class="card border-left-warning shadow h-100 py-2 stat-card">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                            Overall Progress</div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                            <%
+                                                const overallProgress = totalTarget > 0 ? (totalSaved / totalTarget) * 100 : 0;
+                                            %>
+                                            <%= overallProgress.toFixed(1) %>%
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-chart-line fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card shadow">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-bolt me-2"></i>Quick Actions
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row text-center">
+                                    <div class="col-md-4 col-sm-6 mb-3">
+                                        <a href="/user/savings/add" class="card quick-action-card text-decoration-none">
+                                            <div class="card-body text-primary">
+                                                <i class="fas fa-plus-circle"></i><br>
+                                                <h5>Add Goal</h5>
+                                                <p class="text-muted small">Create new savings goal</p>
+                                            </div>
+                                        </a>
+                                    </div>
+                                    <div class="col-md-4 col-sm-6 mb-3">
+                                        <a href="/user/transactions" class="card quick-action-card text-decoration-none">
+                                            <div class="card-body text-success">
+                                                <i class="fas fa-exchange-alt"></i><br>
+                                                <h5>View Transactions</h5>
+                                                <p class="text-muted small">Track your transfers</p>
+                                            </div>
+                                        </a>
+                                    </div>
+                                    <div class="col-md-4 col-sm-6 mb-3">
+                                        <a href="/user/reports" class="card quick-action-card text-decoration-none">
+                                            <div class="card-body text-info">
+                                                <i class="fas fa-chart-bar"></i><br>
+                                                <h5>View Reports</h5>
+                                                <p class="text-muted small">Analyze your savings</p>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Savings Goals Grid -->
+                <div class="row">
+                    <% if (savings && savings.length > 0) { %>
+                        <% savings.forEach((saving, index) => { 
+                            const progress = (saving.current_amount / saving.target_amount) * 100;
+                            const progressPercentage = Math.min(progress, 100);
+                            const isCompleted = saving.current_amount >= saving.target_amount;
+                            const daysRemaining = saving.target_date ? Math.ceil((new Date(saving.target_date) - new Date()) / (1000 * 60 * 60 * 24)) : null;
+                            const progressClass = progressPercentage >= 90 ? 'success' : progressPercentage >= 50 ? 'info' : 'warning';
+                        %>
+                            <div class="col-xl-4 col-lg-6 mb-4 fade-in-up">
+                                <div class="card shadow savings-card h-100 <%= isCompleted ? 'goal-completed' : '' %>">
+                                    <% if (isCompleted) { %>
+                                        <div class="card-header text-white">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="fw-bold">
+                                                    <i class="fas fa-trophy me-2"></i>Goal Achieved!
+                                                </span>
+                                                <i class="fas fa-check-circle"></i>
+                                            </div>
+                                        </div>
+                                    <% } else { %>
+                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                            <h5 class="card-title mb-0">
+                                                <i class="fas fa-bullseye me-2 text-primary"></i>
+                                                <%= saving.name %>
+                                            </h5>
+                                            <span class="badge bg-<%= progressClass %>">
+                                                <%= Math.round(progressPercentage) %>%
+                                            </span>
+                                        </div>
+                                    <% } %>
+                                    
+                                    <div class="card-body">
+                                        <% if (saving.description) { %>
+                                            <p class="card-text text-muted small mb-3">
+                                                <i class="fas fa-info-circle me-1"></i>
+                                                <%= saving.description %>
+                                            </p>
+                                        <% } %>
+                                        
+                                        <!-- Savings Progress -->
+                                        <div class="mb-4">
+                                            <div class="d-flex justify-content-between mb-2">
+                                                <small class="text-muted">Saved: <strong class="currency-ksh">Ksh <%= saving.current_amount.toFixed(2) %></strong></small>
+                                                <small class="text-muted">Target: <strong class="currency-ksh">Ksh <%= saving.target_amount.toFixed(2) %></strong></small>
+                                            </div>
+                                            <div class="progress" style="height: 10px;">
+                                                <div class="progress-bar bg-<%= isCompleted ? 'success' : progressClass %>" 
+                                                     role="progressbar" 
+                                                     style="width: <%= progressPercentage %>%"
+                                                     aria-valuenow="<%= progressPercentage %>" 
+                                                     aria-valuemin="0" 
+                                                     aria-valuemax="100">
+                                                </div>
+                                            </div>
+                                            <div class="d-flex justify-content-between mt-2">
+                                                <small class="text-<%= isCompleted ? 'success' : 'primary' %>">
+                                                    <strong>
+                                                        <%= isCompleted ? 'Goal Completed!' : 'Ksh ' + (saving.target_amount - saving.current_amount).toFixed(2) + ' to go' %>
+                                                    </strong>
+                                                </small>
+                                                <% if (daysRemaining && daysRemaining > 0 && !isCompleted) { %>
+                                                    <small class="text-muted">
+                                                        <%= daysRemaining %> days left
+                                                    </small>
+                                                <% } %>
+                                            </div>
+                                        </div>
+
+                                        <!-- Add Funds Form -->
+                                        <% if (!isCompleted) { %>
+                                            <form action="/user/savings/add-amount/<%= saving.id %>" method="POST" class="mb-3">
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text">Ksh</span>
+                                                    <input type="number" 
+                                                           step="0.01" 
+                                                           min="0.01" 
+                                                           max="<%= saving.target_amount - saving.current_amount %>"
+                                                           class="form-control" 
+                                                           name="amount" 
+                                                           placeholder="Amount to add"
+                                                           title="Maximum: Ksh <%= (saving.target_amount - saving.current_amount).toFixed(2) %>"
+                                                           required>
+                                                    <button type="submit" class="btn btn-success">
+                                                        <i class="fas fa-plus me-1"></i>Add
+                                                    </button>
+                                                </div>
+                                                <small class="text-muted mt-1 d-block">
+                                                    Remaining: <strong>Ksh <%= (saving.target_amount - saving.current_amount).toFixed(2) %></strong>
+                                                </small>
+                                            </form>
+                                        <% } else { %>
+                                            <div class="alert alert-success text-center py-2 mb-3">
+                                                <small>
+                                                    <i class="fas fa-check-circle me-1"></i>
+                                                    Congratulations! You've reached your savings goal!
+                                                </small>
+                                            </div>
+                                        <% } %>
+
+                                        <!-- Additional Info -->
+                                        <div class="savings-meta">
+                                            <% if (saving.target_date) { %>
+                                                <div class="d-flex align-items-center text-muted small mb-2">
+                                                    <i class="fas fa-calendar me-2"></i>
+                                                    <span>
+                                                        Target: <%= new Date(saving.target_date).toLocaleDateString() %>
+                                                    </span>
+                                                </div>
+                                            <% } %>
+                                            
+                                            <% if (saving.created_at) { %>
+                                                <div class="d-flex align-items-center text-muted small">
+                                                    <i class="fas fa-clock me-2"></i>
+                                                    <span>Created <%= new Date(saving.created_at).toLocaleDateString() %></span>
+                                                </div>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Card Footer with Actions -->
+                                    <div class="card-footer bg-transparent">
+                                        <div class="d-flex gap-2">
+                                            <a href="/user/savings/edit/<%= saving.id %>" 
+                                               class="btn btn-outline-primary btn-sm flex-fill">
+                                                <i class="fas fa-edit me-1"></i>Edit
+                                            </a>
+                                            <button type="button" 
+                                                    class="btn btn-outline-info btn-sm"
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#detailsModal<%= saving.id %>">
+                                                <i class="fas fa-chart-line me-1"></i>Details
+                                            </button>
+                                            <form action="/user/savings/delete/<%= saving.id %>" 
+                                                  method="POST" 
+                                                  class="flex-fill"
+                                                  onsubmit="return confirm('Are you sure you want to delete \"<%= saving.name %>\"? This action cannot be undone.')">
+                                                <button type="submit" class="btn btn-outline-danger btn-sm w-100">
+                                                    <i class="fas fa-trash me-1"></i>Delete
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Details Modal -->
+                            <div class="modal fade" id="detailsModal<%= saving.id %>" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Goal Details: <%= saving.name %></h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="row">
+                                                <div class="col-6 mb-3">
+                                                    <strong class="text-muted">Current Amount:</strong>
+                                                    <p class="fw-bold currency-ksh">Ksh <%= saving.current_amount.toFixed(2) %></p>
+                                                </div>
+                                                <div class="col-6 mb-3">
+                                                    <strong class="text-muted">Target Amount:</strong>
+                                                    <p class="fw-bold currency-ksh">Ksh <%= saving.target_amount.toFixed(2) %></p>
+                                                </div>
+                                                <div class="col-6 mb-3">
+                                                    <strong class="text-muted">Progress:</strong>
+                                                    <p class="fw-bold"><%= Math.round(progressPercentage) %>%</p>
+                                                </div>
+                                                <div class="col-6 mb-3">
+                                                    <strong class="text-muted">Status:</strong>
+                                                    <p>
+                                                        <span class="badge <%= isCompleted ? 'bg-success' : 'bg-primary' %>">
+                                                            <%= isCompleted ? 'Completed' : 'In Progress' %>
+                                                        </span>
+                                                    </p>
+                                                </div>
+                                                <% if (saving.target_date) { %>
+                                                    <div class="col-12 mb-3">
+                                                        <strong class="text-muted">Target Date:</strong>
+                                                        <p class="fw-bold"><%= new Date(saving.target_date).toLocaleDateString() %></p>
+                                                    </div>
+                                                <% } %>
+                                                <% if (saving.description) { %>
+                                                    <div class="col-12">
+                                                        <strong class="text-muted">Description:</strong>
+                                                        <p class="text-muted"><%= saving.description %></p>
+                                                    </div>
+                                                <% } %>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }) %>
+                    <% } else { %>
+                        <!-- Empty State -->
+                        <div class="col-12">
+                            <div class="card shadow">
+                                <div class="card-body text-center py-5 empty-state">
+                                    <i class="fas fa-piggy-bank fa-3x text-muted mb-3"></i>
+                                    <h5 class="text-muted">No Savings Goals Found</h5>
+                                    <p class="text-muted mb-4">Start building your financial future by creating your first savings goal.</p>
+                                    <div class="d-flex gap-2 justify-content-center">
+                                        <a href="/user/savings/add" class="btn btn-primary">
+                                            <i class="fas fa-plus me-2"></i>Create Your First Goal
+                                        </a>
+                                        <a href="/user/dashboard" class="btn btn-outline-secondary">
+                                            <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <% } %>
+                </div>
+
+                <!-- Quick Stats -->
+                <% if (savings && savings.length > 0) { %>
+                    <div class="row mt-5">
+                        <div class="col-12">
+                            <div class="card shadow">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">
+                                        <i class="fas fa-chart-pie me-2 text-primary"></i>
+                                        Savings Overview
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row text-center">
+                                        <div class="col-md-3 mb-3">
+                                            <div class="stat-item">
+                                                <h3 class="text-primary"><%= savings.length %></h3>
+                                                <p class="text-muted mb-0">Total Goals</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mb-3">
+                                            <div class="stat-item">
+                                                <h3 class="text-success">
+                                                    Ksh <%= totalSaved.toFixed(0) %>
+                                                </h3>
+                                                <p class="text-muted mb-0">Total Saved</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mb-3">
+                                            <div class="stat-item">
+                                                <h3 class="text-info">
+                                                    Ksh <%= totalTarget.toFixed(0) %>
+                                                </h3>
+                                                <p class="text-muted mb-0">Total Target</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mb-3">
+                                            <div class="stat-item">
+                                                <h3 class="text-warning">
+                                                    <%= overallProgress.toFixed(1) %>%
+                                                </h3>
+                                                <p class="text-muted mb-0">Overall Progress</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <% } %>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Mobile menu toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            var sidebar = document.querySelector('.sidebar');
+            var menuToggle = document.querySelector('[data-bs-toggle="collapse"]');
+            
+            if (menuToggle && sidebar) {
+                menuToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('show');
+                });
+            }
+
+            // Auto-dismiss alerts after 5 seconds
+            setTimeout(function() {
+                var alerts = document.querySelectorAll('.alert');
+                alerts.forEach(function(alert) {
+                    var bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 5000);
+
+            // Form validation for add amount
+            var forms = document.querySelectorAll('form[action*="add-amount"]');
+            forms.forEach(function(form) {
+                form.addEventListener('submit', function(e) {
+                    var amountInput = form.querySelector('input[name="amount"]');
+                    var maxAmount = parseFloat(amountInput.getAttribute('max'));
+                    var amount = parseFloat(amountInput.value);
+                    
+                    if (amount > maxAmount) {
+                        e.preventDefault();
+                        alert('Amount cannot exceed remaining target: Ksh ' + maxAmount.toFixed(2));
+                        amountInput.focus();
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

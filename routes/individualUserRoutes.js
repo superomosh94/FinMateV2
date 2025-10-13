@@ -6,27 +6,33 @@ const asyncHandler = require('../middlewares/asyncHandler');
 
 const router = express.Router();
 
-// Add the getDashboardData function right here
+// Helper functions for MySQL2 result handling
+const handleMySQL2Result = (result) => {
+  return Array.isArray(result) ? result : [];
+};
+
+const getFirstRow = (result) => {
+  const rows = handleMySQL2Result(result);
+  return rows.length > 0 ? rows[0] : null;
+};
+
+// Updated getDashboardData function
 const getDashboardData = async (userId, role = 'individual_user') => {
   try {
-    // console.log('🔍 getDashboardData called with userId:', userId);
-    
     const db = require('../config/db');
 
-    // console.log('📈 Executing expense query...');
-    const [expenseRows] = await db.execute(
+    // All queries without array destructuring
+    const expenseRows = await db.execute(
       `SELECT COALESCE(SUM(amount), 0) AS totalExpenses FROM expenses WHERE user_id = ?`,
       [userId]
     );
 
-    // console.log('💰 Executing savings query...');
-    const [savingsRows] = await db.execute(
+    const savingsRows = await db.execute(
       `SELECT COALESCE(SUM(current_amount), 0) AS totalSavings FROM savings_goals WHERE user_id = ?`,
       [userId]
     );
 
-    // console.log('💳 Executing recent transactions query...');
-    const [recentTransactionsResult] = await db.execute(
+    const recentTransactionsResult = await db.execute(
       `SELECT id, description, amount, category, date, created_at 
        FROM expenses 
        WHERE user_id = ? 
@@ -35,8 +41,7 @@ const getDashboardData = async (userId, role = 'individual_user') => {
       [userId]
     );
 
-    // console.log('📊 Executing budgets query...');
-    const [activeBudgetsResult] = await db.execute(
+    const activeBudgetsResult = await db.execute(
       `SELECT b.id, b.category, b.amount, 
               COALESCE((SELECT SUM(e.amount) FROM expenses e 
                        WHERE e.user_id = b.user_id AND e.category = b.category 
@@ -47,16 +52,14 @@ const getDashboardData = async (userId, role = 'individual_user') => {
       [userId]
     );
 
-    // console.log('📅 Executing planned expenses query...');
-    const [plannedRows] = await db.execute(
+    const plannedRows = await db.execute(
       `SELECT COUNT(*) AS plannedExpenses 
        FROM planned_expenses 
        WHERE user_id = ? AND planned_date >= CURDATE()`,
       [userId]
     );
 
-    // console.log('🎯 Executing savings goals query...');
-    const [savingsGoalsResult] = await db.execute(
+    const savingsGoalsResult = await db.execute(
       `SELECT id, name, target_amount, current_amount, target_date, status 
        FROM savings_goals 
        WHERE user_id = ? 
@@ -64,90 +67,30 @@ const getDashboardData = async (userId, role = 'individual_user') => {
       [userId]
     );
 
-    // console.log('🔔 Executing notifications query...');
-    const [notificationRows] = await db.execute(
+    const notificationRows = await db.execute(
       `SELECT COUNT(*) AS notificationCount 
        FROM notifications 
        WHERE user_id = ? AND is_read = 0`,
       [userId]
     );
 
+    // Process results using helper functions
+    const expenseData = getFirstRow(expenseRows);
+    const savingsData = getFirstRow(savingsRows);
+    const plannedData = getFirstRow(plannedRows);
+    const notificationData = getFirstRow(notificationRows);
 
+    const totalExpenses = parseFloat(expenseData?.totalExpenses) || 0;
+    const totalSavings = parseFloat(savingsData?.totalSavings) || 0;
+    const plannedExpenses = parseInt(plannedData?.plannedExpenses, 10) || 0;
+    const notificationCount = parseInt(notificationData?.notificationCount, 10) || 0;
 
-    
-    // Inspect expenseRows structure
-    if (Array.isArray(expenseRows)) {
-      console.log('💰 expenseRows IS AN ARRAY:');
-      console.log('  - Length:', expenseRows.length);
-      if (expenseRows.length > 0) {
-        console.log('  - expenseRows[0]:', expenseRows[0]);
-        console.log('  - expenseRows[0]?.totalExpenses:', expenseRows[0]?.totalExpenses);
-        console.log('  - typeof expenseRows[0]?.totalExpenses:', typeof expenseRows[0]?.totalExpenses);
-      } else {
-        console.log('  - expenseRows is EMPTY array');
-      }
-    } else if (expenseRows && typeof expenseRows === 'object') {
-      console.log('💰 expenseRows IS AN OBJECT:');
-      console.log('  - expenseRows.totalExpenses:', expenseRows.totalExpenses);
-      console.log('  - typeof expenseRows.totalExpenses:', typeof expenseRows.totalExpenses);
-      console.log('  - Object keys:', Object.keys(expenseRows));
-    } else {
-      console.log('💰 expenseRows is:', typeof expenseRows, '-', expenseRows);
-    }
+    // Process arrays
+    const safeRecentTransactions = handleMySQL2Result(recentTransactionsResult);
+    const safeActiveBudgetsData = handleMySQL2Result(activeBudgetsResult);
+    const safeSavingsGoals = handleMySQL2Result(savingsGoalsResult);
 
-    // Test different access patterns
-    
-    // Pattern 1: Array access
-    const test1_expense = expenseRows?.[0]?.totalExpenses;
-    console.log('  Array access [0]:', test1_expense, 'Type:', typeof test1_expense);
-    
-    // Pattern 2: Direct object access
-    const test2_expense = expenseRows?.totalExpenses;
-    console.log('  Direct object access:', test2_expense, 'Type:', typeof test2_expense);
-    
-    // Pattern 3: Safe access with fallback
-    const test3_expense = (Array.isArray(expenseRows) ? expenseRows[0]?.totalExpenses : expenseRows?.totalExpenses);
-    console.log  ('  Smart access:', test3_expense, 'Type:', typeof test3_expense);
-
-    // Determine the correct raw values based on structure
-    const rawExpense = Array.isArray(expenseRows) ? expenseRows[0]?.totalExpenses : expenseRows?.totalExpenses;
-    const rawSavings = Array.isArray(savingsRows) ? savingsRows[0]?.totalSavings : savingsRows?.totalSavings;
-    const rawPlanned = Array.isArray(plannedRows) ? plannedRows[0]?.plannedExpenses : plannedRows?.plannedExpenses;
-    const rawNotification = Array.isArray(notificationRows) ? notificationRows[0]?.notificationCount : notificationRows?.notificationCount;
-
-
-
-    console.log('\n🔍 DEBUG - PARSING TESTS:');
-    
-    // Test different parsing methods on expense
-    const parseTests = [
-      { method: 'parseFloat', result: parseFloat(rawExpense) },
-      { method: 'Number()', result: Number(rawExpense) },
-      { method: 'Unary +', result: +rawExpense },
-      { method: 'parseFloat with String()', result: parseFloat(String(rawExpense)) },
-      { method: 'Number with String()', result: Number(String(rawExpense)) }
-    ];
-
-    parseTests.forEach(test => {
-      console.log(`  ${test.method}:`, test.result, 'Type:', typeof test.result, 'isNaN:', isNaN(test.result));
-    });
-
-    // Final parsing with fallbacks
-    const totalExpenses = !isNaN(parseFloat(rawExpense)) ? parseFloat(rawExpense) : 0;
-    const totalSavings = !isNaN(parseFloat(rawSavings)) ? parseFloat(rawSavings) : 0;
-    const plannedExpenses = !isNaN(parseInt(rawPlanned, 10)) ? parseInt(rawPlanned, 10) : 0;
-    const notificationCount = !isNaN(parseInt(rawNotification, 10)) ? parseInt(rawNotification, 10) : 0;
-
-
-
-    // Handle single objects vs arrays properly for other queries
-    const safeRecentTransactions = Array.isArray(recentTransactionsResult) ? recentTransactionsResult : (recentTransactionsResult ? [recentTransactionsResult] : []);
-    const safeActiveBudgetsData = Array.isArray(activeBudgetsResult) ? activeBudgetsResult : (activeBudgetsResult ? [activeBudgetsResult] : []);
-    const safeSavingsGoals = Array.isArray(savingsGoalsResult) ? savingsGoalsResult : (savingsGoalsResult ? [savingsGoalsResult] : []);
-
-
-
-    // Convert amounts in transactions and savings goals to numbers
+    // Convert amounts to numbers
     safeRecentTransactions.forEach(transaction => {
       transaction.amount = parseFloat(transaction.amount) || 0;
     });
@@ -174,15 +117,14 @@ const getDashboardData = async (userId, role = 'individual_user') => {
       notificationCount: notificationCount
     };
 
-  
-    console.log(JSON.stringify({
+    console.log('✅ getDashboardData completed:', {
       totalExpenses: result.totalExpenses,
       totalSavings: result.totalSavings,
       recentTransactionsCount: result.recentTransactions.length,
       activeBudgets: result.activeBudgets,
       savingsGoalsCount: result.savingsGoals.length,
       notificationCount: result.notificationCount
-    }, null, 2));
+    });
 
     return result;
     
@@ -192,24 +134,18 @@ const getDashboardData = async (userId, role = 'individual_user') => {
   }
 };
 
-// ======== APPLY AUTHENTICATION MIDDLEWARE FIRST ========
-// Apply authentication and role middleware to all individual user routes
+// ======== APPLY AUTHENTICATION MIDDLEWARE ========
 router.use(authenticate, requireRole('individual_user'));
 
-// ======== THEN DEFINE ALL ROUTES ========
+// ======== ROUTE DEFINITIONS ========
 
 // ROOT ROUTE - Redirect to dashboard
 router.get('/', (req, res) => {
   res.redirect('/user/dashboard');
 });
 
-// DASHBOARD ROUTE - unified (FIXED)
+// DASHBOARD ROUTE
 router.get('/dashboard', asyncHandler(async (req, res) => {
-  // console.log('🎯 /user/dashboard route HIT!');
-  // console.log('👤 User object:', req.user);
-  // console.log('🆔 User ID:', req.user?.id);
-  // console.log('🔐 Is authenticated?', req.isAuthenticated ? req.isAuthenticated() : 'N/A');
-  
   const userId = req.user.id;
   const role = req.user.role || 'individual_user';
 
@@ -217,17 +153,8 @@ router.get('/dashboard', asyncHandler(async (req, res) => {
     console.log('📊 Fetching dashboard data for user:', userId);
     const data = await getDashboardData(userId, role);
 
-    console.log('✅ Dashboard data fetched successfully:', {
-      totalExpenses: data.totalExpenses,
-      totalSavings: data.totalSavings,
-      recentTransactionsCount: data.recentTransactions?.length,
-      activeBudgets: data.activeBudgets,
-      savingsGoalsCount: data.savingsGoals?.length,
-      notificationCount: data.notificationCount
-    });
+    console.log('✅ Dashboard data fetched successfully');
 
-    console.log('🎨 Rendering template...');
-    
     res.render('individualUser/dashboard', {
       title: 'Personal Dashboard',
       user: req.user,
@@ -254,8 +181,6 @@ router.get('/dashboard', asyncHandler(async (req, res) => {
       notificationCount: 0
     };
 
-    console.log('🔄 Using fallback data due to error');
-    
     res.render('individualUser/dashboard', {
       title: 'Personal Dashboard',
       user: req.user,
@@ -267,102 +192,328 @@ router.get('/dashboard', asyncHandler(async (req, res) => {
   }
 }));
 
-// Debug route - MOVED AFTER AUTH MIDDLEWARE
-router.get('/debug-user-data', asyncHandler(async (req, res) => {
+// ======== SAVINGS ROUTES ========
+
+// GET Savings page
+// ======== SAVINGS ROUTES ========
+
+// GET Savings page (FIXED - without description column)
+router.get('/savings', asyncHandler(async (req, res) => {
   const userId = req.user.id;
   const db = require('../config/db');
-  
+
   try {
-    console.log('🔍 Checking data for user ID:', userId);
+    console.log('💰 Fetching savings goals for user:', userId);
     
-    const [expenses] = await db.execute('SELECT * FROM expenses WHERE user_id = ?', [userId]);
-    const [savings] = await db.execute('SELECT * FROM savings_goals WHERE user_id = ?', [userId]);
-    const [budgets] = await db.execute('SELECT * FROM budgets WHERE user_id = ?', [userId]);
-    const [planned] = await db.execute('SELECT * FROM planned_expenses WHERE user_id = ?', [userId]);
-    const [notifications] = await db.execute('SELECT * FROM notifications WHERE user_id = ?', [userId]);
-    
-    // console.log('📊 Data found for user', userId, ':');
-    // console.log('- Expenses:', expenses.length);
-    // console.log('- Savings Goals:', savings.length);
-    // console.log('- Budgets:', budgets.length);
-    // console.log('- Planned Expenses:', planned.length);
-    // console.log('- Notifications:', notifications.length);
-    
-    res.json({
-      userId,
-      expenses: {
-        count: expenses.length,
-        data: expenses
-      },
-      savings: {
-        count: savings.length,
-        data: savings
-      },
-      budgets: {
-        count: budgets.length,
-        data: budgets
-      },
-      planned: {
-        count: planned.length,
-        data: planned
-      },
-      notifications: {
-        count: notifications.length,
-        data: notifications
-      }
+    // FIXED: Removed description column
+    const savingsGoals = await db.execute(`
+      SELECT id, name, target_amount, current_amount, target_date, status, created_at, updated_at
+      FROM savings_goals 
+      WHERE user_id = ? 
+      ORDER BY created_at DESC
+    `, [userId]);
+
+    const savingsArray = handleMySQL2Result(savingsGoals);
+
+    console.log('✅ Savings goals loaded:', { count: savingsArray.length });
+
+    // Get notification count
+    const notificationRows = await db.execute(
+      `SELECT COUNT(*) AS notificationCount 
+       FROM notifications 
+       WHERE user_id = ? AND is_read = 0`,
+      [userId]
+    );
+    const notificationData = getFirstRow(notificationRows);
+    const notificationCount = parseInt(notificationData?.notificationCount, 10) || 0;
+
+    res.render('individualUser/savings/list', {
+      title: 'My Savings Goals',
+      user: req.user,
+      currentPage: 'savings',
+      savings: savingsArray,
+      notificationCount: notificationCount,
+      success: req.query.success || false,
+      message: req.query.message || '',
+      error: req.query.error || ''
     });
+
   } catch (error) {
-    console.error('❌ Debug error:', error);
-    res.json({ error: error.message });
+    console.error('❌ Savings route error:', error);
+    
+    res.render('individualUser/savings/list', {
+      title: 'My Savings Goals',
+      user: req.user,
+      currentPage: 'savings',
+      savings: [],
+      notificationCount: 0,
+      error: 'Unable to load savings goals'
+    });
   }
 }));
 
-// Test aggregation queries directly - MOVED AFTER AUTH MIDDLEWARE
-router.get('/test-aggregation', asyncHandler(async (req, res) => {
+// GET Add Savings page
+router.get('/savings/add', asyncHandler(async (req, res) => {
   const userId = req.user.id;
   const db = require('../config/db');
-  
+
   try {
-    // Test expense sum
-    const [expenseSum] = await db.execute(
-      'SELECT SUM(amount) as total FROM expenses WHERE user_id = ?',
+    const notificationRows = await db.execute(
+      `SELECT COUNT(*) AS notificationCount 
+       FROM notifications 
+       WHERE user_id = ? AND is_read = 0`,
       [userId]
     );
-    
-    // Test savings sum
-    const [savingsSum] = await db.execute(
-      'SELECT SUM(current_amount) as total FROM savings_goals WHERE user_id = ?',
-      [userId]
-    );
-    
-    // Test individual expenses
-    const [individualExpenses] = await db.execute(
-      'SELECT id, amount FROM expenses WHERE user_id = ?',
-      [userId]
-    );
-    
-    // Test individual savings
-    const [individualSavings] = await db.execute(
-      'SELECT id, current_amount FROM savings_goals WHERE user_id = ?',
-      [userId]
-    );
-    
-    res.json({
-      expenseSum: expenseSum[0],
-      savingsSum: savingsSum[0],
-      individualExpenses,
-      individualSavings,
-      calculatedExpenseTotal: individualExpenses.reduce((sum, exp) => sum + parseFloat(exp.amount), 0),
-      calculatedSavingsTotal: individualSavings.reduce((sum, saving) => sum + parseFloat(saving.current_amount), 0)
+    const notificationData = getFirstRow(notificationRows);
+    const notificationCount = parseInt(notificationData?.notificationCount, 10) || 0;
+
+    res.render('individualUser/savings/add', {
+      title: 'Add Savings Goal',
+      user: req.user,
+      currentPage: 'savings',
+      formData: {},
+      notificationCount: notificationCount,
+      error: req.query.error || ''
     });
+
   } catch (error) {
-    res.json({ error: error.message });
+    console.error('❌ Add savings page error:', error);
+    res.redirect('/user/savings?error=Failed to load add savings page');
   }
 }));
 
-// EXPENSES ROUTES
+// POST Add Savings goal (FIXED - without description)
+router.post('/savings/add', asyncHandler(async (req, res) => {
+  const userId = req.user.id;
+  const { name, target_amount, target_date, initial_amount } = req.body;
+
+  console.log('📝 Add savings request:', {
+    userId,
+    name,
+    target_amount,
+    target_date,
+    initial_amount
+  });
+
+  try {
+    const db = require('../config/db');
+    
+    // FIXED: Removed description column
+    const result = await db.execute(`
+      INSERT INTO savings_goals (user_id, name, target_amount, current_amount, target_date, status)
+      VALUES (?, ?, ?, ?, ?, 'active')
+    `, [
+      userId, 
+      name, 
+      parseFloat(target_amount), 
+      parseFloat(initial_amount) || 0, 
+      target_date || null
+    ]);
+
+    if (result.affectedRows > 0) {
+      console.log('🎉 Savings goal created successfully');
+      return res.redirect('/user/savings?success=true&message=Savings goal created successfully');
+    } else {
+      throw new Error('No rows were affected - savings goal not created');
+    }
+    
+  } catch (error) {
+    console.error('❌ Add savings error:', error);
+    
+    let errorMessage = 'Failed to create savings goal';
+    if (error.code === 'ER_DUP_ENTRY') {
+      errorMessage = 'A savings goal with this name already exists';
+    } else if (error.sqlMessage) {
+      errorMessage = `Database error: ${error.sqlMessage}`;
+    }
+
+    const db = require('../config/db');
+    const notificationRows = await db.execute(
+      `SELECT COUNT(*) AS notificationCount 
+       FROM notifications 
+       WHERE user_id = ? AND is_read = 0`,
+      [userId]
+    );
+    const notificationData = getFirstRow(notificationRows);
+    const notificationCount = parseInt(notificationData?.notificationCount, 10) || 0;
+
+    res.render('individualUser/savings/add', {
+      title: 'Add Savings Goal',
+      user: req.user,
+      currentPage: 'savings',
+      formData: req.body,
+      notificationCount: notificationCount,
+      error: errorMessage
+    });
+  }
+}));
+
+// POST Add amount to savings
+router.post('/savings/add-amount/:id', asyncHandler(async (req, res) => {
+  const savingsId = req.params.id;
+  const userId = req.user.id;
+  const { amount } = req.body;
+
+  console.log('💰 Add amount to savings:', { savingsId, userId, amount });
+
+  try {
+    const db = require('../config/db');
+    
+    const currentSavings = await db.execute(
+      `SELECT current_amount, target_amount FROM savings_goals WHERE id = ? AND user_id = ?`,
+      [savingsId, userId]
+    );
+
+    const savingsData = getFirstRow(currentSavings);
+    if (!savingsData) {
+      return res.redirect('/user/savings?error=Savings goal not found');
+    }
+
+    const currentAmount = parseFloat(savingsData.current_amount);
+    const targetAmount = parseFloat(savingsData.target_amount);
+    const addAmount = parseFloat(amount);
+
+    if (addAmount <= 0) {
+      return res.redirect('/user/savings?error=Amount must be greater than 0');
+    }
+
+    if (currentAmount + addAmount > targetAmount) {
+      return res.redirect('/user/savings?error=Amount exceeds remaining target');
+    }
+
+    const result = await db.execute(`
+      UPDATE savings_goals 
+      SET current_amount = current_amount + ?, updated_at = NOW()
+      WHERE id = ? AND user_id = ?
+    `, [addAmount, savingsId, userId]);
+
+    if (result.affectedRows > 0) {
+      console.log('🎉 Amount added successfully');
+      return res.redirect('/user/savings?success=true&message=Amount added successfully');
+    } else {
+      throw new Error('Failed to update savings goal');
+    }
+    
+  } catch (error) {
+    console.error('❌ Add amount error:', error);
+    res.redirect('/user/savings?error=Failed to add amount to savings goal');
+  }
+}));
+
+// GET Edit Savings page
+router.get('/savings/edit/:id', asyncHandler(async (req, res) => {
+  const savingsId = req.params.id;
+  const userId = req.user.id;
+
+  console.log('🔍 Fetching savings goal for edit:', { savingsId, userId });
+
+  try {
+    const db = require('../config/db');
+    
+    const savingsGoals = await db.execute(`
+      SELECT * FROM savings_goals WHERE id = ? AND user_id = ?
+    `, [savingsId, userId]);
+
+    const savingsData = handleMySQL2Result(savingsGoals);
+
+    if (savingsData.length === 0) {
+      console.log('❌ Savings goal not found');
+      return res.redirect('/user/savings?error=Savings goal not found');
+    }
+
+    const notificationRows = await db.execute(
+      `SELECT COUNT(*) AS notificationCount 
+       FROM notifications 
+       WHERE user_id = ? AND is_read = 0`,
+      [userId]
+    );
+    const notificationData = getFirstRow(notificationRows);
+    const notificationCount = parseInt(notificationData?.notificationCount, 10) || 0;
+
+    res.render('individualUser/savings/edit', {
+      title: 'Edit Savings Goal',
+      user: req.user,
+      currentPage: 'savings',
+      savings: savingsData[0],
+      notificationCount: notificationCount,
+      error: req.query.error || ''
+    });
+
+  } catch (error) {
+    console.error('❌ Edit savings error:', error);
+    res.redirect('/user/savings?error=Failed to load savings goal');
+  }
+}));
+
+// POST Update Savings goal (FIXED - without description)
+router.post('/savings/edit/:id', asyncHandler(async (req, res) => {
+  const savingsId = req.params.id;
+  const userId = req.user.id;
+  const { name, target_amount, target_date } = req.body;
+
+  console.log('📝 Edit savings request:', {
+    savingsId,
+    userId,
+    name,
+    target_amount,
+    target_date
+  });
+
+  try {
+    const db = require('../config/db');
+    
+    // FIXED: Removed description column
+    const result = await db.execute(`
+      UPDATE savings_goals 
+      SET name = ?, target_amount = ?, target_date = ?, updated_at = NOW()
+      WHERE id = ? AND user_id = ?
+    `, [name, parseFloat(target_amount), target_date || null, savingsId, userId]);
+
+    if (result.affectedRows > 0) {
+      console.log('🎉 Savings goal updated successfully');
+      return res.redirect('/user/savings?success=true&message=Savings goal updated successfully');
+    } else {
+      throw new Error('Savings goal not found or no changes made');
+    }
+    
+  } catch (error) {
+    console.error('❌ Update savings error:', error);
+    res.redirect(`/user/savings/edit/${savingsId}?error=Failed to update savings goal: ${error.message}`);
+  }
+}));
+
+// POST Delete Savings goal
+router.post('/savings/delete/:id', asyncHandler(async (req, res) => {
+  const savingsId = req.params.id;
+  const userId = req.user.id;
+
+  console.log('🗑️ Delete savings goal:', { savingsId, userId });
+
+  try {
+    const db = require('../config/db');
+    
+    const result = await db.execute(`
+      DELETE FROM savings_goals WHERE id = ? AND user_id = ?
+    `, [savingsId, userId]);
+
+    if (result.affectedRows > 0) {
+      console.log('🎉 Savings goal deleted successfully');
+      return res.redirect('/user/savings?success=true&message=Savings goal deleted successfully');
+    }
+
+    throw new Error('Savings goal not deleted');
+    
+  } catch (error) {
+    console.error('❌ Delete savings error:', error);
+    res.redirect('/user/savings?error=Failed to delete savings goal');
+  }
+}));
+
+// ======== EXPENSES ROUTES ========
+
 router.get('/expenses', asyncHandler(async (req, res) => {
   const userId = req.user.id;
+  const db = require('../config/db');
 
   const expenses = await safeQuery(`
     SELECT * FROM expenses 
@@ -371,6 +522,15 @@ router.get('/expenses', asyncHandler(async (req, res) => {
   `, [userId]);
 
   const expensesArray = Array.isArray(expenses) ? expenses : [];
+
+  const notificationRows = await db.execute(
+    `SELECT COUNT(*) AS notificationCount 
+     FROM notifications 
+     WHERE user_id = ? AND is_read = 0`,
+    [userId]
+  );
+  const notificationData = getFirstRow(notificationRows);
+  const notificationCount = parseInt(notificationData?.notificationCount, 10) || 0;
 
   const currentDate = new Date();
   const currentMonth = currentDate.getMonth();
@@ -401,21 +561,35 @@ router.get('/expenses', asyncHandler(async (req, res) => {
     currentPage: 'expenses',
     expenses: expensesArray,
     summary,
+    notificationCount: notificationCount,
     success: req.query.success,
     message: req.query.message,
     error: req.query.error || ''
   });
 }));
 
-router.get('/expenses/add', (req, res) => {
+router.get('/expenses/add', asyncHandler(async (req, res) => {
+  const userId = req.user.id;
+  const db = require('../config/db');
+
+  const notificationRows = await db.execute(
+    `SELECT COUNT(*) AS notificationCount 
+     FROM notifications 
+     WHERE user_id = ? AND is_read = 0`,
+    [userId]
+  );
+  const notificationData = getFirstRow(notificationRows);
+  const notificationCount = parseInt(notificationData?.notificationCount, 10) || 0;
+
   res.render('individualUser/expenses/add', {
     title: 'Add Expense',
     user: req.user,
     currentPage: 'expenses',
     formData: {},
+    notificationCount: notificationCount,
     error: req.query.error || ''
   });
-});
+}));
 
 router.post('/expenses/add', validateExpense, asyncHandler(async (req, res) => {
   const { amount, description, category, date } = req.body;
@@ -434,79 +608,458 @@ router.post('/expenses/add', validateExpense, asyncHandler(async (req, res) => {
   throw new Error('Expense not inserted - no rows affected');
 }));
 
-// BUDGETS ROUTE
+// GET Edit Expense page
+router.get('/expenses/edit/:id', asyncHandler(async (req, res) => {
+  const expenseId = req.params.id;
+  const userId = req.user.id;
+  const db = require('../config/db');
+
+  console.log('🔍 Fetching expense for edit:', { expenseId, userId });
+
+  try {
+    const expenses = await db.execute(`
+      SELECT * FROM expenses WHERE id = ? AND user_id = ?
+    `, [expenseId, userId]);
+
+    const expenseData = handleMySQL2Result(expenses);
+
+    if (expenseData.length === 0) {
+      console.log('❌ Expense not found');
+      return res.redirect('/user/expenses?error=Expense not found');
+    }
+
+    const notificationRows = await db.execute(
+      `SELECT COUNT(*) AS notificationCount 
+       FROM notifications 
+       WHERE user_id = ? AND is_read = 0`,
+      [userId]
+    );
+    const notificationData = getFirstRow(notificationRows);
+    const notificationCount = parseInt(notificationData?.notificationCount, 10) || 0;
+
+    res.render('individualUser/expenses/edit', {
+      title: 'Edit Expense',
+      user: req.user,
+      currentPage: 'expenses',
+      expense: expenseData[0],
+      notificationCount: notificationCount,
+      error: req.query.error || ''
+    });
+
+  } catch (error) {
+    console.error('❌ Edit expense error:', error);
+    res.redirect('/user/expenses?error=Failed to load expense');
+  }
+}));
+
+// POST Update Expense
+router.post('/expenses/edit/:id', validateExpense, asyncHandler(async (req, res) => {
+  const expenseId = req.params.id;
+  const userId = req.user.id;
+  const { amount, description, category, date } = req.body;
+
+  console.log('📝 Edit expense request:', {
+    expenseId,
+    userId,
+    amount,
+    description,
+    category,
+    date
+  });
+
+  try {
+    const db = require('../config/db');
+    
+    const result = await db.execute(`
+      UPDATE expenses 
+      SET amount = ?, description = ?, category = ?, date = ?, updated_at = NOW()
+      WHERE id = ? AND user_id = ?
+    `, [parseFloat(amount), description, category, date, expenseId, userId]);
+
+    if (result.affectedRows > 0) {
+      console.log('🎉 Expense updated successfully');
+      return res.redirect('/user/expenses?success=true&message=Expense updated successfully');
+    } else {
+      throw new Error('Expense not found or no changes made');
+    }
+    
+  } catch (error) {
+    console.error('❌ Update expense error:', error);
+    res.redirect(`/user/expenses/edit/${expenseId}?error=Failed to update expense: ${error.message}`);
+  }
+}));
+
+// POST Delete Expense
+router.post('/expenses/delete/:id', asyncHandler(async (req, res) => {
+  const expenseId = req.params.id;
+  const userId = req.user.id;
+
+  try {
+    const db = require('../config/db');
+    
+    const result = await db.execute(`
+      DELETE FROM expenses WHERE id = ? AND user_id = ?
+    `, [expenseId, userId]);
+
+    if (result.affectedRows > 0) {
+      return res.redirect('/user/expenses?success=true&message=Expense deleted successfully');
+    }
+
+    throw new Error('Expense not deleted');
+    
+  } catch (error) {
+    console.error('❌ Delete expense error:', error);
+    res.redirect('/user/expenses?error=Failed to delete expense');
+  }
+}));
+
+// ======== BUDGETS ROUTES ========
+
 router.get('/budgets', asyncHandler(async (req, res) => {
-  const budgets = await safeQuery(`
-    SELECT * FROM budgets 
-    WHERE user_id = ? 
-    ORDER BY created_at DESC
-  `, [req.user.id]);
+  const userId = req.user.id;
+  const db = require('../config/db');
 
-  const budgetsArray = Array.isArray(budgets) ? budgets : [];
+  try {
+    const budgets = await db.execute(`
+      SELECT 
+        b.id,
+        b.category as name,
+        b.category,
+        b.amount,
+        b.period,
+        b.start_date,
+        b.end_date,
+        b.created_at,
+        b.updated_at,
+        COALESCE((
+          SELECT SUM(e.amount) 
+          FROM expenses e 
+          WHERE e.user_id = b.user_id 
+            AND e.category = b.category 
+            AND e.date BETWEEN COALESCE(b.start_date, DATE_FORMAT(NOW(), '%Y-%m-01')) 
+            AND COALESCE(b.end_date, LAST_DAY(NOW()))
+            AND e.status = 'approved'
+        ), 0) as spent_amount
+      FROM budgets b 
+      WHERE b.user_id = ? 
+      ORDER BY b.created_at DESC
+    `, [userId]);
 
-  res.render('individualUser/budgets/list', {
-    title: 'My Budgets',
+    const budgetsArray = handleMySQL2Result(budgets);
+
+    const notificationRows = await db.execute(
+      `SELECT COUNT(*) AS notificationCount 
+       FROM notifications 
+       WHERE user_id = ? AND is_read = 0`,
+      [userId]
+    );
+    const notificationData = getFirstRow(notificationRows);
+    const notificationCount = parseInt(notificationData?.notificationCount, 10) || 0;
+
+    res.render('individualUser/budgets/list', {
+      title: 'My Budgets',
+      user: req.user,
+      currentPage: 'budgets',
+      budgets: budgetsArray,
+      notificationCount: notificationCount,
+      success: req.query.success || false,
+      message: req.query.message || '',
+      error: req.query.error || ''
+    });
+
+  } catch (error) {
+    console.error('❌ Budgets route error:', error);
+    
+    const budgets = await safeQuery(`
+      SELECT 
+        id,
+        category as name,
+        category,
+        amount,
+        period,
+        start_date,
+        end_date,
+        created_at,
+        updated_at
+      FROM budgets 
+      WHERE user_id = ? 
+      ORDER BY created_at DESC
+    `, [userId]);
+
+    const budgetsArray = Array.isArray(budgets) ? budgets : [];
+    const budgetsWithSpent = budgetsArray.map(budget => ({
+      ...budget,
+      spent_amount: 0
+    }));
+
+    res.render('individualUser/budgets/list', {
+      title: 'My Budgets',
+      user: req.user,
+      currentPage: 'budgets',
+      budgets: budgetsWithSpent,
+      notificationCount: 0,
+      error: 'Unable to load budget calculations'
+    });
+  }
+}));
+
+// GET Add Budget page
+router.get('/budgets/add', asyncHandler(async (req, res) => {
+  const userId = req.user.id;
+  const db = require('../config/db');
+
+  const notificationRows = await db.execute(
+    `SELECT COUNT(*) AS notificationCount 
+     FROM notifications 
+     WHERE user_id = ? AND is_read = 0`,
+    [userId]
+  );
+  const notificationData = getFirstRow(notificationRows);
+  const notificationCount = parseInt(notificationData?.notificationCount, 10) || 0;
+
+  res.render('individualUser/budgets/add', {
+    title: 'Add Budget',
     user: req.user,
     currentPage: 'budgets',
-    budgets: budgetsArray,
-    success: req.query.success || false,
-    message: req.query.message || '',
+    formData: {},
+    notificationCount: notificationCount,
     error: req.query.error || ''
   });
 }));
 
-// SAVINGS ROUTE
-router.get('/savings', asyncHandler(async (req, res) => {
-  const savings = await safeQuery(`
-    SELECT id, goal_name AS name, target_amount, current_amount, target_date
-    FROM savings 
-    WHERE user_id = ? 
-    ORDER BY created_at DESC
-  `, [req.user.id]);
+// POST Add Budget
+router.post('/budgets/add', asyncHandler(async (req, res) => {
+  const { category, amount, period, start_date, end_date } = req.body;
+  const userId = req.user.id;
 
-  const savingsArray = Array.isArray(savings) ? savings : [];
-
-  res.render('individualUser/savings/list', {
-    title: 'My Savings',
-    user: req.user,
-    currentPage: 'savings',
-    savings: savingsArray,
-    success: req.query.success || false,
-    message: req.query.message || '',
-    error: req.query.error || ''
+  console.log('📝 Add budget request:', {
+    userId,
+    category,
+    amount,
+    period,
+    start_date,
+    end_date
   });
+
+  try {
+    const db = require('../config/db');
+    
+    const formatDateForMySQL = (dateStr) => {
+      if (!dateStr) return null;
+      if (dateStr.includes('/')) {
+        const [month, day, year] = dateStr.split('/');
+        return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+      }
+      return dateStr;
+    };
+
+    const mysqlStartDate = formatDateForMySQL(start_date);
+    const mysqlEndDate = formatDateForMySQL(end_date);
+
+    const result = await db.execute(`
+      INSERT INTO budgets (user_id, category, amount, period, start_date, end_date)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `, [userId, category, parseFloat(amount), period, mysqlStartDate, mysqlEndDate]);
+
+    if (result.affectedRows > 0) {
+      console.log('🎉 Budget created successfully');
+      return res.redirect('/user/budgets?success=true&message=Budget added successfully');
+    } else {
+      throw new Error('No rows were affected - budget not created');
+    }
+    
+  } catch (error) {
+    console.error('❌ Add budget error:', error);
+    
+    let errorMessage = 'Failed to add budget';
+    if (error.code === 'ER_DUP_ENTRY') {
+      errorMessage = 'A budget with this category already exists';
+    } else if (error.sqlMessage) {
+      errorMessage = `Database error: ${error.sqlMessage}`;
+    }
+
+    res.render('individualUser/budgets/add', {
+      title: 'Add Budget',
+      user: req.user,
+      currentPage: 'budgets',
+      formData: req.body,
+      notificationCount: 0,
+      error: errorMessage
+    });
+  }
 }));
 
-// PLANNED EXPENSES ROUTES
+// GET Edit Budget page
+router.get('/budgets/edit/:id', asyncHandler(async (req, res) => {
+  const budgetId = req.params.id;
+  const userId = req.user.id;
+  const db = require('../config/db');
+
+  try {
+    const budgets = await db.execute(`
+      SELECT * FROM budgets WHERE id = ? AND user_id = ?
+    `, [budgetId, userId]);
+
+    const budgetData = handleMySQL2Result(budgets);
+
+    if (budgetData.length === 0) {
+      return res.redirect('/user/budgets?error=Budget not found');
+    }
+
+    const notificationRows = await db.execute(
+      `SELECT COUNT(*) AS notificationCount 
+       FROM notifications 
+       WHERE user_id = ? AND is_read = 0`,
+      [userId]
+    );
+    const notificationData = getFirstRow(notificationRows);
+    const notificationCount = parseInt(notificationData?.notificationCount, 10) || 0;
+
+    res.render('individualUser/budgets/edit', {
+      title: 'Edit Budget',
+      user: req.user,
+      currentPage: 'budgets',
+      budget: budgetData[0],
+      notificationCount: notificationCount,
+      error: req.query.error || ''
+    });
+
+  } catch (error) {
+    console.error('❌ Edit budget error:', error);
+    res.redirect('/user/budgets?error=Failed to load budget');
+  }
+}));
+
+// POST Update Budget
+router.post('/budgets/edit/:id', asyncHandler(async (req, res) => {
+  const budgetId = req.params.id;
+  const userId = req.user.id;
+  const { category, amount, period, start_date, end_date } = req.body;
+
+  console.log('📝 Edit budget request:', {
+    budgetId,
+    category,
+    amount,
+    period,
+    start_date,
+    end_date
+  });
+
+  try {
+    const db = require('../config/db');
+    
+    const formatDateForMySQL = (dateStr) => {
+      if (!dateStr) return null;
+      if (dateStr.includes('/')) {
+        const [month, day, year] = dateStr.split('/');
+        return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+      }
+      return dateStr;
+    };
+
+    const mysqlStartDate = formatDateForMySQL(start_date);
+    const mysqlEndDate = formatDateForMySQL(end_date);
+    
+    const result = await db.execute(`
+      UPDATE budgets 
+      SET category = ?, amount = ?, period = ?, start_date = ?, end_date = ?, updated_at = NOW()
+      WHERE id = ? AND user_id = ?
+    `, [category, parseFloat(amount), period, mysqlStartDate, mysqlEndDate, budgetId, userId]);
+
+    if (result.affectedRows > 0) {
+      console.log('🎉 Budget updated successfully');
+      return res.redirect('/user/budgets?success=true&message=Budget updated successfully');
+    } else {
+      throw new Error('Budget not found or no changes made');
+    }
+    
+  } catch (error) {
+    console.error('❌ Update budget error:', error);
+    res.redirect(`/user/budgets/edit/${budgetId}?error=Failed to update budget: ${error.message}`);
+  }
+}));
+
+// POST Delete Budget
+router.post('/budgets/delete/:id', asyncHandler(async (req, res) => {
+  const budgetId = req.params.id;
+  const userId = req.user.id;
+
+  try {
+    const db = require('../config/db');
+    
+    const result = await db.execute(`
+      DELETE FROM budgets WHERE id = ? AND user_id = ?
+    `, [budgetId, userId]);
+
+    if (result.affectedRows > 0) {
+      return res.redirect('/user/budgets?success=true&message=Budget deleted successfully');
+    }
+
+    throw new Error('Budget not deleted');
+    
+  } catch (error) {
+    console.error('❌ Delete budget error:', error);
+    res.redirect('/user/budgets?error=Failed to delete budget');
+  }
+}));
+
+// ======== PLANNED EXPENSES ROUTES ========
+
 router.get('/planned-expenses', asyncHandler(async (req, res) => {
+  const userId = req.user.id;
+  const db = require('../config/db');
+
   const plannedExpenses = await safeQuery(`
     SELECT * FROM planned_expenses 
     WHERE user_id = ? 
     ORDER BY planned_date ASC
-  `, [req.user.id]);
+  `, [userId]);
 
   const plannedExpensesArray = Array.isArray(plannedExpenses) ? plannedExpenses : [];
+
+  const notificationRows = await db.execute(
+    `SELECT COUNT(*) AS notificationCount 
+     FROM notifications 
+     WHERE user_id = ? AND is_read = 0`,
+    [userId]
+  );
+  const notificationData = getFirstRow(notificationRows);
+  const notificationCount = parseInt(notificationData?.notificationCount, 10) || 0;
 
   res.render('individualUser/planned-expenses/list', {
     title: 'Planned Expenses',
     user: req.user,
     currentPage: 'planned-expenses',
     plannedExpenses: plannedExpensesArray,
+    notificationCount: notificationCount,
     success: req.query.success || false,
     message: req.query.message || '',
     error: req.query.error || ''
   });
 }));
 
-router.get('/planned-expenses/add', (req, res) => {
+router.get('/planned-expenses/add', asyncHandler(async (req, res) => {
+  const userId = req.user.id;
+  const db = require('../config/db');
+
+  const notificationRows = await db.execute(
+    `SELECT COUNT(*) AS notificationCount 
+     FROM notifications 
+     WHERE user_id = ? AND is_read = 0`,
+    [userId]
+  );
+  const notificationData = getFirstRow(notificationRows);
+  const notificationCount = parseInt(notificationData?.notificationCount, 10) || 0;
+
   res.render('individualUser/planned-expenses/add', {
     title: 'Plan New Expense',
     user: req.user,
     currentPage: 'planned-expenses',
     formData: {},
+    notificationCount: notificationCount,
     error: req.query.error || ''
   });
-});
+}));
 
 router.post('/planned-expenses/add', asyncHandler(async (req, res) => {
   const userId = req.user.id;
@@ -527,102 +1080,276 @@ router.post('/planned-expenses/add', asyncHandler(async (req, res) => {
     user: req.user,
     currentPage: 'planned-expenses',
     formData: req.body,
+    notificationCount: 0,
     error: 'Failed to add planned expense'
   });
 }));
 
-// NOTIFICATIONS ROUTE
+// ======== NOTIFICATIONS ROUTES ========
+
+// GET Notifications page (FIXED VERSION)
+// router.get('/notifications', asyncHandler(async (req, res) => {
+//   try {
+//     const userId = req.user.id;
+//     const db = require('../config/db');
+
+//     console.log('🔔 Fetching notifications for user:', userId);
+    
+//     // Get notifications - your MySQL2 returns data directly as array
+//     const notifications = await db.execute(
+//       `SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC`,
+//       [userId]
+//     );
+
+//     console.log('📨 Notifications found:', notifications.length);
+
+//     // Get notification count
+//     const countResult = await db.execute(
+//       `SELECT COUNT(*) AS notificationCount FROM notifications WHERE user_id = ? AND is_read = 0`,
+//       [userId]
+//     );
+    
+//     const countData = getFirstRow(countResult);
+//     const notificationCount = parseInt(countData?.notificationCount, 10) || 0;
+
+//     // Mark notifications as read when viewed
+//     if (notifications.length > 0) {
+//       await db.execute(
+//         `UPDATE notifications SET is_read = true WHERE user_id = ? AND is_read = false`,
+//         [userId]
+//       );
+//       console.log('✅ Notifications marked as read');
+//     }
+
+//     res.render('individualUser/', {
+//       title: 'Notifications',
+//       user: req.user,
+//       currentPage: 'notifications',
+//       notifications: notifications,
+//       notificationCount: notificationCount,
+//       success: req.query.success || false,
+//       message: req.query.message || '',
+//       error: req.query.error || ''
+//     });
+
+//   } catch (error) {
+//     console.error('❌ Error in notifications route:', error);
+//     res.render('individualUser/notifications', {
+//       title: 'Notifications',
+//       user: req.user,
+//       currentPage: 'notifications',
+//       notifications: [],
+//       notificationCount: 0,
+//       error: 'Failed to load notifications'
+//     });
+//   }
+// }));
+// ======== NOTIFICATIONS ROUTES ========
+
+// GET Notifications page (FIXED VIEW PATH)
 router.get('/notifications', asyncHandler(async (req, res) => {
-  const notifications = await safeQuery(`
-    SELECT * FROM notifications 
-    WHERE user_id = ? 
-    ORDER BY created_at DESC
-  `, [req.user.id]);
-
-  const notificationsArray = Array.isArray(notifications) ? notifications : [];
-
-  res.render('individualUser/notifications', {
-    title: 'Notifications',
-    user: req.user,
-    currentPage: 'notifications',
-    notifications: notificationsArray,
-    success: req.query.success || false,
-    message: req.query.message || '',
-    error: req.query.error || ''
-  });
-}));
-
-// ADD SAMPLE DATA ROUTE (for testing)
-router.get('/add-sample-data', asyncHandler(async (req, res) => {
-  const userId = req.user.id;
-  
   try {
-    // Add sample savings
-    await safeQuery(
-      'INSERT INTO savings (user_id, current_amount, target_amount, name) VALUES (?, ?, ?, ?)',
-      [userId, 1000, 5000, 'Emergency Fund']
+    const userId = req.user.id;
+    const db = require('../config/db');
+
+    console.log('🔔 Fetching notifications for user:', userId);
+    
+    // Get notifications - your MySQL2 returns data directly as array
+    const notifications = await db.execute(
+      `SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC`,
+      [userId]
     );
 
-    // Add sample expenses
-    await safeQuery(
-      'INSERT INTO expenses (user_id, amount, description, category) VALUES (?, ?, ?, ?)',
-      [userId, 50, 'Groceries', 'Food']
-    );
-    await safeQuery(
-      'INSERT INTO expenses (user_id, amount, description, category) VALUES (?, ?, ?, ?)',
-      [userId, 30, 'Bus fare', 'Transport']
-    );
+    console.log('📨 Notifications found:', notifications.length);
 
-    // Add sample transactions
-    await safeQuery(
-      'INSERT INTO transactions (user_id, description, category, amount) VALUES (?, ?, ?, ?)',
-      [userId, 'Supermarket', 'Food', 75.50]
+    // Get notification count
+    const countResult = await db.execute(
+      `SELECT COUNT(*) AS notificationCount FROM notifications WHERE user_id = ? AND is_read = 0`,
+      [userId]
     );
-    await safeQuery(
-      'INSERT INTO transactions (user_id, description, category, amount) VALUES (?, ?, ?, ?)',
-      [userId, 'Gas station', 'Transport', 45.00]
-    );
+    
+    const countData = getFirstRow(countResult);
+    const notificationCount = parseInt(countData?.notificationCount, 10) || 0;
 
-    // Add sample savings goal
-    await safeQuery(
-      'INSERT INTO savings_goals (user_id, name, target_amount, current_amount) VALUES (?, ?, ?, ?)',
-      [userId, 'New Laptop', 1500, 300]
-    );
+    // Mark notifications as read when viewed
+    if (notifications.length > 0) {
+      await db.execute(
+        `UPDATE notifications SET is_read = true WHERE user_id = ? AND is_read = false`,
+        [userId]
+      );
+      console.log('✅ Notifications marked as read');
+    }
 
-    // Add sample budget
-    await safeQuery(
-      'INSERT INTO budgets (user_id, name, category, budget_amount, spent_amount) VALUES (?, ?, ?, ?, ?)',
-      [userId, 'Monthly Food', 'Food', 400, 150]
-    );
+    // FIXED: Using the correct view path
+    res.render('individualUser/notifications/list', {
+      title: 'Notifications',
+      user: req.user,
+      currentPage: 'notifications',
+      notifications: notifications,
+      notificationCount: notificationCount,
+      success: req.query.success || false,
+      message: req.query.message || '',
+      error: req.query.error || ''
+    });
 
-    // Add sample notification
-    await safeQuery(
-      'INSERT INTO notifications (user_id, title, message, is_read) VALUES (?, ?, ?, ?)',
-      [userId, 'Welcome!', 'Welcome to FinMate', false]
-    );
-
-    res.redirect('/user/dashboard?success=true&message=Sample data added successfully');
   } catch (error) {
-    console.error('Error adding sample data:', error);
-    res.redirect('/user/dashboard?error=Failed to add sample data');
+    console.error('❌ Error in notifications route:', error);
+    // FIXED: Using the correct view path
+    res.render('individualUser/notifications/list', {
+      title: 'Notifications',
+      user: req.user,
+      currentPage: 'notifications',
+      notifications: [],
+      notificationCount: 0,
+      error: 'Failed to load notifications'
+    });
+  }
+}));
+// POST Mark single notification as read
+router.post('/notifications/mark-read/:id', asyncHandler(async (req, res) => {
+  try {
+    const db = require('../config/db');
+    await db.execute(
+      'UPDATE notifications SET is_read = true WHERE id = ? AND user_id = ?',
+      [req.params.id, req.user.id]
+    );
+    res.redirect('/user/notifications?success=Notification marked as read');
+  } catch (error) {
+    console.error('Error marking notification as read:', error);
+    res.redirect('/user/notifications?error=Failed to mark notification as read');
   }
 }));
 
-// DEBUG ROUTE (remove in production)
-router.get('/debug-db', asyncHandler(async (req, res) => {
-  const userId = req.user.id;
+// POST Mark all notifications as read
+router.post('/notifications/mark-all-read', asyncHandler(async (req, res) => {
+  try {
+    const db = require('../config/db');
+    await db.execute(
+      'UPDATE notifications SET is_read = true WHERE user_id = ?',
+      [req.user.id]
+    );
+    res.redirect('/user/notifications?success=All notifications marked as read');
+  } catch (error) {
+    console.error('Error marking all notifications as read:', error);
+    res.redirect('/user/notifications?error=Failed to mark all notifications as read');
+  }
+}));
 
-  const testResults = {
-    user: req.user,
-    expenses: await safeQuery('SELECT COUNT(*) as count FROM expenses WHERE user_id = ?', [userId]),
-    budgets: await safeQuery('SELECT COUNT(*) as count FROM budgets WHERE user_id = ?', [userId]),
-    savings: await safeQuery('SELECT COUNT(*) as count FROM savings WHERE user_id = ?', [userId]),
-    transactions: await safeQuery('SELECT COUNT(*) as count FROM transactions WHERE user_id = ?', [userId]),
-    savings_goals: await safeQuery('SELECT COUNT(*) as count FROM savings_goals WHERE user_id = ?', [userId]),
-    notifications: await safeQuery('SELECT COUNT(*) as count FROM notifications WHERE user_id = ?', [userId])
-  };
+// POST Delete single notification
+router.post('/notifications/delete/:id', asyncHandler(async (req, res) => {
+  try {
+    const db = require('../config/db');
+    await db.execute(
+      'DELETE FROM notifications WHERE id = ? AND user_id = ?',
+      [req.params.id, req.user.id]
+    );
+    res.redirect('/user/notifications?success=Notification deleted');
+  } catch (error) {
+    console.error('Error deleting notification:', error);
+    res.redirect('/user/notifications?error=Failed to delete notification');
+  }
+}));
 
-  res.json(testResults);
+// POST Clear all notifications
+router.post('/notifications/clear-all', asyncHandler(async (req, res) => {
+  try {
+    const db = require('../config/db');
+    await db.execute(
+      'DELETE FROM notifications WHERE user_id = ?',
+      [req.user.id]
+    );
+    res.redirect('/user/notifications?success=All notifications cleared');
+  } catch (error) {
+    console.error('Error clearing all notifications:', error);
+    res.redirect('/user/notifications?error=Failed to clear all notifications');
+  }
+}));
+
+// ======== DEBUG ROUTES ========
+
+// Debug route to check MySQL2 structure
+router.get('/debug-notifications-simple', asyncHandler(async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const db = require('../config/db');
+
+    const result = await db.execute(
+      `SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC`,
+      [userId]
+    );
+
+    res.json({
+      rawResult: result,
+      userId: userId,
+      resultType: typeof result,
+      isArray: Array.isArray(result),
+      length: result.length
+    });
+
+  } catch (error) {
+    console.error('❌ Debug error:', error);
+    res.json({ error: error.message });
+  }
+}));
+
+// Emergency fallback test
+router.get('/notifications-test', asyncHandler(async (req, res) => {
+  try {
+    console.log('🚨 EMERGENCY: Using hardcoded notifications test');
+    
+    const notifications = [
+      {
+        id: 1,
+        user_id: req.user.id,
+        title: 'Test Notification 1',
+        message: 'This is a test notification to verify the page works.',
+        type: 'info',
+        is_read: 0,
+        created_at: new Date()
+      }
+    ];
+
+    res.render('individualUser/notifications', {
+      title: 'Notifications',
+      user: req.user,
+      currentPage: 'notifications',
+      notifications: notifications,
+      notificationCount: 1,
+      success: true,
+      message: 'Using test data - page is working!'
+    });
+
+  } catch (error) {
+    console.error('❌ EMERGENCY - Fatal error:', error);
+    res.send(`
+      <h1>Notifications</h1>
+      <p>Emergency fallback - page is rendering!</p>
+      <p>Error: ${error.message}</p>
+      <a href="/user/dashboard">Back to Dashboard</a>
+    `);
+  }
+}));
+// DEBUG: Check table structures
+router.get('/debug-tables', asyncHandler(async (req, res) => {
+  try {
+    const db = require('../config/db');
+    
+    const tables = ['savings_goals', 'expenses', 'budgets', 'planned_expenses', 'notifications'];
+    const results = {};
+    
+    for (const table of tables) {
+      try {
+        const [structure] = await db.execute(`DESCRIBE ${table}`);
+        results[table] = structure;
+      } catch (error) {
+        results[table] = { error: error.message };
+      }
+    }
+    
+    res.json(results);
+  } catch (error) {
+    res.json({ error: error.message });
+  }
 }));
 
 module.exports = router;

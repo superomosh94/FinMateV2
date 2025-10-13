@@ -1,42 +1,346 @@
-<%
-    layout = 'layouts/main';
-    title = 'Add Savings Goal';
-    currentPage = 'savings';
-%>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Savings Goal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4e73df;
+            --success: #1cc88a;
+            --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        body {
+            background-color: #f8f9fc;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .sidebar {
+            background: var(--gradient);
+            min-height: 100vh;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.9);
+            padding: 12px 20px;
+            margin: 2px 0;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+            font-weight: 500;
+        }
+        
+        .sidebar .nav-link:hover {
+            background: rgba(255,255,255,0.15);
+            transform: translateX(5px);
+            color: #fff;
+        }
+        
+        .sidebar .nav-link.active {
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+            font-weight: 600;
+        }
+        
+        .page-header {
+            background: #fff;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+        }
+        
+        .form-card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+        }
+        
+        .savings-preview {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+        }
+        
+        .btn {
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 1px solid #e3e6f0;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <%- include('../../partials/sidebar', { activePage: 'savings' }) %>
 
-<div class="row justify-content-center">
-    <div class="col-lg-8">
-        <div class="card shadow">
-            <div class="card-header">
-                <h5 class="card-title mb-0">Add Savings Goal</h5>
-            </div>
-            <div class="card-body">
-                <form action="/user/savings/add" method="POST">
-                    <div class="mb-3">
-                        <label for="name" class="form-label">Goal Name</label>
-                        <input type="text" class="form-control" id="name" name="name" 
-                               placeholder="e.g., New Car, Vacation, Emergency Fund" required>
+            <!-- Main content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <!-- Page Header -->
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 page-header">
+                    <h1 class="h2">
+                        <i class="fas fa-plus-circle me-2 text-primary"></i>
+                        Add Savings Goal
+                    </h1>
+                    <a href="/user/savings" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Savings
+                    </a>
+                </div>
+
+                <!-- Error Message -->
+                <% if (error) { %>
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        <%= error %>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
+                <% } %>
 
-                    <div class="mb-3">
-                        <label for="target_amount" class="form-label">Target Amount</label>
-                        <div class="input-group">
-                            <span class="input-group-text">$</span>
-                            <input type="number" step="0.01" class="form-control" id="target_amount" name="target_amount" required>
+                <!-- Savings Form -->
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="card form-card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-bullseye me-2"></i>Create New Savings Goal
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <form method="POST" action="/user/savings/add">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="name" class="form-label">Goal Name *</label>
+                                            <input type="text" class="form-control" id="name" name="name" 
+                                                   value="<%= typeof name !== 'undefined' ? name : '' %>" 
+                                                   placeholder="e.g., New Car, Vacation, Emergency Fund" required>
+                                            <div class="form-text">Give your goal a descriptive name</div>
+                                        </div>
+                                        
+                                        <div class="col-md-6 mb-3">
+                                            <label for="target_amount" class="form-label">Target Amount (Ksh) *</label>
+                                            <input type="number" class="form-control" id="target_amount" name="target_amount" 
+                                                   step="0.01" min="0.01" 
+                                                   value="<%= typeof target_amount !== 'undefined' ? target_amount : '' %>" 
+                                                   placeholder="Enter target amount" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-12 mb-3">
+                                            <label for="description" class="form-label">Description</label>
+                                            <textarea class="form-control" id="description" name="description" 
+                                                      rows="3" placeholder="Describe your savings goal..."><%= typeof description !== 'undefined' ? description : '' %></textarea>
+                                            <div class="form-text">Optional - add details about your goal</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="target_date" class="form-label">Target Date</label>
+                                            <input type="date" class="form-control" id="target_date" name="target_date" 
+                                                   value="<%= typeof target_date !== 'undefined' ? target_date : '' %>">
+                                            <div class="form-text">Optional - set a deadline for your goal</div>
+                                        </div>
+                                        
+                                        <div class="col-md-6 mb-3">
+                                            <label for="initial_amount" class="form-label">Initial Amount (Ksh)</label>
+                                            <input type="number" class="form-control" id="initial_amount" name="initial_amount" 
+                                                   step="0.01" min="0" 
+                                                   value="<%= typeof initial_amount !== 'undefined' ? initial_amount : '0' %>" 
+                                                   placeholder="Starting amount">
+                                            <div class="form-text">Optional - add initial savings</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex gap-2 mt-4">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-save me-2"></i>Create Savings Goal
+                                        </button>
+                                        <a href="/user/savings" class="btn btn-outline-secondary">Cancel</a>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
                     </div>
+                    
+                    <div class="col-lg-4">
+                        <!-- Savings Preview Card -->
+                        <div class="card form-card mb-4">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-eye me-2 text-info"></i>Goal Preview
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="savings-preview text-center mb-4">
+                                    <h4 id="previewName" class="mb-2">Your Goal</h4>
+                                    <h2 id="previewAmount" class="mb-0">Ksh 0.00</h2>
+                                    <small id="previewTargetDate" class="opacity-75">No target date set</small>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <small class="text-muted d-block mb-1">Description:</small>
+                                    <p id="previewDescription" class="text-muted small mb-0">No description provided</p>
+                                </div>
+                                
+                                <div class="progress mb-3" style="height: 8px;">
+                                    <div class="progress-bar" id="previewProgress" style="width: 0%"></div>
+                                </div>
+                                <small class="text-muted d-block text-center">
+                                    <span id="previewInitial">Ksh 0.00</span> saved of 
+                                    <span id="previewTarget">Ksh 0.00</span> target
+                                </small>
+                                
+                                <div class="alert alert-info mt-3">
+                                    <small>
+                                        <i class="fas fa-lightbulb me-1"></i>
+                                        <strong>Tip:</strong> Set realistic goals and regular contributions to stay on track.
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
 
-                    <div class="mb-3">
-                        <label for="description" class="form-label">Description</label>
-                        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                        <!-- Quick Tips -->
+                        <div class="card form-card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-tips me-2 text-warning"></i>Savings Tips
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="tips-list">
+                                    <div class="d-flex mb-2">
+                                        <i class="fas fa-check-circle text-success me-2 mt-1"></i>
+                                        <small>Start with small, achievable targets</small>
+                                    </div>
+                                    <div class="d-flex mb-2">
+                                        <i class="fas fa-check-circle text-success me-2 mt-1"></i>
+                                        <small>Set realistic deadlines</small>
+                                    </div>
+                                    <div class="d-flex mb-2">
+                                        <i class="fas fa-check-circle text-success me-2 mt-1"></i>
+                                        <small>Make regular contributions</small>
+                                    </div>
+                                    <div class="d-flex">
+                                        <i class="fas fa-check-circle text-success me-2 mt-1"></i>
+                                        <small>Track your progress monthly</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-
-                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <a href="/user/savings" class="btn btn-secondary me-md-2">Cancel</a>
-                        <button type="submit" class="btn btn-primary">Add Savings Goal</button>
-                    </div>
-                </form>
-            </div>
+                </div>
+            </main>
         </div>
     </div>
-</div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Real-time preview updates
+        document.getElementById('name').addEventListener('input', updatePreview);
+        document.getElementById('target_amount').addEventListener('input', updatePreview);
+        document.getElementById('description').addEventListener('input', updatePreview);
+        document.getElementById('target_date').addEventListener('input', updatePreview);
+        document.getElementById('initial_amount').addEventListener('input', updatePreview);
+
+        function updatePreview() {
+            // Update name
+            const name = document.getElementById('name').value || 'Your Goal';
+            document.getElementById('previewName').textContent = name;
+            
+            // Update amounts
+            const targetAmount = parseFloat(document.getElementById('target_amount').value) || 0;
+            const initialAmount = parseFloat(document.getElementById('initial_amount').value) || 0;
+            
+            document.getElementById('previewAmount').textContent = 'Ksh ' + targetAmount.toLocaleString('en-KE', {minimumFractionDigits: 2});
+            document.getElementById('previewTarget').textContent = 'Ksh ' + targetAmount.toLocaleString('en-KE', {minimumFractionDigits: 2});
+            document.getElementById('previewInitial').textContent = 'Ksh ' + initialAmount.toLocaleString('en-KE', {minimumFractionDigits: 2});
+            
+            // Update progress
+            const progress = targetAmount > 0 ? (initialAmount / targetAmount) * 100 : 0;
+            document.getElementById('previewProgress').style.width = Math.min(progress, 100) + '%';
+            
+            // Update description
+            const description = document.getElementById('description').value || 'No description provided';
+            document.getElementById('previewDescription').textContent = description;
+            
+            // Update target date
+            const targetDate = document.getElementById('target_date').value;
+            if (targetDate) {
+                const date = new Date(targetDate);
+                document.getElementById('previewTargetDate').textContent = 'Target: ' + date.toLocaleDateString('en-KE', { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                });
+            } else {
+                document.getElementById('previewTargetDate').textContent = 'No target date set';
+            }
+        }
+
+        // Form validation
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const targetAmount = parseFloat(document.getElementById('target_amount').value);
+            if (targetAmount <= 0) {
+                e.preventDefault();
+                alert('Target amount must be greater than 0');
+                document.getElementById('target_amount').focus();
+                return false;
+            }
+            
+            const initialAmount = parseFloat(document.getElementById('initial_amount').value) || 0;
+            if (initialAmount > targetAmount) {
+                e.preventDefault();
+                alert('Initial amount cannot be greater than target amount');
+                document.getElementById('initial_amount').focus();
+                return false;
+            }
+            
+            const targetDate = document.getElementById('target_date').value;
+            if (targetDate) {
+                const today = new Date();
+                const selectedDate = new Date(targetDate);
+                if (selectedDate < today) {
+                    e.preventDefault();
+                    alert('Target date cannot be in the past');
+                    document.getElementById('target_date').focus();
+                    return false;
+                }
+            }
+        });
+
+        // Auto-format amounts on blur
+        document.getElementById('target_amount').addEventListener('blur', function() {
+            const value = parseFloat(this.value);
+            if (!isNaN(value)) {
+                this.value = value.toFixed(2);
+            }
+        });
+        
+        document.getElementById('initial_amount').addEventListener('blur', function() {
+            const value = parseFloat(this.value);
+            if (!isNaN(value)) {
+                this.value = value.toFixed(2);
+            }
+        });
+
+        // Initialize preview
+        updatePreview();
+    </script>
+</body>
+</html>
