@@ -1,36 +1,59 @@
 const mysql = require('mysql2/promise');
 require('dotenv').config();
 
-const pool = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  port: process.env.DB_PORT || 3306,
+// Determine environment
+const isProduction = process.env.NODE_ENV === 'production';
+
+// Database configuration
+const dbConfig = {
+  host: process.env.DB_HOST || (isProduction ? '' : 'localhost'),
+  user: process.env.DB_USER || (isProduction ? '' : 'root'),
+  password: process.env.DB_PASSWORD || '',
+  database: process.env.DB_NAME || (isProduction ? '' : 'finmate_local'),
+  port: process.env.DB_PORT || (isProduction ? 3306 : 3306),
+  ssl: isProduction ? { rejectUnauthorized: true } : false,
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
-});
-
-const query = async (sql, params = []) => {
-  const [rows] = await pool.execute(sql, params);
-  return rows;
 };
 
+// Log which environment is active
+console.log(`🔧 Database Configuration: ${isProduction ? 'Production (Aiven Cloud)' : 'Development (Local)'}`);
+console.log(`📊 Database: ${dbConfig.database}`);
+
+const pool = mysql.createPool(dbConfig);
+
+// Query helper
+const query = async (sql, params = []) => {
+  try {
+    const [rows] = await pool.execute(sql, params);
+    return rows;
+  } catch (error) {
+    console.error('Database query error:', error.message);
+    throw error;
+  }
+};
+
+// Execute helper
 const execute = async (sql, params = []) => {
-  const [result] = await pool.execute(sql, params);
-  return result;
+  try {
+    const [result] = await pool.execute(sql, params);
+    return result;
+  } catch (error) {
+    console.error('Database execute error:', error.message);
+    throw error;
+  }
 };
 
 // Test connection
 const testConnection = async () => {
   try {
     const connection = await pool.getConnection();
-    console.log('Database connected successfully');
+    console.log('✅ Database connected successfully');
     connection.release();
     return true;
   } catch (error) {
-    console.error('Database connection failed:', error.message);
+    console.error('❌ Database connection failed:', error.message);
     return false;
   }
 };
@@ -38,9 +61,18 @@ const testConnection = async () => {
 // Initialize database tables
 const initDatabase = async () => {
   try {
-    console.log('Initializing database tables...');
+    console.log('📦 Initializing database tables...');
 
-    // Roles table
+    if (!isProduction) {
+      try {
+        await execute(`CREATE DATABASE IF NOT EXISTS \`${dbConfig.database}\``);
+        console.log(`✅ Database ${dbConfig.database} ready`);
+      } catch {
+        console.log('ℹ️ Database already exists or creation not needed');
+      }
+    }
+
+    // === Tables Creation Section ===
     await execute(`
       CREATE TABLE IF NOT EXISTS roles (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -51,7 +83,6 @@ const initDatabase = async () => {
       )
     `);
 
-    // Permissions table
     await execute(`
       CREATE TABLE IF NOT EXISTS permissions (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -61,7 +92,6 @@ const initDatabase = async () => {
       )
     `);
 
-    // Role_Permissions table
     await execute(`
       CREATE TABLE IF NOT EXISTS role_permissions (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -74,7 +104,6 @@ const initDatabase = async () => {
       )
     `);
 
-    // Users table
     await execute(`
       CREATE TABLE IF NOT EXISTS users (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -92,7 +121,6 @@ const initDatabase = async () => {
       )
     `);
 
-    // Teams table
     await execute(`
       CREATE TABLE IF NOT EXISTS teams (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -107,7 +135,6 @@ const initDatabase = async () => {
       )
     `);
 
-    // Expenses table
     await execute(`
       CREATE TABLE IF NOT EXISTS expenses (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -121,7 +148,6 @@ const initDatabase = async () => {
       )
     `);
 
-    // Savings goals table
     await execute(`
       CREATE TABLE IF NOT EXISTS savings_goals (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -137,7 +163,6 @@ const initDatabase = async () => {
       )
     `);
 
-    // Budgets table
     await execute(`
       CREATE TABLE IF NOT EXISTS budgets (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -156,7 +181,6 @@ const initDatabase = async () => {
       )
     `);
 
-    // Planned expenses table
     await execute(`
       CREATE TABLE IF NOT EXISTS planned_expenses (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -172,7 +196,6 @@ const initDatabase = async () => {
       )
     `);
 
-    // Notifications table
     await execute(`
       CREATE TABLE IF NOT EXISTS notifications (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -186,7 +209,7 @@ const initDatabase = async () => {
       )
     `);
 
-    // Insert default roles
+    // === Default Data Section ===
     await execute(`
       INSERT IGNORE INTO roles (id, name, description) VALUES
       (1, 'super_admin', 'Full system access'),
@@ -196,7 +219,6 @@ const initDatabase = async () => {
       (5, 'individual_user', 'Individual user access')
     `);
 
-    // Insert default permissions
     await execute(`
       INSERT IGNORE INTO permissions (id, name, description) VALUES
       (1, 'user_manage', 'Manage users'),
@@ -208,20 +230,19 @@ const initDatabase = async () => {
       (7, 'system_manage', 'Manage system settings')
     `);
 
-    // Assign permissions to roles
     await execute(`
       INSERT IGNORE INTO role_permissions (role_id, permission_id) VALUES
-      (1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (1, 7), -- super_admin
-      (2, 1), (2, 2), (2, 3), (2, 4), (2, 5), (2, 6),         -- admin
-      (3, 2), (3, 3), (3, 4), (3, 5), (3, 6),                 -- team_leader
-      (4, 4), (4, 5), (4, 6),                                 -- team_member
-      (5, 3), (5, 4), (5, 5), (5, 6)                          -- individual_user
+      (1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (1, 7),
+      (2, 1), (2, 2), (2, 3), (2, 4), (2, 5), (2, 6),
+      (3, 2), (3, 3), (3, 4), (3, 5), (3, 6),
+      (4, 4), (4, 5), (4, 6),
+      (5, 3), (5, 4), (5, 5), (5, 6)
     `);
 
-    console.log('Database tables initialized successfully');
+    console.log('✅ Database tables initialized successfully');
 
   } catch (error) {
-    console.error('Error initializing database:', error);
+    console.error('❌ Error initializing database:', error.message);
     throw error;
   }
 };

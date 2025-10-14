@@ -49,7 +49,10 @@ const loadRoute = (routePath, routeName) => {
     console.error(`❌ Failed to load ${routeName}:`, error.message);
     const express = require('express');
     const fallback = express.Router();
-    fallback.get('*', (req, res) => res.status(500).json({ error: `Route ${routeName} failed`, message: error.message }));
+    fallback.get('*', (req, res) => res.status(500).json({ 
+      error: `Route ${routeName} failed`, 
+      message: error.message 
+    }));
     return fallback;
   }
 };
@@ -61,7 +64,7 @@ const adminRoutes = loadRoute('./routes/adminRoutes', 'Admin');
 const teamLeaderRoutes = loadRoute('./routes/teamLeaderRoutes', 'Team Leader');
 const teamMemberRoutes = loadRoute('./routes/teamMemberRoutes', 'Team Member');
 const individualUserRoutes = loadRoute('./routes/individualUserRoutes', 'Individual User');
-const dashboardRoutes = loadRoute('./routes/dashboardRoutes', 'dashboardRoutes');
+const dashboardRoutes = loadRoute('./routes/dashboardRoutes', 'Dashboard');
 
 // Mount routes
 app.use('/auth', authRoutes);
@@ -106,4 +109,4 @@ db.getConnection()
     process.exit(1);
   });
 
-module.exports = app;
+module.exports = app; 
