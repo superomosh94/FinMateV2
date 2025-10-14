@@ -16,15 +16,51 @@ const getFirstRow = (result) => {
   return rows.length > 0 ? rows[0] : null;
 };
 
-// Updated getDashboardData function
+// MySQL2-based notification count function
+const getNotificationCount = async (userId) => {
+    try {
+        const db = require('../config/db');
+        const notificationRows = await db.execute(
+            `SELECT COUNT(*) AS notificationCount 
+             FROM notifications 
+             WHERE user_id = ? AND is_read = 0`,
+            [userId]
+        );
+        const notificationData = getFirstRow(notificationRows);
+        return parseInt(notificationData?.notificationCount, 10) || 0;
+    } catch (error) {
+        console.error('Error getting notification count:', error);
+        return 0;
+    }
+};
+
+// Updated getDashboardData function with daily expense tracking
 const getDashboardData = async (userId, role = 'individual_user') => {
   try {
     const db = require('../config/db');
 
+    // Get today's date for daily expense tracking
+    const today = new Date();
+    const startOfToday = new Date(today.setHours(0, 0, 0, 0));
+    const endOfToday = new Date(today.setHours(23, 59, 59, 999));
+
+    // Get current month dates for monthly expenses
+    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+
     // All queries without array destructuring
-    const expenseRows = await db.execute(
-      `SELECT COALESCE(SUM(amount), 0) AS totalExpenses FROM expenses WHERE user_id = ?`,
-      [userId]
+    const dailyExpenseRows = await db.execute(
+      `SELECT COALESCE(SUM(amount), 0) AS dailyExpenses 
+       FROM expenses 
+       WHERE user_id = ? AND date >= ? AND date <= ?`,
+      [userId, startOfToday, endOfToday]
+    );
+
+    const monthlyExpenseRows = await db.execute(
+      `SELECT COALESCE(SUM(amount), 0) AS totalExpenses 
+       FROM expenses 
+       WHERE user_id = ? AND date >= ? AND date <= ?`,
+      [userId, startOfMonth, endOfMonth]
     );
 
     const savingsRows = await db.execute(
@@ -32,6 +68,17 @@ const getDashboardData = async (userId, role = 'individual_user') => {
       [userId]
     );
 
+    // Today's transactions
+    const todaysTransactionsResult = await db.execute(
+      `SELECT id, description, amount, category, date, created_at 
+       FROM expenses 
+       WHERE user_id = ? AND date >= ? AND date <= ?
+       ORDER BY created_at DESC 
+       LIMIT 10`,
+      [userId, startOfToday, endOfToday]
+    );
+
+    // Recent transactions (all, for the recent transactions section)
     const recentTransactionsResult = await db.execute(
       `SELECT id, description, amount, category, date, created_at 
        FROM expenses 
@@ -75,22 +122,29 @@ const getDashboardData = async (userId, role = 'individual_user') => {
     );
 
     // Process results using helper functions
-    const expenseData = getFirstRow(expenseRows);
+    const dailyExpenseData = getFirstRow(dailyExpenseRows);
+    const monthlyExpenseData = getFirstRow(monthlyExpenseRows);
     const savingsData = getFirstRow(savingsRows);
     const plannedData = getFirstRow(plannedRows);
     const notificationData = getFirstRow(notificationRows);
 
-    const totalExpenses = parseFloat(expenseData?.totalExpenses) || 0;
+    const dailyExpenses = parseFloat(dailyExpenseData?.dailyExpenses) || 0;
+    const totalExpenses = parseFloat(monthlyExpenseData?.totalExpenses) || 0;
     const totalSavings = parseFloat(savingsData?.totalSavings) || 0;
     const plannedExpenses = parseInt(plannedData?.plannedExpenses, 10) || 0;
     const notificationCount = parseInt(notificationData?.notificationCount, 10) || 0;
 
     // Process arrays
+    const safeTodaysTransactions = handleMySQL2Result(todaysTransactionsResult);
     const safeRecentTransactions = handleMySQL2Result(recentTransactionsResult);
     const safeActiveBudgetsData = handleMySQL2Result(activeBudgetsResult);
     const safeSavingsGoals = handleMySQL2Result(savingsGoalsResult);
 
     // Convert amounts to numbers
+    safeTodaysTransactions.forEach(transaction => {
+      transaction.amount = parseFloat(transaction.amount) || 0;
+    });
+
     safeRecentTransactions.forEach(transaction => {
       transaction.amount = parseFloat(transaction.amount) || 0;
     });
@@ -106,6 +160,12 @@ const getDashboardData = async (userId, role = 'individual_user') => {
     });
 
     const result = {
+      // Daily expense tracking
+      dailyExpenses: dailyExpenses,
+      dailyExpenseLimit: 1000, // You can make this configurable per user
+      todaysTransactions: safeTodaysTransactions,
+      
+      // Monthly data
       totalExpenses: totalExpenses,
       totalSavings: totalSavings,
       recentTransactions: safeRecentTransactions,
@@ -118,8 +178,10 @@ const getDashboardData = async (userId, role = 'individual_user') => {
     };
 
     console.log('✅ getDashboardData completed:', {
+      dailyExpenses: result.dailyExpenses,
       totalExpenses: result.totalExpenses,
       totalSavings: result.totalSavings,
+      todaysTransactionsCount: result.todaysTransactions.length,
       recentTransactionsCount: result.recentTransactions.length,
       activeBudgets: result.activeBudgets,
       savingsGoalsCount: result.savingsGoals.length,
@@ -144,57 +206,93 @@ router.get('/', (req, res) => {
   res.redirect('/user/dashboard');
 });
 
-// DASHBOARD ROUTE
+// DASHBOARD ROUTE - UPDATED WITH DAILY EXPENSE TRACKING
+// DASHBOARD ROUTE - UPDATED WITH DAILY EXPENSE TRACKING
 router.get('/dashboard', asyncHandler(async (req, res) => {
-  const userId = req.user.id;
-  const role = req.user.role || 'individual_user';
+    try {
+        const user = req.user;
+        const userId = user.id;
+        
+        console.log('📊 Loading dashboard for user:', user.email);
+        
+        // Get comprehensive dashboard data including daily expenses
+        const dashboardData = await getDashboardData(userId, user.role);
 
+        console.log('✅ Dashboard data loaded successfully:', {
+            dailyExpenses: dashboardData.dailyExpenses,
+            totalExpenses: dashboardData.totalExpenses,
+            todaysTransactions: dashboardData.todaysTransactions.length,
+            notificationCount: dashboardData.notificationCount // Added this
+        });
+
+        res.render('individualUser/dashboard', {
+            title: 'Personal Dashboard',
+            user: user,
+            currentPage: 'dashboard',
+            data: dashboardData,
+            notificationCount: dashboardData.notificationCount // Add this line
+        });
+
+    } catch (error) {
+        console.error('❌ Dashboard error:', error);
+        
+        // Fallback data in case of error
+        const fallbackData = {
+            dailyExpenses: 0,
+            dailyExpenseLimit: 1000,
+            todaysTransactions: [],
+            totalExpenses: 0,
+            totalSavings: 0,
+            activeBudgets: 0,
+            plannedExpenses: 0,
+            recentTransactions: [],
+            activeBudgetsData: [],
+            savingsGoals: [],
+            notificationCount: 0
+        };
+
+        res.render('individualUser/dashboard', {
+            title: 'Personal Dashboard',
+            user: req.user,
+            currentPage: 'dashboard',
+            data: fallbackData,
+            notificationCount: 0, // Add this for fallback
+            error: 'Unable to load complete dashboard data'
+        });
+    }
+}));
+
+// Individual User Profile route
+router.get('/profile', asyncHandler(async (req, res) => {
   try {
-    console.log('📊 Fetching dashboard data for user:', userId);
-    const data = await getDashboardData(userId, role);
+    const user = req.user;
+    
+    // Get notification count for profile page
+    const db = require('../config/db');
+    const notificationRows = await db.execute(
+      `SELECT COUNT(*) AS notificationCount 
+       FROM notifications 
+       WHERE user_id = ? AND is_read = 0`,
+      [user.id]
+    );
+    const notificationData = getFirstRow(notificationRows);
+    const notificationCount = parseInt(notificationData?.notificationCount, 10) || 0;
 
-    console.log('✅ Dashboard data fetched successfully');
-
-    res.render('individualUser/dashboard', {
-      title: 'Personal Dashboard',
-      user: req.user,
-      currentPage: 'dashboard',
-      data,
-      notificationCount: data.notificationCount || 0,
-      success: req.query.success || false,
-      message: req.query.message || '',
-      error: req.query.error || ''
+    res.render('individualUser/profile', {
+      title: 'My Profile',
+      user: user,
+      currentPage: 'profile',
+      notificationCount: notificationCount
     });
   } catch (error) {
-    console.error('❌ Dashboard route error:', error);
-    
-    const fallbackData = {
-      totalSavings: 0,
-      totalExpenses: 0,
-      expensesCount: 0,
-      activeBudgets: 0,
-      plannedExpenses: 0,
-      recentTransactions: [],
-      recentTransactionsCount: 0,
-      savingsGoals: [],
-      activeBudgetsData: [],
-      notificationCount: 0
-    };
-
-    res.render('individualUser/dashboard', {
-      title: 'Personal Dashboard',
-      user: req.user,
-      currentPage: 'dashboard',
-      data: fallbackData,
-      notificationCount: 0,
-      error: 'Unable to load dashboard data. Some features may be unavailable.'
+    console.error('Profile error:', error);
+    res.status(500).render('error', {
+      error: 'Failed to load profile',
+      user: req.user
     });
   }
 }));
 
-// ======== SAVINGS ROUTES ========
-
-// GET Savings page
 // ======== SAVINGS ROUTES ========
 
 // GET Savings page (FIXED - without description column)
@@ -206,12 +304,13 @@ router.get('/savings', asyncHandler(async (req, res) => {
     console.log('💰 Fetching savings goals for user:', userId);
     
     // FIXED: Removed description column
-    const savingsGoals = await db.execute(`
-      SELECT id, name, target_amount, current_amount, target_date, status, created_at, updated_at
-      FROM savings_goals 
-      WHERE user_id = ? 
-      ORDER BY created_at DESC
-    `, [userId]);
+    const savingsGoals = await db.execute(
+      `SELECT id, name, target_amount, current_amount, target_date, status, created_at, updated_at
+       FROM savings_goals 
+       WHERE user_id = ? 
+       ORDER BY created_at DESC`,
+      [userId]
+    );
 
     const savingsArray = handleMySQL2Result(savingsGoals);
 
@@ -299,16 +398,17 @@ router.post('/savings/add', asyncHandler(async (req, res) => {
     const db = require('../config/db');
     
     // FIXED: Removed description column
-    const result = await db.execute(`
-      INSERT INTO savings_goals (user_id, name, target_amount, current_amount, target_date, status)
-      VALUES (?, ?, ?, ?, ?, 'active')
-    `, [
-      userId, 
-      name, 
-      parseFloat(target_amount), 
-      parseFloat(initial_amount) || 0, 
-      target_date || null
-    ]);
+    const result = await db.execute(
+      `INSERT INTO savings_goals (user_id, name, target_amount, current_amount, target_date, status)
+       VALUES (?, ?, ?, ?, ?, 'active')`,
+      [
+        userId, 
+        name, 
+        parseFloat(target_amount), 
+        parseFloat(initial_amount) || 0, 
+        target_date || null
+      ]
+    );
 
     if (result.affectedRows > 0) {
       console.log('🎉 Savings goal created successfully');
@@ -381,11 +481,12 @@ router.post('/savings/add-amount/:id', asyncHandler(async (req, res) => {
       return res.redirect('/user/savings?error=Amount exceeds remaining target');
     }
 
-    const result = await db.execute(`
-      UPDATE savings_goals 
-      SET current_amount = current_amount + ?, updated_at = NOW()
-      WHERE id = ? AND user_id = ?
-    `, [addAmount, savingsId, userId]);
+    const result = await db.execute(
+      `UPDATE savings_goals 
+       SET current_amount = current_amount + ?, updated_at = NOW()
+       WHERE id = ? AND user_id = ?`,
+      [addAmount, savingsId, userId]
+    );
 
     if (result.affectedRows > 0) {
       console.log('🎉 Amount added successfully');
@@ -410,9 +511,10 @@ router.get('/savings/edit/:id', asyncHandler(async (req, res) => {
   try {
     const db = require('../config/db');
     
-    const savingsGoals = await db.execute(`
-      SELECT * FROM savings_goals WHERE id = ? AND user_id = ?
-    `, [savingsId, userId]);
+    const savingsGoals = await db.execute(
+      `SELECT * FROM savings_goals WHERE id = ? AND user_id = ?`,
+      [savingsId, userId]
+    );
 
     const savingsData = handleMySQL2Result(savingsGoals);
 
@@ -463,11 +565,12 @@ router.post('/savings/edit/:id', asyncHandler(async (req, res) => {
     const db = require('../config/db');
     
     // FIXED: Removed description column
-    const result = await db.execute(`
-      UPDATE savings_goals 
-      SET name = ?, target_amount = ?, target_date = ?, updated_at = NOW()
-      WHERE id = ? AND user_id = ?
-    `, [name, parseFloat(target_amount), target_date || null, savingsId, userId]);
+    const result = await db.execute(
+      `UPDATE savings_goals 
+       SET name = ?, target_amount = ?, target_date = ?, updated_at = NOW()
+       WHERE id = ? AND user_id = ?`,
+      [name, parseFloat(target_amount), target_date || null, savingsId, userId]
+    );
 
     if (result.affectedRows > 0) {
       console.log('🎉 Savings goal updated successfully');
@@ -492,9 +595,10 @@ router.post('/savings/delete/:id', asyncHandler(async (req, res) => {
   try {
     const db = require('../config/db');
     
-    const result = await db.execute(`
-      DELETE FROM savings_goals WHERE id = ? AND user_id = ?
-    `, [savingsId, userId]);
+    const result = await db.execute(
+      `DELETE FROM savings_goals WHERE id = ? AND user_id = ?`,
+      [savingsId, userId]
+    );
 
     if (result.affectedRows > 0) {
       console.log('🎉 Savings goal deleted successfully');
@@ -515,11 +619,12 @@ router.get('/expenses', asyncHandler(async (req, res) => {
   const userId = req.user.id;
   const db = require('../config/db');
 
-  const expenses = await safeQuery(`
-    SELECT * FROM expenses 
-    WHERE user_id = ? 
-    ORDER BY date DESC, created_at DESC
-  `, [userId]);
+  const expenses = await safeQuery(
+    `SELECT * FROM expenses 
+     WHERE user_id = ? 
+     ORDER BY date DESC, created_at DESC`,
+    [userId]
+  );
 
   const expensesArray = Array.isArray(expenses) ? expenses : [];
 
@@ -579,7 +684,7 @@ router.get('/expenses/add', asyncHandler(async (req, res) => {
     [userId]
   );
   const notificationData = getFirstRow(notificationRows);
-  const notificationCount = parseInt(notificationData?.notificationCount, 10) || 0;
+    const notificationCount = parseInt(notificationData?.notificationCount, 10) || 0;
 
   res.render('individualUser/expenses/add', {
     title: 'Add Expense',
@@ -596,10 +701,11 @@ router.post('/expenses/add', validateExpense, asyncHandler(async (req, res) => {
   const userId = req.user.id;
   const expenseDate = date || new Date().toISOString().split('T')[0];
 
-  const result = await safeQuery(`
-    INSERT INTO expenses (user_id, amount, description, category, date, status, created_at)
-    VALUES (?, ?, ?, ?, ?, 'pending', NOW())
-  `, [userId, parseFloat(amount), description, category, expenseDate]);
+  const result = await safeQuery(
+    `INSERT INTO expenses (user_id, amount, description, category, date, status, created_at)
+     VALUES (?, ?, ?, ?, ?, 'pending', NOW())`,
+    [userId, parseFloat(amount), description, category, expenseDate]
+  );
 
   if (result?.affectedRows > 0) {
     return res.redirect('/user/expenses?success=true&message=Expense added successfully');
@@ -617,9 +723,10 @@ router.get('/expenses/edit/:id', asyncHandler(async (req, res) => {
   console.log('🔍 Fetching expense for edit:', { expenseId, userId });
 
   try {
-    const expenses = await db.execute(`
-      SELECT * FROM expenses WHERE id = ? AND user_id = ?
-    `, [expenseId, userId]);
+    const expenses = await db.execute(
+      `SELECT * FROM expenses WHERE id = ? AND user_id = ?`,
+      [expenseId, userId]
+    );
 
     const expenseData = handleMySQL2Result(expenses);
 
@@ -670,11 +777,12 @@ router.post('/expenses/edit/:id', validateExpense, asyncHandler(async (req, res)
   try {
     const db = require('../config/db');
     
-    const result = await db.execute(`
-      UPDATE expenses 
-      SET amount = ?, description = ?, category = ?, date = ?, updated_at = NOW()
-      WHERE id = ? AND user_id = ?
-    `, [parseFloat(amount), description, category, date, expenseId, userId]);
+    const result = await db.execute(
+      `UPDATE expenses 
+       SET amount = ?, description = ?, category = ?, date = ?, updated_at = NOW()
+       WHERE id = ? AND user_id = ?`,
+      [parseFloat(amount), description, category, date, expenseId, userId]
+    );
 
     if (result.affectedRows > 0) {
       console.log('🎉 Expense updated successfully');
@@ -697,9 +805,10 @@ router.post('/expenses/delete/:id', asyncHandler(async (req, res) => {
   try {
     const db = require('../config/db');
     
-    const result = await db.execute(`
-      DELETE FROM expenses WHERE id = ? AND user_id = ?
-    `, [expenseId, userId]);
+    const result = await db.execute(
+      `DELETE FROM expenses WHERE id = ? AND user_id = ?`,
+      [expenseId, userId]
+    );
 
     if (result.affectedRows > 0) {
       return res.redirect('/user/expenses?success=true&message=Expense deleted successfully');
@@ -720,8 +829,8 @@ router.get('/budgets', asyncHandler(async (req, res) => {
   const db = require('../config/db');
 
   try {
-    const budgets = await db.execute(`
-      SELECT 
+    const budgets = await db.execute(
+      `SELECT 
         b.id,
         b.category as name,
         b.category,
@@ -740,10 +849,11 @@ router.get('/budgets', asyncHandler(async (req, res) => {
             AND COALESCE(b.end_date, LAST_DAY(NOW()))
             AND e.status = 'approved'
         ), 0) as spent_amount
-      FROM budgets b 
-      WHERE b.user_id = ? 
-      ORDER BY b.created_at DESC
-    `, [userId]);
+       FROM budgets b 
+       WHERE b.user_id = ? 
+       ORDER BY b.created_at DESC`,
+      [userId]
+    );
 
     const budgetsArray = handleMySQL2Result(budgets);
 
@@ -770,8 +880,8 @@ router.get('/budgets', asyncHandler(async (req, res) => {
   } catch (error) {
     console.error('❌ Budgets route error:', error);
     
-    const budgets = await safeQuery(`
-      SELECT 
+    const budgets = await safeQuery(
+      `SELECT 
         id,
         category as name,
         category,
@@ -781,10 +891,11 @@ router.get('/budgets', asyncHandler(async (req, res) => {
         end_date,
         created_at,
         updated_at
-      FROM budgets 
-      WHERE user_id = ? 
-      ORDER BY created_at DESC
-    `, [userId]);
+       FROM budgets 
+       WHERE user_id = ? 
+       ORDER BY created_at DESC`,
+      [userId]
+    );
 
     const budgetsArray = Array.isArray(budgets) ? budgets : [];
     const budgetsWithSpent = budgetsArray.map(budget => ({
@@ -856,10 +967,11 @@ router.post('/budgets/add', asyncHandler(async (req, res) => {
     const mysqlStartDate = formatDateForMySQL(start_date);
     const mysqlEndDate = formatDateForMySQL(end_date);
 
-    const result = await db.execute(`
-      INSERT INTO budgets (user_id, category, amount, period, start_date, end_date)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `, [userId, category, parseFloat(amount), period, mysqlStartDate, mysqlEndDate]);
+    const result = await db.execute(
+      `INSERT INTO budgets (user_id, category, amount, period, start_date, end_date)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [userId, category, parseFloat(amount), period, mysqlStartDate, mysqlEndDate]
+    );
 
     if (result.affectedRows > 0) {
       console.log('🎉 Budget created successfully');
@@ -896,9 +1008,10 @@ router.get('/budgets/edit/:id', asyncHandler(async (req, res) => {
   const db = require('../config/db');
 
   try {
-    const budgets = await db.execute(`
-      SELECT * FROM budgets WHERE id = ? AND user_id = ?
-    `, [budgetId, userId]);
+    const budgets = await db.execute(
+      `SELECT * FROM budgets WHERE id = ? AND user_id = ?`,
+      [budgetId, userId]
+    );
 
     const budgetData = handleMySQL2Result(budgets);
 
@@ -960,11 +1073,12 @@ router.post('/budgets/edit/:id', asyncHandler(async (req, res) => {
     const mysqlStartDate = formatDateForMySQL(start_date);
     const mysqlEndDate = formatDateForMySQL(end_date);
     
-    const result = await db.execute(`
-      UPDATE budgets 
-      SET category = ?, amount = ?, period = ?, start_date = ?, end_date = ?, updated_at = NOW()
-      WHERE id = ? AND user_id = ?
-    `, [category, parseFloat(amount), period, mysqlStartDate, mysqlEndDate, budgetId, userId]);
+    const result = await db.execute(
+      `UPDATE budgets 
+       SET category = ?, amount = ?, period = ?, start_date = ?, end_date = ?, updated_at = NOW()
+       WHERE id = ? AND user_id = ?`,
+      [category, parseFloat(amount), period, mysqlStartDate, mysqlEndDate, budgetId, userId]
+    );
 
     if (result.affectedRows > 0) {
       console.log('🎉 Budget updated successfully');
@@ -987,9 +1101,10 @@ router.post('/budgets/delete/:id', asyncHandler(async (req, res) => {
   try {
     const db = require('../config/db');
     
-    const result = await db.execute(`
-      DELETE FROM budgets WHERE id = ? AND user_id = ?
-    `, [budgetId, userId]);
+    const result = await db.execute(
+      `DELETE FROM budgets WHERE id = ? AND user_id = ?`,
+      [budgetId, userId]
+    );
 
     if (result.affectedRows > 0) {
       return res.redirect('/user/budgets?success=true&message=Budget deleted successfully');
@@ -1009,11 +1124,12 @@ router.get('/planned-expenses', asyncHandler(async (req, res) => {
   const userId = req.user.id;
   const db = require('../config/db');
 
-  const plannedExpenses = await safeQuery(`
-    SELECT * FROM planned_expenses 
-    WHERE user_id = ? 
-    ORDER BY planned_date ASC
-  `, [userId]);
+  const plannedExpenses = await safeQuery(
+    `SELECT * FROM planned_expenses 
+     WHERE user_id = ? 
+     ORDER BY planned_date ASC`,
+    [userId]
+  );
 
   const plannedExpensesArray = Array.isArray(plannedExpenses) ? plannedExpenses : [];
 
@@ -1065,11 +1181,12 @@ router.post('/planned-expenses/add', asyncHandler(async (req, res) => {
   const userId = req.user.id;
   const { amount, description, category, planned_date, recurrence } = req.body;
 
-  const result = await safeQuery(`
-    INSERT INTO planned_expenses 
-    (user_id, amount, description, category, planned_date, recurrence, status, created_at)
-    VALUES (?, ?, ?, ?, ?, ?, 'planned', NOW())
-  `, [userId, parseFloat(amount), description, category, planned_date, recurrence]);
+  const result = await safeQuery(
+    `INSERT INTO planned_expenses 
+     (user_id, amount, description, category, planned_date, recurrence, status, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, 'planned', NOW())`,
+    [userId, parseFloat(amount), description, category, planned_date, recurrence]
+  );
 
   if (result?.affectedRows > 0) {
     return res.redirect('/user/planned-expenses?success=true&message=Planned expense added');
@@ -1085,65 +1202,6 @@ router.post('/planned-expenses/add', asyncHandler(async (req, res) => {
   });
 }));
 
-// ======== NOTIFICATIONS ROUTES ========
-
-// GET Notifications page (FIXED VERSION)
-// router.get('/notifications', asyncHandler(async (req, res) => {
-//   try {
-//     const userId = req.user.id;
-//     const db = require('../config/db');
-
-//     console.log('🔔 Fetching notifications for user:', userId);
-    
-//     // Get notifications - your MySQL2 returns data directly as array
-//     const notifications = await db.execute(
-//       `SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC`,
-//       [userId]
-//     );
-
-//     console.log('📨 Notifications found:', notifications.length);
-
-//     // Get notification count
-//     const countResult = await db.execute(
-//       `SELECT COUNT(*) AS notificationCount FROM notifications WHERE user_id = ? AND is_read = 0`,
-//       [userId]
-//     );
-    
-//     const countData = getFirstRow(countResult);
-//     const notificationCount = parseInt(countData?.notificationCount, 10) || 0;
-
-//     // Mark notifications as read when viewed
-//     if (notifications.length > 0) {
-//       await db.execute(
-//         `UPDATE notifications SET is_read = true WHERE user_id = ? AND is_read = false`,
-//         [userId]
-//       );
-//       console.log('✅ Notifications marked as read');
-//     }
-
-//     res.render('individualUser/', {
-//       title: 'Notifications',
-//       user: req.user,
-//       currentPage: 'notifications',
-//       notifications: notifications,
-//       notificationCount: notificationCount,
-//       success: req.query.success || false,
-//       message: req.query.message || '',
-//       error: req.query.error || ''
-//     });
-
-//   } catch (error) {
-//     console.error('❌ Error in notifications route:', error);
-//     res.render('individualUser/notifications', {
-//       title: 'Notifications',
-//       user: req.user,
-//       currentPage: 'notifications',
-//       notifications: [],
-//       notificationCount: 0,
-//       error: 'Failed to load notifications'
-//     });
-//   }
-// }));
 // ======== NOTIFICATIONS ROUTES ========
 
 // GET Notifications page (FIXED VIEW PATH)
@@ -1205,6 +1263,7 @@ router.get('/notifications', asyncHandler(async (req, res) => {
     });
   }
 }));
+
 // POST Mark single notification as read
 router.post('/notifications/mark-read/:id', asyncHandler(async (req, res) => {
   try {
@@ -1329,6 +1388,7 @@ router.get('/notifications-test', asyncHandler(async (req, res) => {
     `);
   }
 }));
+
 // DEBUG: Check table structures
 router.get('/debug-tables', asyncHandler(async (req, res) => {
   try {
