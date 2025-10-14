@@ -35,6 +35,7 @@ const getNotificationCount = async (userId) => {
 };
 
 // Updated getDashboardData function with daily expense tracking
+// Updated getDashboardData function with user-configurable daily expense limit
 const getDashboardData = async (userId, role = 'individual_user') => {
   try {
     const db = require('../config/db');
@@ -47,6 +48,17 @@ const getDashboardData = async (userId, role = 'individual_user') => {
     // Get current month dates for monthly expenses
     const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+
+    // Get user's daily expense limit from settings (default to 1000 if not set)
+    const dailyLimitRows = await db.execute(
+      `SELECT setting_value FROM user_settings 
+       WHERE user_id = ? AND setting_key = 'daily_expense_limit'`,
+      [userId]
+    );
+    
+    const dailyLimitData = getFirstRow(dailyLimitRows);
+    const dailyExpenseLimit = dailyLimitData ? 
+      parseFloat(dailyLimitData.setting_value) || 1000 : 1000;
 
     // All queries without array destructuring
     const dailyExpenseRows = await db.execute(
@@ -162,7 +174,7 @@ const getDashboardData = async (userId, role = 'individual_user') => {
     const result = {
       // Daily expense tracking
       dailyExpenses: dailyExpenses,
-      dailyExpenseLimit: 1000, // You can make this configurable per user
+      dailyExpenseLimit: dailyExpenseLimit,
       todaysTransactions: safeTodaysTransactions,
       
       // Monthly data
@@ -179,6 +191,7 @@ const getDashboardData = async (userId, role = 'individual_user') => {
 
     console.log('✅ getDashboardData completed:', {
       dailyExpenses: result.dailyExpenses,
+      dailyExpenseLimit: result.dailyExpenseLimit,
       totalExpenses: result.totalExpenses,
       totalSavings: result.totalSavings,
       todaysTransactionsCount: result.todaysTransactions.length,
@@ -1202,6 +1215,80 @@ router.post('/planned-expenses/add', asyncHandler(async (req, res) => {
   });
 }));
 
+
+
+
+// ======== SETTINGS ROUTES ========
+
+// GET Settings page
+router.get('/settings', asyncHandler(async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const db = require('../config/db');
+
+    // Get current settings
+    const settingsRows = await db.execute(
+      `SELECT setting_key, setting_value FROM user_settings WHERE user_id = ?`,
+      [userId]
+    );
+
+    const settings = {};
+    handleMySQL2Result(settingsRows).forEach(setting => {
+      settings[setting.setting_key] = setting.setting_value;
+    });
+
+    // Get notification count
+    const notificationCount = await getNotificationCount(userId);
+
+    res.render('individualUser/settings', {
+      title: 'My Settings',
+      user: req.user,
+      currentPage: 'settings',
+      settings: settings,
+      notificationCount: notificationCount,
+      success: req.query.success || false,
+      message: req.query.message || '',
+      error: req.query.error || ''
+    });
+
+  } catch (error) {
+    console.error('❌ Settings error:', error);
+    res.redirect('/user/dashboard?error=Failed to load settings');
+  }
+}));
+
+// POST Update Settings
+router.post('/settings/update', asyncHandler(async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { daily_expense_limit, currency, language } = req.body;
+    const db = require('../config/db');
+
+    console.log('⚙️ Updating settings for user:', userId, { daily_expense_limit });
+
+    // Update daily expense limit
+    if (daily_expense_limit) {
+      const dailyLimit = parseFloat(daily_expense_limit);
+      if (dailyLimit > 0) {
+        await db.execute(
+          `INSERT INTO user_settings (user_id, setting_key, setting_value) 
+           VALUES (?, 'daily_expense_limit', ?)
+           ON DUPLICATE KEY UPDATE setting_value = ?, updated_at = NOW()`,
+          [userId, dailyLimit, dailyLimit]
+        );
+      }
+    }
+
+    // You can add more settings here (currency, language, etc.)
+
+    console.log('✅ Settings updated successfully');
+    res.redirect('/user/settings?success=true&message=Settings updated successfully');
+
+  } catch (error) {
+    console.error('❌ Update settings error:', error);
+    res.redirect('/user/settings?error=Failed to update settings');
+  }
+}));
 // ======== NOTIFICATIONS ROUTES ========
 
 // GET Notifications page (FIXED VIEW PATH)

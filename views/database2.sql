@@ -390,10 +390,13 @@ CREATE TABLE `transactions` (
   FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+
+
 -- ==========================================
--- NOTIFICATIONS TABLE
+-- CREATE TABLE: notifications
 -- ==========================================
-CREATE TABLE `notifications` (
+
+CREATE TABLE IF NOT EXISTS `notifications` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `user_id` INT NOT NULL,
   `title` VARCHAR(255) NOT NULL,
@@ -402,10 +405,19 @@ CREATE TABLE `notifications` (
   `is_read` TINYINT(1) DEFAULT 0,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  CONSTRAINT `fk_notifications_user`
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`id`)
+    ON DELETE CASCADE
+) ENGINE=InnoDB 
+  DEFAULT CHARSET=utf8mb4 
+  COLLATE=utf8mb4_unicode_ci;
 
-INSERT INTO `notifications` (`user_id`, `title`, `message`, `type`, `is_read`) VALUES 
+
+-- ==========================================
+-- INSERT SAMPLE DATA: notifications
+-- ==========================================
+
+INSERT INTO `notifications` (`user_id`, `title`, `message`, `type`, `is_read`) VALUES
 (1, 'Budget Alert', 'You have exceeded your Food & Dining budget', 'budget', 0),
 (1, 'Expense Approved', 'Your expense for office supplies has been approved', 'expense', 1),
 (1, 'Savings Goal Update', 'You are 50% towards your New Laptop goal', 'savings', 0),
@@ -424,6 +436,28 @@ INSERT INTO `notifications` (`user_id`, `title`, `message`, `type`, `is_read`) V
 (6, 'Welcome to Team', 'You have been added to Development Team', 'team', 1),
 (6, 'Expense Added', 'New personal expense recorded', 'expense', 0),
 (6, 'Budget Alert', 'You are under budget for Personal Care', 'budget', 0);
+
+
+-- ==========================================
+-- CREATE TABLE: user_settings
+-- ==========================================
+
+CREATE TABLE IF NOT EXISTS `user_settings` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `user_id` INT NOT NULL,
+  `setting_key` VARCHAR(100) NOT NULL,
+  `setting_value` VARCHAR(255),
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY `unique_user_setting` (`user_id`, `setting_key`),
+  CONSTRAINT `fk_user_settings_user`
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`id`)
+    ON DELETE CASCADE,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB 
+  DEFAULT CHARSET=utf8mb4 
+  COLLATE=utf8mb4_unicode_ci;
+
 
 -- ==========================================
 -- SETUP COMPLETE
