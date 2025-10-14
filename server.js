@@ -6,6 +6,7 @@ const session = require('express-session');
 const morgan = require('morgan');
 const helmet = require('helmet');
 const cors = require('cors');
+const fs = require('fs');
 const db = require('./config/db');
 
 const app = express();
@@ -21,7 +22,7 @@ app.use(session({
   secret: process.env.JWT_SECRET || 'fallback-secret-key',
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: false }
+  cookie: { secure: process.env.NODE_ENV === 'production' }
 }));
 
 // Static files
@@ -38,7 +39,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// Route loader
+// Route loader helper
 const loadRoute = (routePath, routeName) => {
   try {
     delete require.cache[require.resolve(routePath)];
@@ -58,26 +59,18 @@ const loadRoute = (routePath, routeName) => {
 };
 
 // Load routes
-const authRoutes = loadRoute('./routes/authRoutes', 'Auth');
-const superAdminRoutes = loadRoute('./routes/superAdminRoutes', 'Super Admin');
-const adminRoutes = loadRoute('./routes/adminRoutes', 'Admin');
-const teamLeaderRoutes = loadRoute('./routes/teamLeaderRoutes', 'Team Leader');
-const teamMemberRoutes = loadRoute('./routes/teamMemberRoutes', 'Team Member');
-const individualUserRoutes = loadRoute('./routes/individualUserRoutes', 'Individual User');
-const dashboardRoutes = loadRoute('./routes/dashboardRoutes', 'Dashboard');
+app.use('/auth', loadRoute('./routes/authRoutes', 'Auth'));
+app.use('/super-admin', loadRoute('./routes/superAdminRoutes', 'Super Admin'));
+app.use('/admin', loadRoute('./routes/adminRoutes', 'Admin'));
+app.use('/team-leader', loadRoute('./routes/teamLeaderRoutes', 'Team Leader'));
+app.use('/team-member', loadRoute('./routes/teamMemberRoutes', 'Team Member'));
+app.use('/user', loadRoute('./routes/individualUserRoutes', 'Individual User'));
+app.use('/', loadRoute('./routes/dashboardRoutes', 'Dashboard'));
 
-// Mount routes
-app.use('/auth', authRoutes);
-app.use('/super-admin', superAdminRoutes);
-app.use('/admin', adminRoutes);
-app.use('/team-leader', teamLeaderRoutes);
-app.use('/team-member', teamMemberRoutes);
-app.use('/user', individualUserRoutes);
-app.use('/', dashboardRoutes);
-
-// Routes
+// Root route
 app.get('/', (req, res) => res.render('index', { title: 'Welcome to FinMate' }));
 
+// Health check
 app.get('/health', (req, res) => res.json({
   status: 'OK',
   timestamp: new Date().toISOString(),
@@ -90,23 +83,29 @@ app.use((req, res) => {
   res.status(404).render('404', { title: 'Page Not Found', requestedUrl: req.url });
 });
 
+// Port binding
 const PORT = process.env.PORT || 3000;
 
-// Server start
-db.getConnection()
-  .then(() => {
+// Start server after DB connection
+(async () => {
+  try {
+    // For Aiven SSL: load CA if provided
+    if (process.env.DB_CA_PATH && fs.existsSync(process.env.DB_CA_PATH)) {
+      process.env.DB_SSL_CA = fs.readFileSync(process.env.DB_CA_PATH, 'utf8');
+    }
+
+    await db.getConnection();
     console.log('✅ Database connected');
-    return db.initDatabase();
-  })
-  .then(() => {
+    await db.initDatabase();
     console.log('✅ Database initialized');
+
     app.listen(PORT, () => {
-      console.log(`🚀 Server running at http://localhost:${PORT}`);
+      console.log(`🚀 Server running on port ${PORT}`);
     });
-  })
-  .catch(err => {
+  } catch (err) {
     console.error('❌ Database connection failed:', err.message);
     process.exit(1);
-  });
+  }
+})();
 
-module.exports = app; 
+module.exports = app;
