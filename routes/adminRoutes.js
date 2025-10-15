@@ -16,7 +16,8 @@ router.get('/dashboard', async (req, res) => {
     const [userCount] = await db.pool.execute('SELECT COUNT(*) as count FROM users WHERE is_active = 1');
     const [budgetCount] = await db.pool.execute('SELECT COUNT(*) as count FROM budgets');
     const [expenseCount] = await db.pool.execute('SELECT COUNT(*) as count FROM expenses');
-    const [pendingExpenses] = await db.pool.execute('SELECT COUNT(*) as count FROM expenses WHERE status = "pending"');
+const [pendingExpenses] = await db.pool.execute("SELECT COUNT(*) as count FROM expenses WHERE status = 'pending'");
+
     const [teamCount] = await db.pool.execute('SELECT COUNT(*) as count FROM teams');
     const [notificationCount] = await db.pool.execute('SELECT COUNT(*) as count FROM notifications WHERE is_read = 0');
 
