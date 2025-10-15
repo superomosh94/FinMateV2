@@ -1,348 +1,916 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<!-- get the hesd partial -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= title %></title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <!-- favicon -->
-
-    <meta name="msapplication-TileColor" content="#da532c">
-    <link rel="shortcut icon" href="../../public/images/favicon/favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="/images/favicon/favicon.ico" type="image/x-icon">
     <style>
-        .sidebar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --info-color: #3b82f6;
+            --danger-color: #ef4444;
+            --dark-color: #1f2937;
+            --light-bg: #f8fafc;
+            --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            --hover-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--light-bg);
             min-height: 100vh;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            line-height: 1.6;
+            color: #374151;
+            overflow-x: hidden;
         }
+
+        /* Sidebar Styles */
+        .sidebar {
+            background: var(--primary-gradient);
+            min-height: 100vh;
+            box-shadow: var(--card-shadow);
+            position: fixed;
+            width: 280px;
+            z-index: 1000;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sidebar-brand {
+            padding: 2rem 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 1rem;
+        }
+
+        .sidebar-brand h3 {
+            color: white;
+            font-weight: 700;
+            font-size: 1.5rem;
+            margin: 0;
+        }
+
         .sidebar .nav-link {
-            color: #fff;
-            padding: 12px 20px;
-            margin: 4px 0;
-            border-radius: 8px;
-            transition: all 0.3s;
+            color: rgba(255,255,255,0.85);
+            padding: 1rem 1.5rem;
+            margin: 0.25rem 1rem;
+            border-radius: 12px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+            overflow: hidden;
         }
+
+        .sidebar .nav-link::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 0;
+            background: rgba(255,255,255,0.15);
+            transition: width 0.3s ease;
+            border-radius: 12px;
+        }
+
         .sidebar .nav-link:hover {
-            background: rgba(255,255,255,0.1);
-            transform: translateX(5px);
+            color: white;
+            transform: translateX(8px);
         }
+
+        .sidebar .nav-link:hover::before {
+            width: 100%;
+        }
+
         .sidebar .nav-link.active {
             background: rgba(255,255,255,0.2);
-            font-weight: bold;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            transform: translateX(8px);
         }
+
+        .sidebar .nav-link.active::before {
+            width: 100%;
+        }
+
+        /* Main Content Area */
+        .main-content {
+            margin-left: 280px;
+            padding: 0;
+            transition: all 0.3s ease;
+            min-height: 100vh;
+        }
+
+        /* Top Navigation */
+        .navbar-top {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            padding: 1.25rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 999;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .navbar-top .container-fluid {
+            padding: 0;
+        }
+
+        /* Statistics Cards */
         .stat-card {
-            border-radius: 10px;
-            transition: transform 0.3s;
-        }
-        .stat-card:hover {
-            transform: translateY(-5px);
-        }
-        .border-left-primary { border-left: 4px solid #4e73df !important; }
-        .border-left-success { border-left: 4px solid #1cc88a !important; }
-        .border-left-warning { border-left: 4px solid #f6c23e !important; }
-        .border-left-info { border-left: 4px solid #36b9cc !important; }
-        .border-left-danger { border-left: 4px solid #e74a3b !important; }
-        .dropdown-menu {
-            background: #2c3e50;
             border: none;
+            border-radius: 20px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background: white;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+            position: relative;
+            border: 1px solid rgba(0,0,0,0.03);
         }
-        .dropdown-item {
-            color: #ecf0f1;
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--info-color);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
         }
-        .dropdown-item:hover {
-            background: #34495e;
-            color: #fff;
+
+        .stat-card:hover {
+            transform: translateY(-12px) scale(1.02);
+            box-shadow: var(--hover-shadow);
+        }
+
+        .stat-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .stat-card-primary::before { background: var(--info-color); }
+        .stat-card-success::before { background: var(--success-color); }
+        .stat-card-warning::before { background: var(--warning-color); }
+        .stat-card-info::before { background: var(--info-color); }
+        .stat-card-dark::before { background: var(--dark-color); }
+        .stat-card-danger::before { background: var(--danger-color); }
+
+        .stat-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover .stat-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .stat-icon-primary { background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(59, 130, 246, 0.05)); color: var(--info-color); }
+        .stat-icon-success { background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.05)); color: var(--success-color); }
+        .stat-icon-warning { background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.05)); color: var(--warning-color); }
+        .stat-icon-info { background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(59, 130, 246, 0.05)); color: var(--info-color); }
+        .stat-icon-dark { background: linear-gradient(135deg, rgba(31, 41, 55, 0.15), rgba(31, 41, 55, 0.05)); color: var(--dark-color); }
+        .stat-icon-danger { background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(239, 68, 68, 0.05)); color: var(--danger-color); }
+
+        /* Welcome Card */
+        .welcome-card {
+            background: var(--primary-gradient);
+            border: none;
+            border-radius: 24px;
+            color: white;
+            overflow: hidden;
+            position: relative;
+            box-shadow: var(--card-shadow);
+        }
+
+        .welcome-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        /* Quick Actions */
+        .quick-action-btn {
+            border: none;
+            border-radius: 20px;
+            padding: 2rem 1.5rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background: white;
+            box-shadow: var(--card-shadow);
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.03);
+        }
+
+        .quick-action-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.5s;
+        }
+
+        .quick-action-btn:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--hover-shadow);
+        }
+
+        .quick-action-btn:hover::before {
+            left: 100%;
+        }
+
+        .action-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.25rem;
+            margin: 0 auto 1.25rem;
+            transition: all 0.3s ease;
+        }
+
+        .quick-action-btn:hover .action-icon {
+            transform: scale(1.15);
+        }
+
+        /* User Badge */
+        .user-badge {
+            background: var(--primary-gradient);
+            border: none;
+            border-radius: 30px;
+            padding: 0.75rem 1.5rem;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .user-badge:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Cards */
+        .card {
+            border: none;
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            background: white;
+            border: 1px solid rgba(0,0,0,0.03);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: var(--hover-shadow);
+        }
+
+        .card-header {
+            background: white;
+            border-bottom: 1px solid rgba(0,0,0,0.06);
+            padding: 1.75rem 2rem;
+            font-weight: 700;
+            font-size: 1.1rem;
+            border-radius: 20px 20px 0 0 !important;
+        }
+
+        /* System Status */
+        .system-status {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .system-status:last-child {
+            border-bottom: none;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+            flex-shrink: 0;
+        }
+
+        .status-online { background: var(--success-color); }
+        .status-offline { background: var(--danger-color); }
+
+        @keyframes pulse {
+            0%, 100% { 
+                opacity: 1;
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            }
+            50% { 
+                opacity: 0.8;
+                box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+            }
+        }
+
+        /* Buttons */
+        .btn {
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 0.875rem 1.5rem;
+        }
+
+        .btn-outline-primary:hover,
+        .btn-outline-success:hover,
+        .btn-outline-warning:hover,
+        .btn-outline-info:hover,
+        .btn-outline-dark:hover,
+        .btn-outline-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .sidebar {
+                width: 250px;
+            }
+            .main-content {
+                margin-left: 250px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: 280px;
+            }
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+            .main-content {
+                margin-left: 0;
+            }
+            .mobile-menu-btn {
+                display: block !important;
+            }
+            .navbar-top {
+                padding: 1rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container-fluid.py-4 {
+                padding: 1rem !important;
+            }
+            .stat-card {
+                margin-bottom: 1rem;
+            }
+            .welcome-card {
+                padding: 2rem 1.5rem !important;
+            }
+            .quick-action-btn {
+                padding: 1.5rem 1rem;
+                margin-bottom: 1rem;
+            }
+            .action-icon {
+                width: 60px;
+                height: 60px;
+                font-size: 1.75rem;
+            }
+            .user-badge {
+                padding: 0.5rem 1rem;
+                font-size: 0.875rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .navbar-top {
+                padding: 0.75rem 1rem;
+            }
+            .welcome-card h3 {
+                font-size: 1.5rem;
+            }
+            .stat-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 1.25rem;
+            }
+            .card-header {
+                padding: 1.25rem 1.5rem;
+            }
+            .system-status {
+                padding: 0.75rem 0;
+            }
+        }
+
+        /* Mobile Menu Button */
+        .mobile-menu-btn {
+            display: none;
+            background: var(--primary-gradient);
+            border: none;
+            color: white;
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-menu-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* Loading Animation */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--info-color);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #2563eb;
         }
     </style>
 </head>
 <body>
-    <%- include('../partials/admin-sidebar') -%>
-    <div class="container-fluid">
-        <div class="row">
+    <div class="container-fluid p-0">
+        <div class="row g-0">
             <!-- Sidebar -->
+            <div class="sidebar">
+                <div class="sidebar-brand">
+                    <h3><i class="fas fa-crown me-2"></i>FinMate Admin</h3>
+                </div>
+                <%- include('../partials/admin-sidebar') -%>
+            </div>
 
-            <!-- Main content -->
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2">
-                        <i class="fas fa-crown me-2 text-warning"></i>
-                        Admin Dashboard
-                    </h1>
-                    <div class="btn-toolbar mb-2 mb-md-0">
-                        <span class="me-2 badge bg-primary">
-                            <i class="fas fa-user me-1"></i>
-                            <%= user.first_name %> <%= user.last_name %>
-                            (<%= user.role_name %>)
-                        </span>
+            <!-- Main Content -->
+            <div class="main-content col">
+                <!-- Top Navigation -->
+                <nav class="navbar-top">
+                    <div class="container-fluid">
+                        <div class="d-flex justify-content-between align-items-center w-100">
+                            <div class="d-flex align-items-center gap-3">
+                                <button class="mobile-menu-btn" id="mobileMenuBtn">
+                                    <i class="fas fa-bars"></i>
+                                </button>
+                                <div>
+                                    <h2 class="h4 mb-0 fw-bold text-dark">
+                                        <i class="fas fa-crown me-2 text-warning"></i>
+                                        Admin Dashboard
+                                    </h2>
+                                    <p class="text-muted mb-0 small">Welcome back, <%= user.first_name || user.username %>!</p>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="user-badge">
+                                    <i class="fas fa-user me-2"></i>
+                                    <%= user.first_name %> <%= user.last_name %>
+                                    <span class="badge bg-light text-dark ms-2"><%= user.role_name %></span>
+                                </span>
+                                <div class="dropdown">
+                                    <button class="btn btn-light rounded-circle" type="button" data-bs-toggle="dropdown" style="width: 45px; height: 45px;">
+                                        <i class="fas fa-cog"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0">
+                                        <li><a class="dropdown-item" href="/admin/profile"><i class="fas fa-user me-2"></i>Profile</a></li>
+                                        <li><a class="dropdown-item" href="/admin/notifications"><i class="fas fa-bell me-2"></i>Notifications</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item" href="/logout"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+
+                <!-- Main Content Area -->
+                <div class="container-fluid py-4 animate-fade-in">
+                    <!-- Welcome Banner -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="welcome-card p-5">
+                                <div class="row align-items-center">
+                                    <div class="col-lg-8">
+                                        <h3 class="fw-bold mb-3">Welcome to Admin Panel</h3>
+                                        <p class="mb-0 opacity-90 fs-6">Manage users, budgets, expenses, and system-wide settings from this centralized dashboard. Everything you need to oversee your financial operations.</p>
+                                    </div>
+                                    <div class="col-lg-4 text-lg-end text-center mt-3 mt-lg-0">
+                                        <i class="fas fa-rocket fa-5x opacity-25"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Statistics Cards -->
+                    <div class="row mb-4">
+                        <div class="col-xxl-2 col-xl-3 col-lg-4 col-md-6 mb-4">
+                            <div class="stat-card stat-card-primary h-100">
+                                <div class="card-body p-4">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="flex-grow-1">
+                                            <h6 class="text-uppercase text-muted small fw-bold mb-2">Total Users</h6>
+                                            <h2 class="fw-bold text-dark mb-1 display-6"><%= stats && stats.totalUsers ? stats.totalUsers : 0 %></h2>
+                                            <span class="text-success small fw-bold">
+                                                <i class="fas fa-arrow-up me-1"></i>2.5% growth
+                                            </span>
+                                        </div>
+                                        <div class="stat-icon stat-icon-primary">
+                                            <i class="fas fa-users"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xxl-2 col-xl-3 col-lg-4 col-md-6 mb-4">
+                            <div class="stat-card stat-card-success h-100">
+                                <div class="card-body p-4">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="flex-grow-1">
+                                            <h6 class="text-uppercase text-muted small fw-bold mb-2">Total Budgets</h6>
+                                            <h2 class="fw-bold text-dark mb-1 display-6"><%= stats && stats.totalBudgets ? stats.totalBudgets : 0 %></h2>
+                                            <span class="text-success small fw-bold">
+                                                <i class="fas fa-arrow-up me-1"></i>5.2% growth
+                                            </span>
+                                        </div>
+                                        <div class="stat-icon stat-icon-success">
+                                            <i class="fas fa-wallet"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xxl-2 col-xl-3 col-lg-4 col-md-6 mb-4">
+                            <div class="stat-card stat-card-warning h-100">
+                                <div class="card-body p-4">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="flex-grow-1">
+                                            <h6 class="text-uppercase text-muted small fw-bold mb-2">Total Expenses</h6>
+                                            <h2 class="fw-bold text-dark mb-1 display-6"><%= stats && stats.totalExpenses ? stats.totalExpenses : 0 %></h2>
+                                            <span class="text-danger small fw-bold">
+                                                <i class="fas fa-arrow-down me-1"></i>1.3% decrease
+                                            </span>
+                                        </div>
+                                        <div class="stat-icon stat-icon-warning">
+                                            <i class="fas fa-money-bill-wave"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xxl-2 col-xl-3 col-lg-4 col-md-6 mb-4">
+                            <div class="stat-card stat-card-info h-100">
+                                <div class="card-body p-4">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="flex-grow-1">
+                                            <h6 class="text-uppercase text-muted small fw-bold mb-2">Active Teams</h6>
+                                            <h2 class="fw-bold text-dark mb-1 display-6"><%= stats && stats.totalTeams ? stats.totalTeams : 0 %></h2>
+                                            <span class="text-success small fw-bold">
+                                                <i class="fas fa-arrow-up me-1"></i>3.1% growth
+                                            </span>
+                                        </div>
+                                        <div class="stat-icon stat-icon-info">
+                                            <i class="fas fa-sitemap"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xxl-2 col-xl-3 col-lg-4 col-md-6 mb-4">
+                            <div class="stat-card stat-card-dark h-100">
+                                <div class="card-body p-4">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="flex-grow-1">
+                                            <h6 class="text-uppercase text-muted small fw-bold mb-2">Notifications</h6>
+                                            <h2 class="fw-bold text-dark mb-1 display-6"><%= stats && stats.pendingNotifications ? stats.pendingNotifications : 0 %></h2>
+                                            <span class="text-warning small fw-bold">
+                                                <i class="fas fa-circle me-1"></i>Requires attention
+                                            </span>
+                                        </div>
+                                        <div class="stat-icon stat-icon-dark">
+                                            <i class="fas fa-bell"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xxl-2 col-xl-3 col-lg-4 col-md-6 mb-4">
+                            <div class="stat-card stat-card-danger h-100">
+                                <div class="card-body p-4">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="flex-grow-1">
+                                            <h6 class="text-uppercase text-muted small fw-bold mb-2">System Health</h6>
+                                            <h2 class="fw-bold text-dark mb-1 display-6">100%</h2>
+                                            <span class="text-success small fw-bold">
+                                                <i class="fas fa-check-circle me-1"></i>Optimal
+                                            </span>
+                                        </div>
+                                        <div class="stat-icon stat-icon-danger">
+                                            <i class="fas fa-heartbeat"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header d-flex align-items-center">
+                                    <i class="fas fa-bolt me-3 text-warning fs-5"></i>
+                                    <h5 class="card-title mb-0 fw-bold">Quick Actions</h5>
+                                </div>
+                                <div class="card-body p-4">
+                                    <div class="row g-4">
+                                        <div class="col-xxl-2 col-xl-3 col-lg-4 col-md-6">
+                                            <a href="/admin/users/add" class="quick-action-btn text-center">
+                                                <div class="action-icon bg-primary bg-opacity-10 text-primary">
+                                                    <i class="fas fa-user-plus"></i>
+                                                </div>
+                                                <h6 class="fw-bold mb-2">Add User</h6>
+                                                <p class="text-muted small mb-0">Create new user account with specific roles and permissions</p>
+                                            </a>
+                                        </div>
+                                        <div class="col-xxl-2 col-xl-3 col-lg-4 col-md-6">
+                                            <a href="/admin/budgets/create" class="quick-action-btn text-center">
+                                                <div class="action-icon bg-success bg-opacity-10 text-success">
+                                                    <i class="fas fa-wallet"></i>
+                                                </div>
+                                                <h6 class="fw-bold mb-2">Create Budget</h6>
+                                                <p class="text-muted small mb-0">Set up new budget allocation for departments or projects</p>
+                                            </a>
+                                        </div>
+                                        <div class="col-xxl-2 col-xl-3 col-lg-4 col-md-6">
+                                            <a href="/admin/expenses/add" class="quick-action-btn text-center">
+                                                <div class="action-icon bg-info bg-opacity-10 text-info">
+                                                    <i class="fas fa-money-bill-wave"></i>
+                                                </div>
+                                                <h6 class="fw-bold mb-2">Add Expense</h6>
+                                                <p class="text-muted small mb-0">Record and categorize new expense entries</p>
+                                            </a>
+                                        </div>
+                                        <div class="col-xxl-2 col-xl-3 col-lg-4 col-md-6">
+                                            <a href="/admin/teams" class="quick-action-btn text-center">
+                                                <div class="action-icon bg-warning bg-opacity-10 text-warning">
+                                                    <i class="fas fa-users-cog"></i>
+                                                </div>
+                                                <h6 class="fw-bold mb-2">Manage Teams</h6>
+                                                <p class="text-muted small mb-0">Organize and manage team structures and members</p>
+                                            </a>
+                                        </div>
+                                        <div class="col-xxl-2 col-xl-3 col-lg-4 col-md-6">
+                                            <a href="/admin/notifications" class="quick-action-btn text-center">
+                                                <div class="action-icon bg-dark bg-opacity-10 text-dark">
+                                                    <i class="fas fa-bell"></i>
+                                                </div>
+                                                <h6 class="fw-bold mb-2">Notifications</h6>
+                                                <p class="text-muted small mb-0">View and manage system alerts and notifications</p>
+                                            </a>
+                                        </div>
+                                        <div class="col-xxl-2 col-xl-3 col-lg-4 col-md-6">
+                                            <a href="/admin/reports" class="quick-action-btn text-center">
+                                                <div class="action-icon bg-danger bg-opacity-10 text-danger">
+                                                    <i class="fas fa-chart-bar"></i>
+                                                </div>
+                                                <h6 class="fw-bold mb-2">Reports</h6>
+                                                <p class="text-muted small mb-0">Access detailed analytics and performance reports</p>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- System Info & Actions -->
+                    <div class="row">
+                        <div class="col-xl-6 col-lg-12 mb-4">
+                            <div class="card h-100">
+                                <div class="card-header d-flex align-items-center">
+                                    <i class="fas fa-info-circle me-3 text-primary fs-5"></i>
+                                    <h6 class="card-title mb-0 fw-bold">System Information</h6>
+                                </div>
+                                <div class="card-body p-4">
+                                    <div class="system-status">
+                                        <div class="status-dot status-online"></div>
+                                        <div class="flex-grow-1">
+                                            <strong class="d-block mb-1">System Status</strong>
+                                            <span class="text-success">All Systems Operational</span>
+                                        </div>
+                                    </div>
+                                    <div class="system-status">
+                                        <i class="fas fa-database text-info fs-5"></i>
+                                        <div class="flex-grow-1">
+                                            <strong class="d-block mb-1">Database</strong>
+                                            <span class="text-success">Connected & Healthy</span>
+                                        </div>
+                                    </div>
+                                    <div class="system-status">
+                                        <i class="fas fa-clock text-warning fs-5"></i>
+                                        <div class="flex-grow-1">
+                                            <strong class="d-block mb-1">Server Time</strong>
+                                            <span id="server-time" class="text-muted"><%= new Date().toLocaleString() %></span>
+                                        </div>
+                                    </div>
+                                    <div class="system-status">
+                                        <i class="fas fa-user-shield text-primary fs-5"></i>
+                                        <div class="flex-grow-1">
+                                            <strong class="d-block mb-1">Your Role</strong>
+                                            <span class="badge bg-primary"><%= user.role_name %></span>
+                                        </div>
+                                    </div>
+                                    <div class="system-status">
+                                        <i class="fas fa-sign-in-alt text-success fs-5"></i>
+                                        <div class="flex-grow-1">
+                                            <strong class="d-block mb-1">Last Login</strong>
+                                            <span class="text-muted">Just now</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xl-6 col-lg-12 mb-4">
+                            <div class="card h-100">
+                                <div class="card-header d-flex align-items-center">
+                                    <i class="fas fa-cogs me-3 text-primary fs-5"></i>
+                                    <h6 class="card-title mb-0 fw-bold">System Management</h6>
+                                </div>
+                                <div class="card-body p-4">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <a href="/admin/users" class="btn btn-outline-primary w-100 h-100 py-3 d-flex align-items-center justify-content-center">
+                                                <i class="fas fa-users me-2 fs-5"></i>
+                                                <span>Manage Users</span>
+                                            </a>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <a href="/admin/budgets" class="btn btn-outline-success w-100 h-100 py-3 d-flex align-items-center justify-content-center">
+                                                <i class="fas fa-wallet me-2 fs-5"></i>
+                                                <span>Manage Budgets</span>
+                                            </a>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <a href="/admin/expenses" class="btn btn-outline-warning w-100 h-100 py-3 d-flex align-items-center justify-content-center">
+                                                <i class="fas fa-money-bill-wave me-2 fs-5"></i>
+                                                <span>Manage Expenses</span>
+                                            </a>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <a href="/admin/teams" class="btn btn-outline-info w-100 h-100 py-3 d-flex align-items-center justify-content-center">
+                                                <i class="fas fa-sitemap me-2 fs-5"></i>
+                                                <span>Manage Teams</span>
+                                            </a>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <a href="/admin/reports" class="btn btn-outline-dark w-100 h-100 py-3 d-flex align-items-center justify-content-center">
+                                                <i class="fas fa-chart-bar me-2 fs-5"></i>
+                                                <span>View Reports</span>
+                                            </a>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <a href="/admin/profile" class="btn btn-outline-secondary w-100 h-100 py-3 d-flex align-items-center justify-content-center">
+                                                <i class="fas fa-user me-2 fs-5"></i>
+                                                <span>My Profile</span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-
-                <!-- Welcome Alert -->
-                <div class="alert alert-primary mb-4">
-                    <h5><i class="fas fa-info-circle me-2"></i>Welcome to Admin Panel</h5>
-                    <p class="mb-0">Manage users, budgets, expenses, and system-wide settings from this dashboard.</p>
-                </div>
-
-                <!-- Statistics Cards -->
-                <div class="row mb-4">
-                    <div class="col-xl-2 col-md-4 col-sm-6 mb-4">
-                        <div class="card border-left-primary shadow h-100 py-2 stat-card">
-                            <div class="card-body">
-                                <div class="row no-gutters align-items-center">
-                                    <div class="col mr-2">
-                                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                            Total Users</div>
-                                        <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                            <%= stats && stats.totalUsers ? stats.totalUsers : 0 %>
-                                        </div>
-                                    </div>
-                                    <div class="col-auto">
-                                        <i class="fas fa-users fa-2x text-gray-300"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-xl-2 col-md-4 col-sm-6 mb-4">
-                        <div class="card border-left-success shadow h-100 py-2 stat-card">
-                            <div class="card-body">
-                                <div class="row no-gutters align-items-center">
-                                    <div class="col mr-2">
-                                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                            Total Budgets</div>
-                                        <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                            <%= stats && stats.totalBudgets ? stats.totalBudgets : 0 %>
-                                        </div>
-                                    </div>
-                                    <div class="col-auto">
-                                        <i class="fas fa-wallet fa-2x text-gray-300"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-xl-2 col-md-4 col-sm-6 mb-4">
-                        <div class="card border-left-warning shadow h-100 py-2 stat-card">
-                            <div class="card-body">
-                                <div class="row no-gutters align-items-center">
-                                    <div class="col mr-2">
-                                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                            Total Expenses</div>
-                                        <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                            <%= stats && stats.totalExpenses ? stats.totalExpenses : 0 %>
-                                        </div>
-                                    </div>
-                                    <div class="col-auto">
-                                        <i class="fas fa-money-bill-wave fa-2x text-gray-300"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-xl-2 col-md-4 col-sm-6 mb-4">
-                        <div class="card border-left-info shadow h-100 py-2 stat-card">
-                            <div class="card-body">
-                                <div class="row no-gutters align-items-center">
-                                    <div class="col mr-2">
-                                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                                            Active Teams</div>
-                                        <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                            <%= stats && stats.totalTeams ? stats.totalTeams : 0 %>
-                                        </div>
-                                    </div>
-                                    <div class="col-auto">
-                                        <i class="fas fa-sitemap fa-2x text-gray-300"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-xl-2 col-md-4 col-sm-6 mb-4">
-                        <div class="card border-left-danger shadow h-100 py-2 stat-card">
-                            <div class="card-body">
-                                <div class="row no-gutters align-items-center">
-                                    <div class="col mr-2">
-                                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
-                                            Pending Approvals</div>
-                                        <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                            <%= stats && stats.pendingExpenses ? stats.pendingExpenses : 0 %>
-                                        </div>
-                                    </div>
-                                    <div class="col-auto">
-                                        <i class="fas fa-clock fa-2x text-gray-300"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-xl-2 col-md-4 col-sm-6 mb-4">
-                        <div class="card border-left-secondary shadow h-100 py-2 stat-card">
-                            <div class="card-body">
-                                <div class="row no-gutters align-items-center">
-                                    <div class="col mr-2">
-                                        <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">
-                                            Notifications</div>
-                                        <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                            <%= stats && stats.pendingNotifications ? stats.pendingNotifications : 0 %>
-                                        </div>
-                                    </div>
-                                    <div class="col-auto">
-                                        <i class="fas fa-bell fa-2x text-gray-300"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Quick Actions -->
-                <div class="row mb-4">
-                    <div class="col-12">
-                        <div class="card shadow">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">
-                                    <i class="fas fa-bolt me-2"></i>Quick Actions
-                                </h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="row text-center">
-                                    <div class="col-md-2 col-sm-4 mb-3">
-                                        <a href="/admin/users/add" class="btn btn-primary btn-lg w-100">
-                                            <i class="fas fa-user-plus fa-2x mb-2"></i><br>
-                                            Add User
-                                        </a>
-                                    </div>
-                                    <div class="col-md-2 col-sm-4 mb-3">
-                                        <a href="/admin/budgets/add" class="btn btn-success btn-lg w-100">
-                                            <i class="fas fa-wallet fa-2x mb-2"></i><br>
-                                            Create Budget
-                                        </a>
-                                    </div>
-                                    <div class="col-md-2 col-sm-4 mb-3">
-                                        <a href="/admin/expenses/add" class="btn btn-info btn-lg w-100">
-                                            <i class="fas fa-money-bill-wave fa-2x mb-2"></i><br>
-                                            Add Expense
-                                        </a>
-                                    </div>
-                                    <div class="col-md-2 col-sm-4 mb-3">
-                                        <a href="/admin/expenses" class="btn btn-warning btn-lg w-100">
-                                            <i class="fas fa-clock fa-2x mb-2"></i><br>
-                                            Pending Approvals
-                                        </a>
-                                    </div>
-                                    <div class="col-md-2 col-sm-4 mb-3">
-                                        <a href="/admin/notifications" class="btn btn-secondary btn-lg w-100">
-                                            <i class="fas fa-bell fa-2x mb-2"></i><br>
-                                            Notifications
-                                        </a>
-                                    </div>
-                                    <div class="col-md-2 col-sm-4 mb-3">
-                                        <a href="/admin/test" class="btn btn-dark btn-lg w-100">
-                                            <i class="fas fa-code fa-2x mb-2"></i><br>
-                                            Test API
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Recent Activity -->
-                <div class="row">
-                    <!-- Quick Info -->
-                    <div class="col-lg-6 mb-4">
-                        <div class="card shadow">
-                            <div class="card-header py-3">
-                                <h6 class="m-0 font-weight-bold text-primary">Quick Information</h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="mb-3">
-                                    <strong>System Status:</strong> 
-                                    <span class="badge bg-success">Online</span>
-                                </div>
-                                <div class="mb-3">
-                                    <strong>Database:</strong> 
-                                    <span class="badge bg-success">Connected</span>
-                                </div>
-                                <div class="mb-3">
-                                    <strong>Server Time:</strong> 
-                                    <span id="server-time"><%= new Date().toLocaleString() %></span>
-                                </div>
-                                <div class="mb-3">
-                                    <strong>Your Role:</strong> 
-                                    <span class="badge bg-primary"><%= user.role_name %></span>
-                                </div>
-                                <div class="mb-3">
-                                    <strong>Last Login:</strong> 
-                                    <span>Just now</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- System Actions -->
-                    <div class="col-lg-6 mb-4">
-                        <div class="card shadow">
-                            <div class="card-header py-3">
-                                <h6 class="m-0 font-weight-bold text-primary">System Actions</h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="row text-center">
-                                    <div class="col-6 mb-3">
-                                        <a href="/admin/users" class="btn btn-outline-primary w-100">
-                                            <i class="fas fa-users me-1"></i>
-                                            Manage Users
-                                        </a>
-                                    </div>
-                                    <div class="col-6 mb-3">
-                                        <a href="/admin/budgets" class="btn btn-outline-success w-100">
-                                            <i class="fas fa-wallet me-1"></i>
-                                            Manage Budgets
-                                        </a>
-                                    </div>
-                                    <div class="col-6 mb-3">
-                                        <a href="/admin/expenses" class="btn btn-outline-warning w-100">
-                                            <i class="fas fa-money-bill-wave me-1"></i>
-                                            Manage Expenses
-                                        </a>
-                                    </div>
-                                    <div class="col-6 mb-3">
-                                        <a href="/admin/notifications" class="btn btn-outline-info w-100">
-                                            <i class="fas fa-bell me-1"></i>
-                                            Notifications
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </main>
+            </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Update server time every second
-        function updateServerTime() {
-            const now = new Date();
-            document.getElementById('server-time').textContent = now.toLocaleString();
-        }
-        setInterval(updateServerTime, 1000);
-        
-        // Initialize tooltips
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl)
+        // Mobile menu functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const sidebar = document.querySelector('.sidebar');
+            
+            if (mobileMenuBtn) {
+                mobileMenuBtn.addEventListener('click', function() {
+                    sidebar.classList.toggle('mobile-open');
+                });
+            }
+
+            // Close mobile menu when clicking outside
+            document.addEventListener('click', function(event) {
+                if (window.innerWidth <= 992) {
+                    if (!sidebar.contains(event.target) && !mobileMenuBtn.contains(event.target)) {
+                        sidebar.classList.remove('mobile-open');
+                    }
+                }
+            });
+
+            // Update server time every second
+            function updateServerTime() {
+                const now = new Date();
+                const options = { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                };
+                document.getElementById('server-time').textContent = now.toLocaleString('en-US', options);
+            }
+            setInterval(updateServerTime, 1000);
+            updateServerTime();
+
+            // Add loading animations
+            const statsCards = document.querySelectorAll('.stat-card');
+            statsCards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.1}s`;
+            });
+
+            // Initialize tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 992) {
+                document.querySelector('.sidebar').classList.remove('mobile-open');
+            }
         });
     </script>
 </body>
