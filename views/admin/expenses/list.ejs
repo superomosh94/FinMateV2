@@ -21,67 +21,37 @@
         .sidebar .nav-link:hover, .sidebar .nav-link.active {
             background: rgba(255,255,255,0.2);
         }
+        .stat-card {
+            transition: transform 0.2s;
+            border: none;
+            border-radius: 10px;
+        }
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+        .expense-table tr {
+            transition: background-color 0.2s;
+        }
+        .expense-table tr:hover {
+            background-color: #f8f9fa;
+        }
+        .badge-pending { background-color: #ffc107; }
+        .badge-approved { background-color: #198754; }
+        .badge-rejected { background-color: #dc3545; }
+        .filter-active {
+            background-color: #e9ecef;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
     <div class="container-fluid">
         <div class="row">
             <!-- Sidebar -->
-            <nav class="col-md-3 col-lg-2 d-md-block sidebar">
-                <div class="position-sticky pt-3">
-                    <h4 class="text-white text-center mb-4">
-                        <i class="fas fa-crown me-2"></i>
-                        FinMate Admin
-                    </h4>
-                    <ul class="nav flex-column">
-                        <li class="nav-item">
-                            <a class="nav-link" href="/admin/dashboard">
-                                <i class="fas fa-tachometer-alt me-2"></i>
-                                Dashboard
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/admin/users">
-                                <i class="fas fa-users me-2"></i>
-                                User Management
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/admin/budgets">
-                                <i class="fas fa-wallet me-2"></i>
-                                Budget Management
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link active" href="/admin/expenses">
-                                <i class="fas fa-money-bill-wave me-2"></i>
-                                Expense Management
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/admin/notifications">
-                                <i class="fas fa-bell me-2"></i>
-                                Notifications
-                            </a>
-                        </li>
-                        <li class="nav-item mt-4">
-                            <a class="nav-link" href="/auth/profile">
-                                <i class="fas fa-user me-2"></i>
-                                Profile
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/auth/logout">
-                                <i class="fas fa-sign-out-alt me-2"></i>
-                                Logout
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </nav>
+            <%- include('../../partials/admin-sidebar') -%>
 
             <!-- Main content -->
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4" style="margin-left: 280px;">
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                     <h1 class="h2">
                         <i class="fas fa-money-bill-wave me-2 text-warning"></i>
@@ -94,104 +64,349 @@
                     </div>
                 </div>
 
-                <!-- Success Message -->
-                <% if (typeof success !== 'undefined') { %>
+                <!-- Success/Error Messages -->
+                <% if (typeof success !== 'undefined' && success) { %>
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
                         <i class="fas fa-check-circle me-2"></i>
                         <%= success %>
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                 <% } %>
+                
+                <% if (typeof error !== 'undefined' && error) { %>
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        <%= error %>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                <% } %>
+
+                <!-- Statistics Cards -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card stat-card bg-primary text-white">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h4 class="card-title" id="totalExpenses"><%= expenses.length %></h4>
+                                        <p class="card-text">Total Expenses</p>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <i class="fas fa-receipt fa-2x"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stat-card bg-warning text-dark">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h4 class="card-title" id="pendingExpenses">
+                                            <%= expenses.filter(e => e.status === 'pending').length %>
+                                        </h4>
+                                        <p class="card-text">Pending Approval</p>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <i class="fas fa-clock fa-2x"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stat-card bg-success text-white">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h4 class="card-title" id="approvedExpenses">
+                                            <%= expenses.filter(e => e.status === 'approved').length %>
+                                        </h4>
+                                        <p class="card-text">Approved</p>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <i class="fas fa-check-circle fa-2x"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stat-card bg-info text-white">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h4 class="card-title" id="totalAmount">
+                                            $<%= expenses.reduce((sum, expense) => sum + parseFloat(expense.amount), 0).toFixed(2) %>
+                                        </h4>
+                                        <p class="card-text">Total Amount</p>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <i class="fas fa-dollar-sign fa-2x"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- Filter Tabs -->
-                <ul class="nav nav-tabs mb-4">
+                <ul class="nav nav-tabs mb-4" id="expenseTabs">
                     <li class="nav-item">
-                        <a class="nav-link active" href="/admin/expenses">All Expenses</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/admin/expenses?status=pending">
-                            Pending Approval
-                            <span class="badge bg-danger ms-1">5</span>
+                        <a class="nav-link <%= !currentFilter ? 'active' : '' %>" 
+                           href="/admin/expenses">
+                            All Expenses
+                            <span class="badge bg-secondary ms-1"><%= expenses.length %></span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/admin/expenses?status=approved">Approved</a>
+                        <a class="nav-link <%= currentFilter === 'pending' ? 'active' : '' %>" 
+                           href="/admin/expenses?status=pending">
+                            Pending Approval
+                            <span class="badge bg-warning ms-1">
+                                <%= expenses.filter(e => e.status === 'pending').length %>
+                            </span>
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/admin/expenses?status=rejected">Rejected</a>
+                        <a class="nav-link <%= currentFilter === 'approved' ? 'active' : '' %>" 
+                           href="/admin/expenses?status=approved">
+                            Approved
+                            <span class="badge bg-success ms-1">
+                                <%= expenses.filter(e => e.status === 'approved').length %>
+                            </span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link <%= currentFilter === 'rejected' ? 'active' : '' %>" 
+                           href="/admin/expenses?status=rejected">
+                            Rejected
+                            <span class="badge bg-danger ms-1">
+                                <%= expenses.filter(e => e.status === 'rejected').length %>
+                            </span>
+                        </a>
                     </li>
                 </ul>
 
+                <!-- Search and Filter -->
+                <div class="row mb-4">
+                    <div class="col-md-8">
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-search"></i>
+                            </span>
+                            <input type="text" class="form-control" id="searchInput" placeholder="Search expenses by description, user, or category...">
+                            <button class="btn btn-outline-secondary" type="button" onclick="clearSearch()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <select class="form-select" id="categoryFilter" onchange="filterExpenses()">
+                            <option value="">All Categories</option>
+                            <% const categories = [...new Set(expenses.map(e => e.category))]; %>
+                            <% categories.forEach(category => { %>
+                                <option value="<%= category %>"><%= category %></option>
+                            <% }); %>
+                        </select>
+                    </div>
+                </div>
+
                 <!-- Expenses Table -->
                 <div class="card shadow">
-                    <div class="card-header">
+                    <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="card-title mb-0">
-                            <i class="fas fa-list me-2"></i>All Expenses
+                            <i class="fas fa-list me-2"></i>
+                            <% if (currentFilter) { %>
+                                <%= currentFilter.charAt(0).toUpperCase() + currentFilter.slice(1) %> Expenses
+                            <% } else { %>
+                                All Expenses
+                            <% } %>
                         </h5>
+                        <div class="d-flex align-items-center">
+                            <span class="me-2 text-muted small" id="showingCount">
+                                Showing <%= expenses.length %> expenses
+                            </span>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="refreshData()">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
                     </div>
                     <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Description</th>
-                                        <th>User</th>
-                                        <th>Amount</th>
-                                        <th>Category</th>
-                                        <th>Date</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>1</td>
-                                        <td>Office Supplies Purchase</td>
-                                        <td>John Doe</td>
-                                        <td>$245.50</td>
-                                        <td>Office</td>
-                                        <td>2024-01-20</td>
-                                        <td><span class="badge bg-success">Approved</span></td>
-                                        <td>
-                                            <div class="btn-group btn-group-sm">
-                                                <a href="/admin/expenses/edit/1" class="btn btn-outline-primary">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                                <button class="btn btn-outline-danger">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>2</td>
-                                        <td>Team Lunch Meeting</td>
-                                        <td>Jane Smith</td>
-                                        <td>$189.75</td>
-                                        <td>Food</td>
-                                        <td>2024-01-19</td>
-                                        <td><span class="badge bg-warning">Pending</span></td>
-                                        <td>
-                                            <div class="btn-group btn-group-sm">
-                                                <a href="/admin/expenses/edit/2" class="btn btn-outline-primary">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                                <form action="/admin/expenses/approve/2" method="POST" class="d-inline">
-                                                    <button type="submit" class="btn btn-outline-success">
-                                                        <i class="fas fa-check"></i>
-                                                    </button>
-                                                </form>
-                                                <form action="/admin/expenses/reject/2" method="POST" class="d-inline">
-                                                    <button type="submit" class="btn btn-outline-danger">
-                                                        <i class="fas fa-times"></i>
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                        <% if (expenses && expenses.length > 0) { %>
+                            <div class="table-responsive">
+                                <table class="table table-hover expense-table" id="expensesTable">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Description</th>
+                                            <th>User</th>
+                                            <th>Amount</th>
+                                            <th>Category</th>
+                                            <th>Date</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% expenses.forEach(expense => { %>
+                                        <tr class="expense-row" data-category="<%= expense.category %>" data-status="<%= expense.status %>">
+                                            <td><strong>#<%= expense.id %></strong></td>
+                                            <td>
+                                                <div class="fw-bold"><%= expense.description %></div>
+                                                <% if (expense.team_name) { %>
+                                                    <small class="text-muted">Team: <%= expense.team_name %></small>
+                                                <% } %>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-2" 
+                                                         style="width: 32px; height: 32px;">
+                                                        <i class="fas fa-user text-white small"></i>
+                                                    </div>
+                                                    <div>
+                                                        <div class="fw-bold"><%= expense.username %></div>
+                                                        <small class="text-muted">User #<%= expense.user_id %></small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="fw-bold text-success">
+                                                    $<%= parseFloat(expense.amount).toFixed(2) %>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-light text-dark">
+                                                    <i class="fas fa-tag me-1"></i><%= expense.category %>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="small">
+                                                    <%= new Date(expense.date).toLocaleDateString() %>
+                                                </div>
+                                                <div class="text-muted smaller">
+                                                    <%= new Date(expense.created_at).toLocaleDateString() %>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge badge-<%= expense.status %>">
+                                                    <i class="fas fa-<%= getStatusIcon(expense.status) %> me-1"></i>
+                                                    <%= expense.status.charAt(0).toUpperCase() + expense.status.slice(1) %>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    <a href="/admin/expenses/edit/<%= expense.id %>" 
+                                                       class="btn btn-outline-primary" 
+                                                       title="Edit Expense">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    
+                                                    <% if (expense.status === 'pending') { %>
+                                                        <form action="/admin/expenses/approve/<%= expense.id %>" 
+                                                              method="POST" 
+                                                              class="d-inline"
+                                                              onsubmit="return confirm('Are you sure you want to approve this expense?')">
+                                                            <button type="submit" class="btn btn-outline-success" title="Approve">
+                                                                <i class="fas fa-check"></i>
+                                                            </button>
+                                                        </form>
+                                                        <form action="/admin/expenses/reject/<%= expense.id %>" 
+                                                              method="POST" 
+                                                              class="d-inline"
+                                                              onsubmit="return confirm('Are you sure you want to reject this expense?')">
+                                                            <button type="submit" class="btn btn-outline-danger" title="Reject">
+                                                                <i class="fas fa-times"></i>
+                                                            </button>
+                                                        </form>
+                                                    <% } %>
+                                                    
+                                                    <form action="/admin/expenses/delete/<%= expense.id %>" 
+                                                          method="POST" 
+                                                          class="d-inline"
+                                                          onsubmit="return confirm('Are you sure you want to delete this expense?')">
+                                                        <button type="submit" class="btn btn-outline-danger" title="Delete">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <% }); %>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Pagination (if needed in future) -->
+                            <nav aria-label="Expense pagination">
+                                <ul class="pagination justify-content-center">
+                                    <li class="page-item disabled">
+                                        <a class="page-link" href="#">Previous</a>
+                                    </li>
+                                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="#">Next</a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        <% } else { %>
+                            <div class="text-center py-5">
+                                <i class="fas fa-receipt fa-4x text-muted mb-3"></i>
+                                <h4 class="text-muted">No Expenses Found</h4>
+                                <p class="text-muted mb-4">
+                                    <% if (currentFilter) { %>
+                                        No <%= currentFilter %> expenses found.
+                                    <% } else { %>
+                                        There are no expenses in the system yet.
+                                    <% } %>
+                                </p>
+                                <a href="/admin/expenses/add" class="btn btn-warning">
+                                    <i class="fas fa-plus me-1"></i>Add First Expense
+                                </a>
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="row mt-4">
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <i class="fas fa-file-export fa-2x text-primary mb-3"></i>
+                                <h6>Export Expenses</h6>
+                                <p class="text-muted small">Export all expenses to CSV</p>
+                                <button class="btn btn-outline-primary btn-sm" onclick="exportExpenses()">
+                                    <i class="fas fa-download me-1"></i>Export CSV
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <i class="fas fa-chart-bar fa-2x text-success mb-3"></i>
+                                <h6>Expense Reports</h6>
+                                <p class="text-muted small">View detailed expense analytics</p>
+                                <a href="/admin/reports?type=expenses" class="btn btn-outline-success btn-sm">
+                                    <i class="fas fa-chart-line me-1"></i>View Reports
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <i class="fas fa-cog fa-2x text-warning mb-3"></i>
+                                <h6>Expense Settings</h6>
+                                <p class="text-muted small">Configure expense categories</p>
+                                <button class="btn btn-outline-warning btn-sm" onclick="showCategories()">
+                                    <i class="fas fa-tags me-1"></i>Manage Categories
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -200,5 +415,149 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Expense filtering and search functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize search functionality
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.addEventListener('input', filterExpenses);
+            }
+
+            // Update showing count
+            updateShowingCount();
+
+            // Auto-dismiss alerts after 5 seconds
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                setTimeout(() => {
+                    if (alert.parentNode) {
+                        const bsAlert = new bootstrap.Alert(alert);
+                        bsAlert.close();
+                    }
+                }, 5000);
+            });
+        });
+
+        function filterExpenses() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            const rows = document.querySelectorAll('.expense-row');
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+                const description = row.cells[1].textContent.toLowerCase();
+                const user = row.cells[2].textContent.toLowerCase();
+                const category = row.getAttribute('data-category');
+                const matchesSearch = !searchTerm || 
+                    description.includes(searchTerm) || 
+                    user.includes(searchTerm) ||
+                    category.toLowerCase().includes(searchTerm);
+                const matchesCategory = !categoryFilter || category === categoryFilter;
+                
+                if (matchesSearch && matchesCategory) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            updateShowingCount(visibleCount);
+        }
+
+        function updateShowingCount(count) {
+            const showingElement = document.getElementById('showingCount');
+            const totalCount = <%= expenses.length %>;
+            const visibleCount = count !== undefined ? count : totalCount;
+            
+            if (showingElement) {
+                if (visibleCount === totalCount) {
+                    showingElement.textContent = `Showing ${totalCount} expenses`;
+                } else {
+                    showingElement.textContent = `Showing ${visibleCount} of ${totalCount} expenses`;
+                }
+            }
+        }
+
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('categoryFilter').value = '';
+            filterExpenses();
+        }
+
+        function refreshData() {
+            const refreshBtn = event.target.closest('button');
+            const originalHtml = refreshBtn.innerHTML;
+            
+            refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            refreshBtn.disabled = true;
+
+            // Simulate refresh - in real app, this would be an API call
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        }
+
+        function exportExpenses() {
+            // Simulate export functionality
+            showToast('Preparing expense export...', 'info');
+            setTimeout(() => {
+                showToast('Expense data exported successfully!', 'success');
+                // In real implementation, this would trigger a file download
+            }, 2000);
+        }
+
+        function showCategories() {
+            showToast('Category management feature coming soon!', 'info');
+        }
+
+        function showToast(message, type = 'info') {
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.className = `toast align-items-center text-white bg-${type} border-0`;
+            toast.setAttribute('role', 'alert');
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'exclamation-triangle' : 'info'}-circle me-2"></i>
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            `;
+            
+            // Add to container or create one
+            let toastContainer = document.querySelector('.toast-container');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+                document.body.appendChild(toastContainer);
+            }
+            
+            toastContainer.appendChild(toast);
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+            
+            // Remove toast after it's hidden
+            toast.addEventListener('hidden.bs.toast', () => {
+                toast.remove();
+            });
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + F for search
+            if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+                e.preventDefault();
+                document.getElementById('searchInput').focus();
+            }
+            // Ctrl/Cmd + N for new expense
+            if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+                e.preventDefault();
+                window.location.href = '/admin/expenses/add';
+            }
+        });
+    </script>
 </body>
 </html>

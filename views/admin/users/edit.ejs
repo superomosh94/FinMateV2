@@ -4,25 +4,96 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= title %></title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        .sidebar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
+        .user-avatar-lg {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: white;
+            margin: 0 auto;
+            border: 5px solid #fff;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
-        .sidebar .nav-link {
-            color: #fff;
-            padding: 12px 20px;
-            margin: 4px 0;
-            border-radius: 8px;
+        .user-info-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        .user-info-card:hover {
+            transform: translateY(-5px);
+        }
+        .info-label {
+            font-weight: 600;
+            color: #495057;
+            font-size: 0.9rem;
+        }
+        .info-value {
+            color: #212529;
+            font-size: 1rem;
+        }
+        .nav-tabs .nav-link.active {
+            font-weight: 600;
+            border-bottom: 3px solid #0d6efd;
+            background: transparent;
+        }
+        .nav-tabs .nav-link {
+            border: none;
+            color: #6c757d;
+        }
+        .nav-tabs .nav-link:hover {
+            border: none;
+            color: #0d6efd;
+        }
+        .form-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+        .password-strength {
+            height: 8px;
+            border-radius: 4px;
+            margin-top: 5px;
             transition: all 0.3s ease;
         }
-        .sidebar .nav-link:hover, .sidebar .nav-link.active {
-            background: rgba(255,255,255,0.2);
+        .activity-item {
+            border-left: 3px solid #0d6efd;
+            padding-left: 15px;
+            margin-bottom: 15px;
         }
-        .progress {
-            height: 8px;
+        .status-badge {
+            font-size: 0.8rem;
+            padding: 4px 8px;
+        }
+        .stat-card {
+            transition: transform 0.2s;
+        }
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+        .security-status-card {
+            border-left: 4px solid #28a745;
+        }
+        .password-actions .card {
+            transition: all 0.3s ease;
+        }
+        .password-actions .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .toast-container {
+            z-index: 9999;
+        }
+        .tab-pane {
+            padding-top: 20px;
         }
     </style>
 </head>
@@ -30,156 +101,660 @@
     <div class="container-fluid">
         <div class="row">
             <!-- Sidebar -->
-            <nav class="col-md-3 col-lg-2 d-md-block sidebar">
-                <div class="position-sticky pt-3">
-                    <h4 class="text-white text-center mb-4">
-                        <i class="fas fa-crown me-2"></i>
-                        FinMate Admin
-                    </h4>
-                    <ul class="nav flex-column">
-                        <li class="nav-item">
-                            <a class="nav-link" href="/admin/dashboard">
-                                <i class="fas fa-tachometer-alt me-2"></i>
-                                Dashboard
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/admin/users">
-                                <i class="fas fa-users me-2"></i>
-                                User Management
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link active" href="/admin/budgets">
-                                <i class="fas fa-wallet me-2"></i>
-                                Budget Management
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/admin/expenses">
-                                <i class="fas fa-money-bill-wave me-2"></i>
-                                Expense Management
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/admin/notifications">
-                                <i class="fas fa-bell me-2"></i>
-                                Notifications
-                            </a>
-                        </li>
-                        <li class="nav-item mt-4">
-                            <a class="nav-link" href="/auth/profile">
-                                <i class="fas fa-user me-2"></i>
-                                Profile
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/auth/logout">
-                                <i class="fas fa-sign-out-alt me-2"></i>
-                                Logout
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </nav>
+            <%- include('../../partials/admin-sidebar') -%>
 
             <!-- Main content -->
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4" style="margin-left: 280px;">
+                <!-- Header -->
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2">
-                        <i class="fas fa-wallet me-2 text-success"></i>
-                        Budget Management
-                    </h1>
+                    <div>
+                        <h1 class="h2">
+                            <i class="fas fa-user-edit me-2"></i>
+                            Edit User
+                        </h1>
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="/admin/dashboard">Dashboard</a></li>
+                                <li class="breadcrumb-item"><a href="/admin/users">User Management</a></li>
+                                <li class="breadcrumb-item active">Edit <%= userData.username %></li>
+                            </ol>
+                        </nav>
+                    </div>
                     <div class="btn-toolbar mb-2 mb-md-0">
-                        <a href="/admin/budgets/add" class="btn btn-success">
-                            <i class="fas fa-plus me-1"></i>Add Budget
+                        <a href="/admin/users" class="btn btn-outline-secondary me-2">
+                            <i class="fas fa-arrow-left me-1"></i>
+                            Back to Users
                         </a>
+                        <button type="submit" form="editUserForm" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i>
+                            Save Changes
+                        </button>
                     </div>
                 </div>
 
-                <!-- Success Message -->
-                <% if (typeof success !== 'undefined') { %>
+                <!-- Success/Error Messages -->
+                <% if (locals.success) { %>
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
                         <i class="fas fa-check-circle me-2"></i>
-                        <%= success %>
+                        <%= locals.success %>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                <% } %>
+                
+                <% if (locals.error) { %>
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        <%= locals.error %>
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                 <% } %>
 
-                <!-- Budgets Table -->
-                <div class="card shadow">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">
-                            <i class="fas fa-list me-2"></i>All Budgets
-                        </h5>
+                <div class="row">
+                    <!-- User Profile Sidebar -->
+                    <div class="col-md-4 mb-4">
+                        <div class="card user-info-card">
+                            <div class="card-body text-center">
+                                <div class="user-avatar-lg mb-3">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <h4 class="card-title"><%= userData.first_name || 'No Name' %> <%= userData.last_name || '' %></h4>
+                                <p class="text-muted">@<%= userData.username %></p>
+                                
+                                <div class="d-flex justify-content-center mb-3">
+                                    <span class="badge <%= userData.is_active ? 'bg-success' : 'bg-danger' %> status-badge me-2">
+                                        <i class="fas fa-circle me-1"></i>
+                                        <%= userData.is_active ? 'Active' : 'Inactive' %>
+                                    </span>
+                                    <span class="badge bg-info status-badge">
+                                        <i class="fas fa-user-tag me-1"></i>
+                                        <%= userData.role_name || 'No Role' %>
+                                    </span>
+                                </div>
+
+                                <div class="row text-start mt-4">
+                                    <div class="col-12 mb-2">
+                                        <span class="info-label">Email:</span>
+                                        <div class="info-value"><%= userData.email %></div>
+                                    </div>
+                                    <div class="col-12 mb-2">
+                                        <span class="info-label">User ID:</span>
+                                        <div class="info-value">#<%= userData.id %></div>
+                                    </div>
+                                    <div class="col-12 mb-2">
+                                        <span class="info-label">Team:</span>
+                                        <div class="info-value">
+                                            <% if (userData.team_id) { %>
+                                                <%= userData.team_name || 'Team #' + userData.team_id %>
+                                            <% } else { %>
+                                                No Team
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 mb-2">
+                                        <span class="info-label">Member Since:</span>
+                                        <div class="info-value"><%= new Date(userData.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></div>
+                                    </div>
+                                    <div class="col-12 mb-2">
+                                        <span class="info-label">Last Updated:</span>
+                                        <div class="info-value"><%= new Date(userData.updated_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></div>
+                                    </div>
+                                </div>
+
+                                <!-- Quick Actions -->
+                                <div class="mt-4">
+                                    <div class="d-grid gap-2">
+                                        <% if (userData.is_active) { %>
+                                            <button class="btn btn-warning btn-sm" onclick="toggleUserStatus()">
+                                                <i class="fas fa-user-slash me-1"></i>
+                                                Deactivate User
+                                            </button>
+                                        <% } else { %>
+                                            <button class="btn btn-success btn-sm" onclick="toggleUserStatus()">
+                                                <i class="fas fa-user-check me-1"></i>
+                                                Activate User
+                                            </button>
+                                        <% } %>
+                                        <button class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteUserModal">
+                                            <i class="fas fa-trash me-1"></i>
+                                            Delete User
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- User Statistics -->
+                        <div class="card mt-4">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">
+                                    <i class="fas fa-chart-bar me-2"></i>
+                                    User Statistics
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row text-center">
+                                    <div class="col-6 mb-3">
+                                        <div class="text-primary stat-card">
+                                            <i class="fas fa-receipt fa-2x mb-2"></i>
+                                            <h5 id="expensesCount"><%= userAnalytics.expenses.total || 0 %></h5>
+                                            <small class="text-muted">Expenses</small>
+                                            <% if (userAnalytics.expenses.totalAmount > 0) { %>
+                                                <div class="small text-muted">$<%= parseFloat(userAnalytics.expenses.totalAmount).toFixed(2) %> total</div>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 mb-3">
+                                        <div class="text-success stat-card">
+                                            <i class="fas fa-wallet fa-2x mb-2"></i>
+                                            <h5 id="budgetsCount"><%= userAnalytics.budgets.total || 0 %></h5>
+                                            <small class="text-muted">Budgets</small>
+                                            <% if (userAnalytics.budgets.totalAmount > 0) { %>
+                                                <div class="small text-muted">$<%= parseFloat(userAnalytics.budgets.totalAmount).toFixed(2) %> total</div>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="text-warning stat-card">
+                                            <i class="fas fa-piggy-bank fa-2x mb-2"></i>
+                                            <h5 id="savingsCount"><%= userAnalytics.savings.total || 0 %></h5>
+                                            <small class="text-muted">Savings Goals</small>
+                                            <% if (userAnalytics.savings.totalSaved > 0) { %>
+                                                <div class="small text-muted">$<%= parseFloat(userAnalytics.savings.totalSaved).toFixed(2) %> saved</div>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="text-info stat-card">
+                                            <i class="fas fa-bell fa-2x mb-2"></i>
+                                            <h5 id="notificationsCount"><%= userAnalytics.notifications.total || 0 %></h5>
+                                            <small class="text-muted">Notifications</small>
+                                            <% if (userAnalytics.notifications.unread > 0) { %>
+                                                <div class="small text-danger"><%= userAnalytics.notifications.unread %> unread</div>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Summary -->
+                        <div class="card mt-4">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Quick Summary
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row small">
+                                    <div class="col-12 mb-2">
+                                        <span class="info-label">Pending Expenses:</span>
+                                        <span class="info-value float-end"><%= userAnalytics.expenses.pending || 0 %></span>
+                                    </div>
+                                    <div class="col-12 mb-2">
+                                        <span class="info-label">Total Budgets:</span>
+                                        <span class="info-value float-end">$<%= parseFloat(userAnalytics.budgets.totalAmount || 0).toFixed(2) %></span>
+                                    </div>
+                                    <div class="col-12 mb-2">
+                                        <span class="info-label">Savings Progress:</span>
+                                        <span class="info-value float-end">
+                                            <% if (userAnalytics.savings.totalTarget > 0) { %>
+                                                <%= ((userAnalytics.savings.totalSaved / userAnalytics.savings.totalTarget) * 100).toFixed(1) %>%
+                                            <% } else { %>
+                                                0%
+                                            <% } %>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Budget Name</th>
-                                        <th>Owner</th>
-                                        <th>Amount</th>
-                                        <th>Spent</th>
-                                        <th>Progress</th>
-                                        <th>Status</th>
-                                        <th>Period</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>1</td>
-                                        <td>Marketing Campaign</td>
-                                        <td>Jane Smith</td>
-                                        <td>$5,000</td>
-                                        <td>$3,200</td>
-                                        <td>
-                                            <div class="progress">
-                                                <div class="progress-bar bg-warning" style="width: 64%">64%</div>
+
+                    <!-- Main Edit Form -->
+                    <div class="col-md-8">
+                        <!-- Tabs Navigation -->
+                        <ul class="nav nav-tabs mb-4" id="userEditTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="true">
+                                    <i class="fas fa-user me-1"></i>
+                                    Profile Information
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="security-tab" data-bs-toggle="tab" data-bs-target="#security" type="button" role="tab" aria-controls="security" aria-selected="false">
+                                    <i class="fas fa-shield-alt me-1"></i>
+                                    Security & Password
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="activity-tab" data-bs-toggle="tab" data-bs-target="#activity" type="button" role="tab" aria-controls="activity" aria-selected="false">
+                                    <i class="fas fa-history me-1"></i>
+                                    Recent Activity
+                                </button>
+                            </li>
+                        </ul>
+
+                        <div class="tab-content" id="userEditTabsContent">
+                            <!-- Profile Information Tab -->
+                            <div class="tab-pane fade show active" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                                <form id="editUserForm" action="/admin/users/edit/<%= userData.id %>" method="POST">
+                                    <div class="form-section">
+                                        <h5 class="mb-4">
+                                            <i class="fas fa-id-card me-2"></i>
+                                            Basic Information
+                                        </h5>
+                                        
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label for="username" class="form-label">Username *</label>
+                                                <input type="text" class="form-control" id="username" name="username" 
+                                                       value="<%= userData.username %>" required>
+                                                <div class="form-text">Unique identifier for the user</div>
                                             </div>
-                                        </td>
-                                        <td><span class="badge bg-success">Active</span></td>
-                                        <td>Jan 2024</td>
-                                        <td>
-                                            <div class="btn-group btn-group-sm">
-                                                <a href="/admin/budgets/edit/1" class="btn btn-outline-primary">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                                <button class="btn btn-outline-danger">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="email" class="form-label">Email Address *</label>
+                                                <input type="email" class="form-control" id="email" name="email" 
+                                                       value="<%= userData.email %>" required>
+                                                <div class="form-text">User's primary email address</div>
                                             </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>2</td>
-                                        <td>Team Development</td>
-                                        <td>John Doe</td>
-                                        <td>$2,500</td>
-                                        <td>$2,100</td>
-                                        <td>
-                                            <div class="progress">
-                                                <div class="progress-bar bg-danger" style="width: 84%">84%</div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label for="first_name" class="form-label">First Name</label>
+                                                <input type="text" class="form-control" id="first_name" name="first_name" 
+                                                       value="<%= userData.first_name || '' %>">
                                             </div>
-                                        </td>
-                                        <td><span class="badge bg-warning">Near Limit</span></td>
-                                        <td>Jan 2024</td>
-                                        <td>
-                                            <div class="btn-group btn-group-sm">
-                                                <a href="/admin/budgets/edit/2" class="btn btn-outline-primary">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                                <button class="btn btn-outline-danger">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="last_name" class="form-label">Last Name</label>
+                                                <input type="text" class="form-control" id="last_name" name="last_name" 
+                                                       value="<%= userData.last_name || '' %>">
                                             </div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-section">
+                                        <h5 class="mb-4">
+                                            <i class="fas fa-users me-2"></i>
+                                            Role & Team Assignment
+                                        </h5>
+                                        
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label for="role_id" class="form-label">User Role *</label>
+                                                <select class="form-select" id="role_id" name="role_id" required>
+                                                    <option value="">Select a role...</option>
+                                                    <% roles.forEach(role => { %>
+                                                        <option value="<%= role.id %>" 
+                                                                <%= userData.role_id == role.id ? 'selected' : '' %>>
+                                                            <%= role.name %>
+                                                        </option>
+                                                    <% }); %>
+                                                </select>
+                                                <div class="form-text">Determines user permissions and access levels</div>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="team_id" class="form-label">Team Assignment</label>
+                                                <select class="form-select" id="team_id" name="team_id">
+                                                    <option value="">No Team</option>
+                                                    <% teams.forEach(team => { %>
+                                                        <option value="<%= team.id %>" 
+                                                                <%= userData.team_id == team.id ? 'selected' : '' %>>
+                                                            <%= team.name %>
+                                                        </option>
+                                                    <% }); %>
+                                                </select>
+                                                <div class="form-text">Assign user to a specific team (optional)</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-section">
+                                        <h5 class="mb-4">
+                                            <i class="fas fa-toggle-on me-2"></i>
+                                            Account Status
+                                        </h5>
+                                        
+                                        <div class="mb-3">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="is_active" name="is_active" 
+                                                       <%= userData.is_active ? 'checked' : '' %> value="1">
+                                                <label class="form-check-label" for="is_active">
+                                                    <strong>Active Account</strong>
+                                                </label>
+                                            </div>
+                                            <div class="form-text">
+                                                <% if (userData.is_active) { %>
+                                                    <span class="text-success">User can log in and access the system</span>
+                                                <% } else { %>
+                                                    <span class="text-danger">User account is deactivated and cannot log in</span>
+                                                <% } %>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Form Actions -->
+                                    <div class="d-flex justify-content-between align-items-center mt-4">
+                                        <a href="/admin/users" class="btn btn-outline-secondary">
+                                            <i class="fas fa-times me-1"></i>
+                                            Cancel
+                                        </a>
+                                        <div>
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fas fa-save me-1"></i>
+                                                Save Changes
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <!-- Security & Password Tab -->
+                            <div class="tab-pane fade" id="security" role="tabpanel" aria-labelledby="security-tab">
+                                <!-- Enhanced Password Management Section -->
+                                <div class="form-section">
+                                    <h5 class="mb-4">
+                                        <i class="fas fa-key me-2"></i>
+                                        Password Management
+                                    </h5>
+                                    
+                                    <!-- Password Reset Options -->
+                                    <div class="row mb-4 password-actions">
+                                        <div class="col-md-6 mb-3">
+                                            <div class="card border-primary h-100">
+                                                <div class="card-body text-center">
+                                                    <h6 class="card-title">
+                                                        <i class="fas fa-sync-alt me-2 text-primary"></i>
+                                                        Quick Password Reset
+                                                    </h6>
+                                                    <p class="card-text small text-muted">
+                                                        Generate a secure temporary password that the user can change on next login.
+                                                    </p>
+                                                    <button type="button" class="btn btn-outline-primary btn-sm w-100" 
+                                                            onclick="generateTemporaryPassword()">
+                                                        <i class="fas fa-bolt me-1"></i>
+                                                        Generate Temporary Password
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <div class="card border-warning h-100">
+                                                <div class="card-body text-center">
+                                                    <h6 class="card-title">
+                                                        <i class="fas fa-lock me-2 text-warning"></i>
+                                                        Force Password Reset
+                                                    </h6>
+                                                    <p class="card-text small text-muted">
+                                                        Require the user to set a new password immediately on next login.
+                                                    </p>
+                                                    <button type="button" class="btn btn-outline-warning btn-sm w-100" 
+                                                            onclick="forcePasswordReset()">
+                                                        <i class="fas fa-exclamation-triangle me-1"></i>
+                                                        Force Password Reset
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Manual Password Change Form -->
+                                    <div class="card">
+                                        <div class="card-header bg-light">
+                                            <h6 class="card-title mb-0">
+                                                <i class="fas fa-edit me-2"></i>
+                                                Manual Password Change
+                                            </h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="alert alert-info">
+                                                <i class="fas fa-info-circle me-2"></i>
+                                                <strong>Note:</strong> The user will be automatically notified about password changes via the system notifications.
+                                            </div>
+
+                                            <form id="passwordForm" action="/admin/users/change-password/<%= userData.id %>" method="POST">
+                                                <div class="row">
+                                                    <div class="col-md-6 mb-3">
+                                                        <label for="new_password" class="form-label">
+                                                            New Password *
+                                                        </label>
+                                                        <div class="input-group">
+                                                            <input type="password" class="form-control" id="new_password" name="new_password" 
+                                                                   minlength="6" oninput="checkPasswordStrength(this.value)" required>
+                                                            <button type="button" class="btn btn-outline-secondary" onclick="togglePasswordVisibility('new_password')">
+                                                                <i class="fas fa-eye"></i>
+                                                            </button>
+                                                        </div>
+                                                        <div class="password-strength mt-2" id="passwordStrength"></div>
+                                                        <div class="form-text">
+                                                            <i class="fas fa-info-circle me-1"></i>
+                                                            Minimum 6 characters. Include uppercase, lowercase, numbers, and symbols for stronger security.
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6 mb-3">
+                                                        <label for="confirm_password" class="form-label">
+                                                            Confirm Password *
+                                                        </label>
+                                                        <div class="input-group">
+                                                            <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                                                            <button type="button" class="btn btn-outline-secondary" onclick="togglePasswordVisibility('confirm_password')">
+                                                                <i class="fas fa-eye"></i>
+                                                            </button>
+                                                        </div>
+                                                        <div class="form-text" id="passwordMatchText"></div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Password Last Updated -->
+                                                <div class="d-flex justify-content-between align-items-center mt-3 p-3 bg-light rounded">
+                                                    <div>
+                                                        <span class="text-muted">
+                                                            <i class="fas fa-clock me-1"></i>
+                                                            Password last updated: 
+                                                            <strong><%= new Date(userData.updated_at).toLocaleDateString() %></strong>
+                                                        </span>
+                                                    </div>
+                                                    <div>
+                                                        <button type="submit" class="btn btn-warning" id="updatePasswordBtn">
+                                                            <i class="fas fa-key me-1"></i>
+                                                            Update Password
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Password History & Security -->
+                                <div class="form-section">
+                                    <h5 class="mb-4">
+                                        <i class="fas fa-history me-2"></i>
+                                        Password History & Security
+                                    </h5>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="card security-status-card h-100">
+                                                <div class="card-body">
+                                                    <h6 class="card-title">Security Status</h6>
+                                                    <div class="security-status">
+                                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                                            <span>Password Strength:</span>
+                                                            <span class="badge bg-secondary" id="currentPasswordStrength">Unknown</span>
+                                                        </div>
+                                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                                            <span>Last Changed:</span>
+                                                            <span id="lastChangedText"><%= new Date(userData.updated_at).toLocaleDateString() %></span>
+                                                        </div>
+                                                        <div class="d-flex justify-content-between align-items-center">
+                                                            <span>Password Age:</span>
+                                                            <span id="passwordAgeText" data-updated="<%= userData.updated_at %>"></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="card h-100">
+                                                <div class="card-body">
+                                                    <h6 class="card-title">Quick Actions</h6>
+                                                    <div class="d-grid gap-2">
+                                                        <button class="btn btn-outline-info btn-sm" onclick="sendPasswordResetLink()">
+                                                            <i class="fas fa-paper-plane me-1"></i>
+                                                            Send Reset Link
+                                                        </button>
+                                                        <button class="btn btn-outline-secondary btn-sm" onclick="viewPasswordPolicy()">
+                                                            <i class="fas fa-shield-alt me-1"></i>
+                                                            View Password Policy
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Access Permissions Section -->
+                                <div class="form-section">
+                                    <h5 class="mb-4">
+                                        <i class="fas fa-user-shield me-2"></i>
+                                        Access Permissions
+                                    </h5>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <h6>Role-Based Permissions</h6>
+                                            <div class="table-responsive">
+                                                <table class="table table-sm">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Permission</th>
+                                                            <th>Status</th>
+                                                            <th>Description</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td>User Management</td>
+                                                            <td>
+                                                                <span class="badge <%= ['super_admin', 'admin'].includes(userData.role_name) ? 'bg-success' : 'bg-secondary' %>">
+                                                                    <%= ['super_admin', 'admin'].includes(userData.role_name) ? 'Allowed' : 'Not Allowed' %>
+                                                                </span>
+                                                            </td>
+                                                            <td>Manage users and permissions</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>Budget Management</td>
+                                                            <td>
+                                                                <span class="badge bg-success">Allowed</span>
+                                                            </td>
+                                                            <td>Create and manage budgets</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>Expense Management</td>
+                                                            <td>
+                                                                <span class="badge bg-success">Allowed</span>
+                                                            </td>
+                                                            <td>Submit and track expenses</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>Team Management</td>
+                                                            <td>
+                                                                <span class="badge <%= ['super_admin', 'admin', 'team_leader'].includes(userData.role_name) ? 'bg-success' : 'bg-secondary' %>">
+                                                                    <%= ['super_admin', 'admin', 'team_leader'].includes(userData.role_name) ? 'Allowed' : 'Limited' %>
+                                                                </span>
+                                                            </td>
+                                                            <td>Manage team members and expenses</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Recent Activity Tab -->
+                            <div class="tab-pane fade" id="activity" role="tabpanel" aria-labelledby="activity-tab">
+                                <div class="form-section">
+                                    <h5 class="mb-4">
+                                        <i class="fas fa-list-alt me-2"></i>
+                                        Recent User Activity
+                                    </h5>
+                                    
+                                    <div id="userActivity">
+                                        <!-- Activity items will be loaded here -->
+                                        <div class="text-center py-4">
+                                            <i class="fas fa-spinner fa-spin fa-2x text-muted mb-3"></i>
+                                            <p class="text-muted">Loading user activity...</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="text-center mt-3">
+                                        <button class="btn btn-outline-primary btn-sm" onclick="loadMoreActivity()">
+                                            <i class="fas fa-redo me-1"></i>
+                                            Load More Activity
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="form-section">
+                                    <h5 class="mb-4">
+                                        <i class="fas fa-chart-line me-2"></i>
+                                        Financial Overview
+                                    </h5>
+                                    
+                                    <div class="table-responsive">
+                                        <table class="table table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th>Type</th>
+                                                    <th>Description</th>
+                                                    <th>Amount</th>
+                                                    <th>Date</th>
+                                                    <th>Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="financialHistory">
+                                                <% if (userAnalytics.recentExpenses && userAnalytics.recentExpenses.length > 0) { %>
+                                                    <% userAnalytics.recentExpenses.forEach(expense => { %>
+                                                    <tr>
+                                                        <td>Expense</td>
+                                                        <td><%= expense.description %></td>
+                                                        <td>$<%= parseFloat(expense.amount).toFixed(2) %></td>
+                                                        <td><%= new Date(expense.date).toLocaleDateString() %></td>
+                                                        <td>
+                                                            <span class="badge bg-<%= expense.status === 'approved' ? 'success' : expense.status === 'pending' ? 'warning' : 'secondary' %>">
+                                                                <%= expense.status %>
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                    <% }); %>
+                                                <% } %>
+                                                <% if (userAnalytics.recentBudgets && userAnalytics.recentBudgets.length > 0) { %>
+                                                    <% userAnalytics.recentBudgets.forEach(budget => { %>
+                                                    <tr>
+                                                        <td>Budget</td>
+                                                        <td><%= budget.category %></td>
+                                                        <td>$<%= parseFloat(budget.amount).toFixed(2) %></td>
+                                                        <td><%= new Date().toLocaleDateString() %></td>
+                                                        <td><span class="badge bg-info">Active</span></td>
+                                                    </tr>
+                                                    <% }); %>
+                                                <% } %>
+                                                <% if ((!userAnalytics.recentExpenses || userAnalytics.recentExpenses.length === 0) && (!userAnalytics.recentBudgets || userAnalytics.recentBudgets.length === 0)) { %>
+                                                <tr>
+                                                    <td colspan="5" class="text-center text-muted py-3">
+                                                        No recent financial activity found
+                                                    </td>
+                                                </tr>
+                                                <% } %>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -187,6 +762,485 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Delete User Confirmation Modal -->
+    <div class="modal fade" id="deleteUserModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm User Deletion</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Warning:</strong> This action cannot be undone!
+                    </div>
+                    <p>Are you sure you want to delete user "<strong><%= userData.username %></strong>"?</p>
+                    <p class="text-muted">This will deactivate the user account and prevent future logins.</p>
+                    
+                    <div class="form-check mt-3">
+                        <input class="form-check-input" type="checkbox" id="confirmDelete">
+                        <label class="form-check-label" for="confirmDelete">
+                            I understand this action will deactivate the user account
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <form action="/admin/users/delete/<%= userData.id %>" method="POST" style="display: inline;">
+                        <button type="submit" class="btn btn-danger" id="deleteButton" disabled>
+                            <i class="fas fa-trash me-1"></i>
+                            Delete User
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Enhanced Password Management Functions
+        function generateTemporaryPassword() {
+            if (!confirm('Generate a temporary password for this user? They will be required to change it on next login.')) {
+                return;
+            }
+
+            // Generate a secure random password
+            const tempPassword = generateSecurePassword(12);
+            
+            // Fill the form fields
+            document.getElementById('new_password').value = tempPassword;
+            document.getElementById('confirm_password').value = tempPassword;
+            
+            // Check strength and show to admin
+            checkPasswordStrength(tempPassword);
+            
+            // Show the generated password to admin
+            showToast(`Temporary password generated: ${tempPassword} - User will be required to change it on next login.`, 'info');
+        }
+
+        function generateSecurePassword(length = 12) {
+            const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
+            let password = '';
+            for (let i = 0; i < length; i++) {
+                password += charset.charAt(Math.floor(Math.random() * charset.length));
+            }
+            return password;
+        }
+
+        function forcePasswordReset() {
+            if (confirm('Force this user to reset their password on next login? This will log them out of all devices.')) {
+                // This would typically call an API endpoint
+                showToast('This feature would force password reset on next login. Implementation required.', 'info');
+            }
+        }
+
+        function togglePasswordVisibility(fieldId) {
+            const field = document.getElementById(fieldId);
+            const icon = field.nextElementSibling.querySelector('i');
+            
+            if (field.type === 'password') {
+                field.type = 'text';
+                icon.className = 'fas fa-eye-slash';
+            } else {
+                field.type = 'password';
+                icon.className = 'fas fa-eye';
+            }
+        }
+
+        function sendPasswordResetLink() {
+            if (confirm('Send password reset link to user\'s email?')) {
+                // Show loading state
+                showToast('This feature would send a password reset link. Implementation required.', 'info');
+            }
+        }
+
+        function viewPasswordPolicy() {
+            const policyHtml = `
+                <div class="alert alert-info">
+                    <h6><i class="fas fa-shield-alt me-2"></i>Password Policy</h6>
+                    <ul class="mb-0">
+                        <li>Minimum 6 characters in length</li>
+                        <li>Recommended to include uppercase and lowercase letters</li>
+                        <li>Recommended to include numbers and special characters</li>
+                        <li>Cannot be the same as previous 3 passwords</li>
+                        <li>Must be changed every 90 days</li>
+                    </ul>
+                </div>
+            `;
+            
+            // You could use a modal or toast to show this
+            showToast('Password policy: Min 6 chars, mixed case, numbers, symbols recommended', 'info');
+        }
+
+        // Enhanced password strength checker
+        function checkPasswordStrength(password) {
+            const strengthBar = document.getElementById('passwordStrength');
+            const strengthText = document.getElementById('currentPasswordStrength');
+            
+            if (!password) {
+                if (strengthBar) strengthBar.style.width = '0%';
+                if (strengthText) strengthText.textContent = 'None';
+                return;
+            }
+
+            let strength = 0;
+            let feedback = [];
+
+            // Length check
+            if (password.length >= 8) strength += 25;
+            else if (password.length >= 6) strength += 15;
+            else feedback.push('Too short');
+
+            // Character variety checks
+            if (password.match(/[a-z]/)) strength += 15;
+            else feedback.push('Add lowercase letters');
+            
+            if (password.match(/[A-Z]/)) strength += 15;
+            else feedback.push('Add uppercase letters');
+            
+            if (password.match(/[0-9]/)) strength += 15;
+            else feedback.push('Add numbers');
+            
+            if (password.match(/[^a-zA-Z0-9]/)) strength += 15;
+            else feedback.push('Add special characters');
+
+            // Entropy check (basic)
+            if (password.length >= 12) strength += 15;
+
+            strength = Math.min(strength, 100);
+
+            let color, text, bgColor;
+            if (strength >= 80) {
+                color = '#198754'; bgColor = '#198754'; text = 'Very Strong';
+            } else if (strength >= 60) {
+                color = '#198754'; bgColor = '#198754'; text = 'Strong';
+            } else if (strength >= 40) {
+                color = '#ffc107'; bgColor = '#ffc107'; text = 'Medium';
+            } else if (strength >= 20) {
+                color = '#fd7e14'; bgColor = '#fd7e14'; text = 'Weak';
+            } else {
+                color = '#dc3545'; bgColor = '#dc3545'; text = 'Very Weak';
+            }
+
+            if (strengthBar) {
+                strengthBar.style.width = strength + '%';
+                strengthBar.style.backgroundColor = bgColor;
+                strengthBar.style.height = '8px';
+                strengthBar.style.borderRadius = '4px';
+                strengthBar.style.transition = 'all 0.3s ease';
+            }
+            
+            if (strengthText) {
+                strengthText.textContent = text;
+                strengthText.className = `badge bg-${getStrengthColorClass(strength)}`;
+            }
+        }
+
+        function getStrengthColorClass(strength) {
+            if (strength >= 80) return 'success';
+            if (strength >= 60) return 'success';
+            if (strength >= 40) return 'warning';
+            if (strength >= 20) return 'danger';
+            return 'danger';
+        }
+
+        // Password confirmation real-time check
+        document.getElementById('confirm_password')?.addEventListener('input', function() {
+            const newPassword = document.getElementById('new_password').value;
+            const confirmPassword = this.value;
+            const matchText = document.getElementById('passwordMatchText');
+            
+            if (!newPassword) {
+                matchText.innerHTML = '<span class="text-muted">Enter new password first</span>';
+                return;
+            }
+            
+            if (confirmPassword && newPassword !== confirmPassword) {
+                matchText.innerHTML = '<span class="text-danger"><i class="fas fa-times me-1"></i>Passwords do not match</span>';
+            } else if (confirmPassword && newPassword === confirmPassword) {
+                matchText.innerHTML = '<span class="text-success"><i class="fas fa-check me-1"></i>Passwords match</span>';
+            } else {
+                matchText.innerHTML = '<span class="text-muted">Confirm your password</span>';
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Update dynamic time displays
+            const lastChangedElement = document.getElementById('lastChangedText');
+            const passwordAgeElement = document.getElementById('passwordAgeText');
+            
+            if (lastChangedElement) {
+                const lastChanged = new Date('<%= userData.updated_at %>');
+                lastChangedElement.textContent = formatTimeAgo(lastChanged);
+            }
+            
+            if (passwordAgeElement) {
+                const passwordAge = calculatePasswordAge(new Date('<%= userData.updated_at %>'));
+                passwordAgeElement.textContent = passwordAge;
+            }
+
+            // Load user activity with real data
+            loadUserActivity('<%= userData.id %>');
+
+            // Delete confirmation toggle
+            const confirmDelete = document.getElementById('confirmDelete');
+            const deleteButton = document.getElementById('deleteButton');
+            
+            if (confirmDelete && deleteButton) {
+                confirmDelete.addEventListener('change', function() {
+                    deleteButton.disabled = !this.checked;
+                });
+            }
+
+            // Form validation
+            const editUserForm = document.getElementById('editUserForm');
+            if (editUserForm) {
+                editUserForm.addEventListener('submit', function(e) {
+                    const username = document.getElementById('username').value;
+                    const email = document.getElementById('email').value;
+                    const roleId = document.getElementById('role_id').value;
+                    
+                    if (!username || !email || !roleId) {
+                        e.preventDefault();
+                        showToast('Please fill in all required fields (Username, Email, and Role).', 'error');
+                    }
+                });
+            }
+
+            // Password form validation
+            const passwordForm = document.getElementById('passwordForm');
+            if (passwordForm) {
+                passwordForm.addEventListener('submit', function(e) {
+                    const newPassword = document.getElementById('new_password').value;
+                    const confirmPassword = document.getElementById('confirm_password').value;
+                    
+                    if (newPassword && newPassword !== confirmPassword) {
+                        e.preventDefault();
+                        showToast('Passwords do not match!', 'error');
+                        return;
+                    }
+                    
+                    if (newPassword && newPassword.length < 6) {
+                        e.preventDefault();
+                        showToast('Password must be at least 6 characters long!', 'error');
+                        return;
+                    }
+
+                    // Show loading state
+                    const submitBtn = passwordForm.querySelector('button[type="submit"]');
+                    const originalText = submitBtn.innerHTML;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Updating...';
+                    submitBtn.disabled = true;
+
+                    // Re-enable after 3 seconds in case of error
+                    setTimeout(() => {
+                        submitBtn.innerHTML = originalText;
+                        submitBtn.disabled = false;
+                    }, 3000);
+                });
+            }
+
+            // Initialize tabs
+            const triggerTabList = [].slice.call(document.querySelectorAll('#userEditTabs button'));
+            triggerTabList.forEach(function (triggerEl) {
+                var tabTrigger = new bootstrap.Tab(triggerEl);
+                triggerEl.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    tabTrigger.show();
+                });
+            });
+        });
+
+        // Server-side helper functions for client-side use
+        function calculatePasswordAge(passwordUpdatedAt) {
+            if (!passwordUpdatedAt) return 'N/A';
+            
+            const updated = new Date(passwordUpdatedAt);
+            const now = new Date();
+            const diffTime = Math.abs(now - updated);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            return `${diffDays} day${diffDays !== 1 ? 's' : ''}`;
+        }
+
+        function formatTimeAgo(date) {
+            if (!date) return 'Unknown time';
+            
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+
+            if (diffMins < 1) return 'Just now';
+            if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
+            if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+            if (diffDays === 1) return 'Yesterday';
+            if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+            if (diffDays < 30) return `${Math.floor(diffDays / 7)} week${Math.floor(diffDays / 7) > 1 ? 's' : ''} ago`;
+            return date.toLocaleDateString();
+        }
+
+        async function loadUserActivity(userId) {
+            try {
+                const response = await fetch(`/admin/api/users/${userId}/activity?limit=10`);
+                const data = await response.json();
+                
+                let activityHtml = '';
+                
+                if (data.success && data.activities && data.activities.length > 0) {
+                    activityHtml = data.activities.map(activity => {
+                        const activityDate = new Date(activity.activity_date || activity.created_at);
+                        const amount = activity.amount ? `$${parseFloat(activity.amount).toFixed(2)}` : '';
+                        const statusBadge = activity.status ? 
+                            `<span class="badge bg-${getStatusColor(activity.status)}">${activity.status}</span>` : '';
+                        
+                        return `
+                            <div class="activity-item">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <strong>${activity.description}</strong>
+                                        ${amount ? `<div class="text-success fw-bold">${amount}</div>` : ''}
+                                        <div class="text-muted small">
+                                            <i class="fas fa-clock me-1"></i>
+                                            ${formatTimeAgo(activityDate)}
+                                        </div>
+                                    </div>
+                                    ${statusBadge}
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    // Fallback to template data - show recent expenses and budgets
+                    const recentExpenses = <%= JSON.stringify(userAnalytics.recentExpenses || []) %>;
+                    const recentBudgets = <%= JSON.stringify(userAnalytics.recentBudgets || []) %>;
+                    
+                    const allActivities = [
+                        ...recentExpenses.map(expense => ({
+                            description: `Expense: ${expense.description}`,
+                            amount: expense.amount,
+                            activity_date: expense.date,
+                            status: expense.status,
+                            type: 'expense'
+                        })),
+                        ...recentBudgets.map(budget => ({
+                            description: `Budget: ${budget.category}`,
+                            amount: budget.amount,
+                            activity_date: new Date(),
+                            status: 'active',
+                            type: 'budget'
+                        }))
+                    ].sort((a, b) => new Date(b.activity_date) - new Date(a.activity_date)).slice(0, 10);
+
+                    activityHtml = allActivities.map(activity => `
+                        <div class="activity-item">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <strong>${activity.description}</strong>
+                                    <div class="text-success fw-bold">$${parseFloat(activity.amount).toFixed(2)}</div>
+                                    <div class="text-muted small">
+                                        <i class="fas fa-clock me-1"></i>
+                                        ${new Date(activity.activity_date).toLocaleDateString()}
+                                    </div>
+                                </div>
+                                <span class="badge bg-${getStatusColor(activity.status)}">
+                                    ${activity.status}
+                                </span>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+                
+                document.getElementById('userActivity').innerHTML = activityHtml || `
+                    <div class="text-center py-4">
+                        <i class="fas fa-inbox fa-2x text-muted mb-3"></i>
+                        <p class="text-muted">No recent activity found</p>
+                    </div>
+                `;
+                
+            } catch (error) {
+                console.error('Error loading user activity:', error);
+                // Fallback template
+                document.getElementById('userActivity').innerHTML = `
+                    <div class="text-center py-4">
+                        <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                        <span class="text-muted">Unable to load activity data</span>
+                    </div>
+                `;
+            }
+        }
+
+        function getStatusColor(status) {
+            const statusMap = {
+                'approved': 'success',
+                'pending': 'warning',
+                'rejected': 'danger',
+                'active': 'info',
+                'completed': 'success',
+                'cancelled': 'secondary'
+            };
+            return statusMap[status?.toLowerCase()] || 'secondary';
+        }
+
+        function toggleUserStatus() {
+            const isActive = <%= userData.is_active %>;
+            const newStatus = !isActive;
+            const confirmMessage = newStatus ? 
+                'Are you sure you want to activate this user?' : 
+                'Are you sure you want to deactivate this user?';
+
+            if (confirm(confirmMessage)) {
+                document.getElementById('is_active').checked = newStatus;
+                document.getElementById('editUserForm').submit();
+            }
+        }
+
+        function showToast(message, type = 'info') {
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.className = `toast align-items-center text-white bg-${type === 'error' ? 'danger' : type} border-0`;
+            toast.setAttribute('role', 'alert');
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'exclamation-triangle' : 'info'}-circle me-2"></i>
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            `;
+            
+            // Add to container or create one
+            let toastContainer = document.querySelector('.toast-container');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+                document.body.appendChild(toastContainer);
+            }
+            
+            toastContainer.appendChild(toast);
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+            
+            // Remove toast after it's hidden
+            toast.addEventListener('hidden.bs.toast', () => {
+                toast.remove();
+            });
+        }
+
+        // Auto-dismiss alerts after 5 seconds
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => {
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                }
+            }, 5000);
+        });
+    </script>
 </body>
 </html>

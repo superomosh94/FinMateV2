@@ -21,9 +21,47 @@
         .sidebar .nav-link:hover, .sidebar .nav-link.active {
             background: rgba(255,255,255,0.2);
         }
+        
+        /* Notification Styles */
         .notification-unread {
             background-color: #f8f9fa;
             border-left: 4px solid #007bff;
+        }
+        .notification-read {
+            opacity: 0.8;
+        }
+        .notification-type-system { border-left-color: #6c757d; }
+        .notification-type-security { border-left-color: #dc3545; }
+        .notification-type-user { border-left-color: #28a745; }
+        .notification-type-expense { border-left-color: #17a2b8; }
+        .notification-type-budget { border-left-color: #ffc107; }
+        
+        .notification-badge {
+            font-size: 0.7rem;
+            padding: 2px 6px;
+        }
+        
+        /* Filter section */
+        .filter-section {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+        }
+        
+        /* Notification actions */
+        .notification-actions {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .list-group-item:hover .notification-actions {
+            opacity: 1;
         }
     </style>
 </head>
@@ -31,58 +69,7 @@
     <div class="container-fluid">
         <div class="row">
             <!-- Sidebar -->
-            <nav class="col-md-3 col-lg-2 d-md-block sidebar">
-                <div class="position-sticky pt-3">
-                    <h4 class="text-white text-center mb-4">
-                        <i class="fas fa-crown me-2"></i>
-                        FinMate Admin
-                    </h4>
-                    <ul class="nav flex-column">
-                        <li class="nav-item">
-                            <a class="nav-link" href="/admin/dashboard">
-                                <i class="fas fa-tachometer-alt me-2"></i>
-                                Dashboard
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/admin/users">
-                                <i class="fas fa-users me-2"></i>
-                                User Management
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/admin/budgets">
-                                <i class="fas fa-wallet me-2"></i>
-                                Budget Management
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/admin/expenses">
-                                <i class="fas fa-money-bill-wave me-2"></i>
-                                Expense Management
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link active" href="/admin/notifications">
-                                <i class="fas fa-bell me-2"></i>
-                                Notifications
-                            </a>
-                        </li>
-                        <li class="nav-item mt-4">
-                            <a class="nav-link" href="/auth/profile">
-                                <i class="fas fa-user me-2"></i>
-                                Profile
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/auth/logout">
-                                <i class="fas fa-sign-out-alt me-2"></i>
-                                Logout
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </nav>
+            <%- include('../../partials/admin-sidebar') -%>
 
             <!-- Main content -->
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
@@ -90,85 +77,214 @@
                     <h1 class="h2">
                         <i class="fas fa-bell me-2 text-info"></i>
                         Notifications
+                        <% if (locals.notifications && locals.notifications.length > 0) { %>
+                            <%
+                                const unreadCount = locals.notifications.filter(n => !n.is_read).length;
+                            %>
+                            <span class="badge bg-primary ms-2" id="unreadCount">
+                                <%= unreadCount %> unread
+                            </span>
+                        <% } %>
                     </h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
-                        <button class="btn btn-outline-secondary me-2">
-                            <i class="fas fa-check-double me-1"></i>Mark All Read
-                        </button>
-                        <button class="btn btn-outline-danger">
-                            <i class="fas fa-trash me-1"></i>Clear All
-                        </button>
+                        <form action="/admin/notifications/mark-all-read" method="POST" style="display: inline;" class="me-2">
+                            <button type="submit" class="btn btn-outline-secondary">
+                                <i class="fas fa-check-double me-1"></i>Mark All Read
+                            </button>
+                        </form>
+                        <form action="/admin/notifications/clear-all" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to clear all notifications?');">
+                            <button type="submit" class="btn btn-outline-danger">
+                                <i class="fas fa-trash me-1"></i>Clear All
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Success/Error Messages -->
+                <% if (locals.query && locals.query.success) { %>
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-check-circle me-2"></i>
+                        <%= locals.query.success %>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                <% } %>
+
+                <% if (locals.query && locals.query.error) { %>
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        <%= locals.query.error %>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                <% } %>
+
+                <!-- Filters -->
+                <div class="filter-section">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label for="typeFilter" class="form-label">Filter by Type</label>
+                            <select class="form-select" id="typeFilter">
+                                <option value="">All Types</option>
+                                <option value="system">System</option>
+                                <option value="security">Security</option>
+                                <option value="user">User</option>
+                                <option value="expense">Expense</option>
+                                <option value="budget">Budget</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="statusFilter" class="form-label">Filter by Status</label>
+                            <select class="form-select" id="statusFilter">
+                                <option value="">All Status</option>
+                                <option value="unread">Unread Only</option>
+                                <option value="read">Read Only</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="userFilter" class="form-label">Filter by User</label>
+                            <select class="form-select" id="userFilter">
+                                <option value="">All Users</option>
+                                <% if (locals.notifications) { 
+                                    let users = new Set();
+                                    locals.notifications.forEach(notification => {
+                                        if (notification.username) users.add(notification.username);
+                                    });
+                                    users.forEach(user => { %>
+                                        <option value="<%= user %>"><%= user %></option>
+                                    <% });
+                                } %>
+                            </select>
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button class="btn btn-outline-secondary w-100" id="resetFilters">
+                                <i class="fas fa-redo me-1"></i>Reset Filters
+                            </button>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Notifications List -->
                 <div class="card shadow">
-                    <div class="card-header">
+                    <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="card-title mb-0">
                             <i class="fas fa-list me-2"></i>System Notifications
+                            <% if (locals.notifications && locals.notifications.length > 0) { %>
+                                <span class="badge bg-primary ms-2"><%= locals.notifications.length %> total</span>
+                            <% } %>
                         </h5>
+                        <div class="text-muted small">
+                            <% if (locals.notifications && locals.notifications.length > 0) { %>
+                                Last updated: <%= new Date().toLocaleString() %>
+                            <% } %>
+                        </div>
                     </div>
                     <div class="card-body p-0">
-                        <div class="list-group list-group-flush">
-                            <!-- Unread Notification -->
-                            <div class="list-group-item notification-unread">
-                                <div class="d-flex w-100 justify-content-between">
-                                    <h6 class="mb-1">
-                                        <i class="fas fa-exclamation-triangle text-warning me-2"></i>
-                                        New User Registration
-                                    </h6>
-                                    <small class="text-muted">2 minutes ago</small>
-                                </div>
-                                <p class="mb-1">New user "Sarah Johnson" has registered and is awaiting approval.</p>
-                                <div class="btn-group btn-group-sm mt-2">
-                                    <button class="btn btn-outline-success btn-sm">
-                                        <i class="fas fa-check me-1"></i>Approve
-                                    </button>
-                                    <button class="btn btn-outline-primary btn-sm">
-                                        <i class="fas fa-eye me-1"></i>View
-                                    </button>
-                                    <button class="btn btn-outline-secondary btn-sm">
-                                        <i class="fas fa-check me-1"></i>Mark Read
-                                    </button>
-                                </div>
+                        <% if (locals.notifications && locals.notifications.length > 0) { %>
+                            <div class="list-group list-group-flush" id="notificationsList">
+                                <% 
+                                locals.notifications.forEach(notification => {
+                                    // Determine icon and color based on notification type
+                                    let icon = 'bell';
+                                    let color = 'primary';
+                                    
+                                    switch(notification.type) {
+                                        case 'system':
+                                            icon = 'server';
+                                            color = 'secondary';
+                                            break;
+                                        case 'security':
+                                            icon = 'shield-alt';
+                                            color = 'danger';
+                                            break;
+                                        case 'user':
+                                            icon = 'users';
+                                            color = 'success';
+                                            break;
+                                        case 'expense':
+                                            icon = 'money-bill-wave';
+                                            color = 'info';
+                                            break;
+                                        case 'budget':
+                                            icon = 'chart-pie';
+                                            color = 'warning';
+                                            break;
+                                        default:
+                                            icon = 'bell';
+                                            color = 'primary';
+                                    }
+                                    
+                                    // Calculate time ago
+                                    const createdDate = new Date(notification.created_at);
+                                    const now = new Date();
+                                    const diffInSeconds = Math.floor((now - createdDate) / 1000);
+                                    let timeAgo = '';
+                                    
+                                    if (diffInSeconds < 60) timeAgo = 'just now';
+                                    else if (diffInSeconds < 3600) timeAgo = `${Math.floor(diffInSeconds / 60)} minutes ago`;
+                                    else if (diffInSeconds < 86400) timeAgo = `${Math.floor(diffInSeconds / 3600)} hours ago`;
+                                    else if (diffInSeconds < 2592000) timeAgo = `${Math.floor(diffInSeconds / 86400)} days ago`;
+                                    else timeAgo = createdDate.toLocaleDateString();
+                                %>
+                                    <div class="list-group-item <%= notification.is_read ? 'notification-read' : 'notification-unread' %> notification-type-<%= notification.type || 'system' %>"
+                                         data-type="<%= notification.type || 'system' %>"
+                                         data-status="<%= notification.is_read ? 'read' : 'unread' %>"
+                                         data-user="<%= notification.username || '' %>">
+                                        <div class="d-flex w-100 justify-content-between">
+                                            <h6 class="mb-1">
+                                                <i class="fas fa-<%= icon %> me-2 text-<%= color %>"></i>
+                                                <%= notification.title %>
+                                                <% if (!notification.is_read) { %>
+                                                    <span class="badge bg-primary notification-badge ms-2">New</span>
+                                                <% } %>
+                                            </h6>
+                                            <small class="text-muted" title="<%= createdDate.toLocaleString() %>">
+                                                <%= timeAgo %>
+                                            </small>
+                                        </div>
+                                        <p class="mb-1"><%= notification.message %></p>
+                                        <div class="d-flex justify-content-between align-items-center mt-2">
+                                            <div class="text-muted small">
+                                                <% if (notification.username) { %>
+                                                    <i class="fas fa-user me-1"></i><%= notification.username %>
+                                                <% } %>
+                                                <span class="badge bg-secondary ms-2"><%= notification.type || 'system' %></span>
+                                            </div>
+                                            <div class="notification-actions">
+                                                <div class="btn-group btn-group-sm">
+                                                    <% if (!notification.is_read) { %>
+                                                        <form action="/admin/notifications/mark-read/<%= notification.id %>" method="POST" style="display: inline;">
+                                                            <button type="submit" class="btn btn-outline-success" title="Mark as Read">
+                                                                <i class="fas fa-check"></i>
+                                                            </button>
+                                                        </form>
+                                                    <% } %>
+                                                    <% if (notification.type === 'user' && notification.title.includes('Registration')) { %>
+                                                        <a href="/admin/users" class="btn btn-outline-primary" title="View Users">
+                                                            <i class="fas fa-users"></i>
+                                                        </a>
+                                                    <% } %>
+                                                    <% if (notification.type === 'expense') { %>
+                                                        <a href="/admin/expenses" class="btn btn-outline-primary" title="View Expenses">
+                                                            <i class="fas fa-money-bill-wave"></i>
+                                                        </a>
+                                                    <% } %>
+                                                    <form action="/admin/notifications/delete/<%= notification.id %>" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this notification?');">
+                                                        <button type="submit" class="btn btn-outline-danger" title="Delete Notification">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <% }); %>
                             </div>
-
-                            <!-- Read Notification -->
-                            <div class="list-group-item">
-                                <div class="d-flex w-100 justify-content-between">
-                                    <h6 class="mb-1">
-                                        <i class="fas fa-money-bill-wave text-success me-2"></i>
-                                        Expense Approved
-                                    </h6>
-                                    <small class="text-muted">1 hour ago</small>
-                                </div>
-                                <p class="mb-1">Expense "Team Lunch" by John Doe has been automatically approved.</p>
+                        <% } else { %>
+                            <div class="empty-state">
+                                <i class="fas fa-bell-slash fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">No Notifications</h5>
+                                <p class="text-muted">You're all caught up! There are no notifications to display.</p>
                             </div>
-
-                            <!-- System Notification -->
-                            <div class="list-group-item">
-                                <div class="d-flex w-100 justify-content-between">
-                                    <h6 class="mb-1">
-                                        <i class="fas fa-server text-info me-2"></i>
-                                        System Backup Completed
-                                    </h6>
-                                    <small class="text-muted">3 hours ago</small>
-                                </div>
-                                <p class="mb-1">Nightly system backup completed successfully. All data is secure.</p>
-                            </div>
-
-                            <!-- Budget Alert -->
-                            <div class="list-group-item">
-                                <div class="d-flex w-100 justify-content-between">
-                                    <h6 class="mb-1">
-                                        <i class="fas fa-chart-pie text-warning me-2"></i>
-                                        Budget Limit Approaching
-                                    </h6>
-                                    <small class="text-muted">5 hours ago</small>
-                                </div>
-                                <p class="mb-1">Marketing budget has reached 85% of its limit for this month.</p>
-                            </div>
-                        </div>
+                        <% } %>
                     </div>
                 </div>
 
@@ -180,52 +296,63 @@
                         </h5>
                     </div>
                     <div class="card-body">
-                        <form>
+                        <form action="/admin/notifications/settings" method="POST">
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-check mb-3">
-                                        <input class="form-check-input" type="checkbox" id="newUsers" checked>
+                                        <input class="form-check-input" type="checkbox" name="newUsers" id="newUsers" checked>
                                         <label class="form-check-label" for="newUsers">
+                                            <i class="fas fa-user-plus me-1 text-success"></i>
                                             New User Registrations
                                         </label>
                                     </div>
                                     <div class="form-check mb-3">
-                                        <input class="form-check-input" type="checkbox" id="expenseApprovals" checked>
+                                        <input class="form-check-input" type="checkbox" name="expenseApprovals" id="expenseApprovals" checked>
                                         <label class="form-check-label" for="expenseApprovals">
+                                            <i class="fas fa-money-bill-wave me-1 text-info"></i>
                                             Expense Approval Requests
                                         </label>
                                     </div>
                                     <div class="form-check mb-3">
-                                        <input class="form-check-input" type="checkbox" id="budgetAlerts" checked>
+                                        <input class="form-check-input" type="checkbox" name="budgetAlerts" id="budgetAlerts" checked>
                                         <label class="form-check-label" for="budgetAlerts">
+                                            <i class="fas fa-chart-pie me-1 text-warning"></i>
                                             Budget Limit Alerts
                                         </label>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-check mb-3">
-                                        <input class="form-check-input" type="checkbox" id="systemAlerts" checked>
+                                        <input class="form-check-input" type="checkbox" name="systemAlerts" id="systemAlerts" checked>
                                         <label class="form-check-label" for="systemAlerts">
+                                            <i class="fas fa-server me-1 text-secondary"></i>
                                             System Alerts
                                         </label>
                                     </div>
                                     <div class="form-check mb-3">
-                                        <input class="form-check-input" type="checkbox" id="securityAlerts" checked>
+                                        <input class="form-check-input" type="checkbox" name="securityAlerts" id="securityAlerts" checked>
                                         <label class="form-check-label" for="securityAlerts">
+                                            <i class="fas fa-shield-alt me-1 text-danger"></i>
                                             Security Alerts
                                         </label>
                                     </div>
                                     <div class="form-check mb-3">
-                                        <input class="form-check-input" type="checkbox" id="weeklyReports">
+                                        <input class="form-check-input" type="checkbox" name="weeklyReports" id="weeklyReports">
                                         <label class="form-check-label" for="weeklyReports">
+                                            <i class="fas fa-chart-bar me-1 text-primary"></i>
                                             Weekly Reports
                                         </label>
                                     </div>
                                 </div>
                             </div>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save me-1"></i>Save Settings
-                            </button>
+                            <div class="mt-3">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-1"></i>Save Settings
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" id="testNotification">
+                                    <i class="fas fa-bell me-1"></i>Test Notification
+                                </button>
+                            </div>
                         </form>
                     </div>
                 </div>
@@ -234,5 +361,68 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Auto-dismiss alerts after 5 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                setTimeout(() => {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                }, 5000);
+            });
+
+            // Filter functionality
+            const typeFilter = document.getElementById('typeFilter');
+            const statusFilter = document.getElementById('statusFilter');
+            const userFilter = document.getElementById('userFilter');
+            const resetFilters = document.getElementById('resetFilters');
+            const notificationItems = document.querySelectorAll('.list-group-item');
+
+            function filterNotifications() {
+                const typeValue = typeFilter.value;
+                const statusValue = statusFilter.value;
+                const userValue = userFilter.value;
+
+                notificationItems.forEach(item => {
+                    const itemType = item.getAttribute('data-type');
+                    const itemStatus = item.getAttribute('data-status');
+                    const itemUser = item.getAttribute('data-user');
+
+                    const typeMatch = !typeValue || itemType === typeValue;
+                    const statusMatch = !statusValue || itemStatus === statusValue;
+                    const userMatch = !userValue || itemUser === userValue;
+
+                    if (typeMatch && statusMatch && userMatch) {
+                        item.style.display = 'block';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            }
+
+            typeFilter.addEventListener('change', filterNotifications);
+            statusFilter.addEventListener('change', filterNotifications);
+            userFilter.addEventListener('change', filterNotifications);
+
+            resetFilters.addEventListener('click', function() {
+                typeFilter.value = '';
+                statusFilter.value = '';
+                userFilter.value = '';
+                filterNotifications();
+            });
+
+            // Test notification button
+            document.getElementById('testNotification').addEventListener('click', function() {
+                alert('Test notification would be sent here. In a real application, this would trigger a test notification.');
+            });
+
+            // Auto-refresh notifications every 30 seconds
+            setInterval(function() {
+                // In a real application, you would fetch new notifications via AJAX
+                console.log('Auto-refresh notifications...');
+            }, 30000);
+        });
+    </script>
 </body>
 </html>

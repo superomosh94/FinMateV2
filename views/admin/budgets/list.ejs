@@ -25,65 +25,60 @@
         .period-weekly { background-color: #28a745; }
         .period-monthly { background-color: #007bff; }
         .period-yearly { background-color: #6f42c1; }
+        
+        /* Budget progress bars */
+        .progress {
+            height: 8px;
+            margin-top: 5px;
+        }
+        
+        /* Budget status indicators */
+        .budget-status {
+            font-size: 0.75rem;
+            padding: 3px 8px;
+            border-radius: 12px;
+        }
+        .status-on-track { background-color: #d4edda; color: #155724; }
+        .status-warning { background-color: #fff3cd; color: #856404; }
+        .status-exceeded { background-color: #f8d7da; color: #721c24; }
+        
+        /* Budget usage indicators */
+        .usage-low { border-left: 4px solid #28a745; }
+        .usage-medium { border-left: 4px solid #ffc107; }
+        .usage-high { border-left: 4px solid #dc3545; }
+        
+        /* Filter section */
+        .filter-section {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        /* Quick stats cards */
+        .stat-card {
+            border-radius: 10px;
+            transition: transform 0.2s;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        /* Budget chart */
+        .budget-chart {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
     </style>
 </head>
 <body>
     <div class="container-fluid">
         <div class="row">
             <!-- Sidebar -->
-            <nav class="col-md-3 col-lg-2 d-md-block sidebar">
-                <div class="position-sticky pt-3">
-                    <h4 class="text-white text-center mb-4">
-                        <i class="fas fa-crown me-2"></i>
-                        FinMate Admin
-                    </h4>
-                    <ul class="nav flex-column">
-                        <li class="nav-item">
-                            <a class="nav-link" href="/admin/dashboard">
-                                <i class="fas fa-tachometer-alt me-2"></i>
-                                Dashboard
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/admin/users">
-                                <i class="fas fa-users me-2"></i>
-                                User Management
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link active" href="/admin/budgets">
-                                <i class="fas fa-wallet me-2"></i>
-                                Budget Management
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/admin/expenses">
-                                <i class="fas fa-money-bill-wave me-2"></i>
-                                Expense Management
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/admin/notifications">
-                                <i class="fas fa-bell me-2"></i>
-                                Notifications
-                            </a>
-                        </li>
-                        <li class="nav-item mt-4">
-                            <a class="nav-link" href="/auth/profile">
-                                <i class="fas fa-user me-2"></i>
-                                Profile
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/auth/logout">
-                                <i class="fas fa-sign-out-alt me-2"></i>
-                                Logout
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </nav>
-
+            
+            <%- include('../../partials/admin-sidebar') -%>
             <!-- Main content -->
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
@@ -115,6 +110,141 @@
                     </div>
                 <% } %>
 
+                <!-- Budget Statistics -->
+                <% if (locals.budgets && locals.budgets.length > 0) { %>
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card stat-card bg-primary text-white">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h4 class="card-title"><%= locals.budgets.length %></h4>
+                                        <p class="card-text">Total Budgets</p>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <i class="fas fa-wallet fa-2x"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stat-card bg-success text-white">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <%
+                                            let totalAmount = 0;
+                                            locals.budgets.forEach(budget => {
+                                                totalAmount += parseFloat(budget.amount);
+                                            });
+                                        %>
+                                        <h4 class="card-title">$<%= totalAmount.toFixed(2) %></h4>
+                                        <p class="card-text">Total Budget Amount</p>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <i class="fas fa-dollar-sign fa-2x"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stat-card bg-info text-white">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <%
+                                            let monthlyBudgets = 0;
+                                            locals.budgets.forEach(budget => {
+                                                if (budget.period === 'Monthly') monthlyBudgets++;
+                                            });
+                                        %>
+                                        <h4 class="card-title"><%= monthlyBudgets %></h4>
+                                        <p class="card-text">Monthly Budgets</p>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <i class="fas fa-calendar-alt fa-2x"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stat-card bg-warning text-white">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <%
+                                            let activeUsers = new Set();
+                                            locals.budgets.forEach(budget => {
+                                                if (budget.user_name) activeUsers.add(budget.user_name);
+                                            });
+                                        %>
+                                        <h4 class="card-title"><%= activeUsers.size %></h4>
+                                        <p class="card-text">Active Users</p>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <i class="fas fa-users fa-2x"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <% } %>
+
+                <!-- Filters -->
+                <div class="filter-section">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label for="periodFilter" class="form-label">Filter by Period</label>
+                            <select class="form-select" id="periodFilter">
+                                <option value="">All Periods</option>
+                                <option value="Daily">Daily</option>
+                                <option value="Weekly">Weekly</option>
+                                <option value="Monthly">Monthly</option>
+                                <option value="Yearly">Yearly</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="userFilter" class="form-label">Filter by User</label>
+                            <select class="form-select" id="userFilter">
+                                <option value="">All Users</option>
+                                <% if (locals.budgets) { 
+                                    let users = new Set();
+                                    locals.budgets.forEach(budget => {
+                                        if (budget.user_name) users.add(budget.user_name);
+                                    });
+                                    users.forEach(user => { %>
+                                        <option value="<%= user %>"><%= user %></option>
+                                    <% });
+                                } %>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="teamFilter" class="form-label">Filter by Team</label>
+                            <select class="form-select" id="teamFilter">
+                                <option value="">All Teams</option>
+                                <% if (locals.budgets) { 
+                                    let teams = new Set();
+                                    locals.budgets.forEach(budget => {
+                                        if (budget.team_name) teams.add(budget.team_name);
+                                    });
+                                    teams.forEach(team => { %>
+                                        <option value="<%= team %>"><%= team %></option>
+                                    <% });
+                                } %>
+                            </select>
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button class="btn btn-outline-secondary w-100" id="resetFilters">
+                                <i class="fas fa-redo me-1"></i>Reset Filters
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Budgets Table -->
                 <div class="card shadow">
                     <div class="card-header d-flex justify-content-between align-items-center">
@@ -131,22 +261,26 @@
                     <div class="card-body">
                         <% if (locals.budgets && locals.budgets.length > 0) { %>
                             <div class="table-responsive">
-                                <table class="table table-hover">
+                                <table class="table table-hover" id="budgetsTable">
                                     <thead class="table-light">
                                         <tr>
                                             <th>ID</th>
                                             <th>Category</th>
                                             <th>Amount</th>
                                             <th>Period</th>
-                                            <th>Description</th>
-                                            <th>Created By</th>
-                                            <th>Created Date</th>
+                                            <th>User</th>
+                                            <th>Team</th>
+                                            <th>Start Date</th>
+                                            <th>End Date</th>
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <% locals.budgets.forEach(budget => { %>
-                                            <tr>
+                                            <tr class="budget-row" 
+                                                data-period="<%= budget.period %>"
+                                                data-user="<%= budget.user_name || '' %>"
+                                                data-team="<%= budget.team_name || '' %>">
                                                 <td><strong>#<%= budget.id %></strong></td>
                                                 <td>
                                                     <div class="d-flex align-items-center">
@@ -171,19 +305,25 @@
                                                     </span>
                                                 </td>
                                                 <td>
-                                                    <small class="text-muted">
-                                                        <%= budget.description || 'No description' %>
-                                                    </small>
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="fas fa-user text-muted me-2"></i>
+                                                        <span><%= budget.user_name || 'N/A' %></span>
+                                                    </div>
                                                 </td>
                                                 <td>
                                                     <div class="d-flex align-items-center">
-                                                        <i class="fas fa-user text-muted me-2"></i>
-                                                        <span><%= budget.created_by_name || 'System' %></span>
+                                                        <i class="fas fa-users text-muted me-2"></i>
+                                                        <span><%= budget.team_name || 'N/A' %></span>
                                                     </div>
                                                 </td>
                                                 <td>
                                                     <small class="text-muted">
-                                                        <%= new Date(budget.created_at).toLocaleDateString() %>
+                                                        <%= budget.start_date ? new Date(budget.start_date).toLocaleDateString() : 'N/A' %>
+                                                    </small>
+                                                </td>
+                                                <td>
+                                                    <small class="text-muted">
+                                                        <%= budget.end_date ? new Date(budget.end_date).toLocaleDateString() : 'N/A' %>
                                                     </small>
                                                 </td>
                                                 <td>
@@ -220,7 +360,8 @@
                 <div class="mt-3 text-center">
                     <small class="text-muted">
                         <a href="/admin/fix-budgets-table" target="_blank" class="text-decoration-none">Fix Budgets Table</a> | 
-                        <a href="/admin/check-budgets-columns" target="_blank" class="text-decoration-none">Check Table Structure</a>
+                        <a href="/admin/check-budgets-columns" target="_blank" class="text-decoration-none">Check Table Structure</a> |
+                        <a href="/admin/reports" class="text-decoration-none">View Reports</a>
                     </small>
                 </div>
             </main>
@@ -238,6 +379,61 @@
                     bsAlert.close();
                 }, 5000);
             });
+
+            // Filter functionality
+            const periodFilter = document.getElementById('periodFilter');
+            const userFilter = document.getElementById('userFilter');
+            const teamFilter = document.getElementById('teamFilter');
+            const resetFilters = document.getElementById('resetFilters');
+            const budgetRows = document.querySelectorAll('.budget-row');
+
+            function filterBudgets() {
+                const periodValue = periodFilter.value;
+                const userValue = userFilter.value;
+                const teamValue = teamFilter.value;
+
+                budgetRows.forEach(row => {
+                    const rowPeriod = row.getAttribute('data-period');
+                    const rowUser = row.getAttribute('data-user');
+                    const rowTeam = row.getAttribute('data-team');
+
+                    const periodMatch = !periodValue || rowPeriod === periodValue;
+                    const userMatch = !userValue || rowUser === userValue;
+                    const teamMatch = !teamValue || rowTeam === teamValue;
+
+                    if (periodMatch && userMatch && teamMatch) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            }
+
+            periodFilter.addEventListener('change', filterBudgets);
+            userFilter.addEventListener('change', filterBudgets);
+            teamFilter.addEventListener('change', filterBudgets);
+
+            resetFilters.addEventListener('click', function() {
+                periodFilter.value = '';
+                userFilter.value = '';
+                teamFilter.value = '';
+                filterBudgets();
+            });
+
+            // Initialize filters based on URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('period')) {
+                periodFilter.value = urlParams.get('period');
+            }
+            if (urlParams.get('user')) {
+                userFilter.value = urlParams.get('user');
+            }
+            if (urlParams.get('team')) {
+                teamFilter.value = urlParams.get('team');
+            }
+            
+            // Apply initial filters
+            filterBudgets();
         });
     </script>
 </body>
