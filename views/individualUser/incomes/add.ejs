@@ -44,10 +44,26 @@
                         <h1 class="h3 mb-1">Add New Income</h1>
                         <p class="text-muted">Record a new income transaction</p>
                     </div>
-                    <a href="/incomes" class="btn btn-back">
+                    <a href="/user/incomes" class="btn btn-back">
                         <i class="fas fa-arrow-left"></i> Back to Incomes
                     </a>
                 </div>
+
+                <!-- Display error messages if any -->
+                <% if (typeof error !== 'undefined' && error) { %>
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <strong>Error:</strong> <%= error %>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                <% } %>
+
+                <!-- Display success messages if any -->
+                <% if (typeof success !== 'undefined' && success) { %>
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <strong>Success:</strong> <%= message %>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                <% } %>
 
                 <div class="row">
                     <div class="col-lg-8">
@@ -56,13 +72,15 @@
                                 <h5 class="card-title mb-0">Income Information</h5>
                             </div>
                             <div class="card-body">
-                                <form id="incomeForm">
+                                <!-- Updated form to use traditional submission -->
+                                <form id="incomeForm" action="/user/incomes/add" method="POST">
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="mb-3">
                                                 <label for="title" class="form-label">Income Title *</label>
                                                 <input type="text" class="form-control" id="title" name="title" required 
-                                                       placeholder="e.g., Salary, Freelance Work, Bonus">
+                                                       placeholder="e.g., Salary, Freelance Work, Bonus"
+                                                       value="<%= typeof formData !== 'undefined' ? formData.title : '' %>">
                                                 <div class="form-text">A descriptive name for this income</div>
                                             </div>
                                         </div>
@@ -70,9 +88,10 @@
                                             <div class="mb-3">
                                                 <label for="amount" class="form-label">Amount *</label>
                                                 <div class="input-group">
-                                                    <span class="input-group-text">$</span>
+                                                    <span class="input-group-text">Ksh</span>
                                                     <input type="number" class="form-control" id="amount" name="amount" 
-                                                           step="0.01" min="0.01" required placeholder="0.00">
+                                                           step="0.01" min="0.01" required placeholder="0.00"
+                                                           value="<%= typeof formData !== 'undefined' ? formData.amount : '' %>">
                                                 </div>
                                             </div>
                                         </div>
@@ -84,14 +103,14 @@
                                                 <label for="source" class="form-label">Income Source</label>
                                                 <select class="form-select" id="source" name="source">
                                                     <option value="">Select Source</option>
-                                                    <option value="Salary">Salary</option>
-                                                    <option value="Freelance">Freelance Work</option>
-                                                    <option value="Business">Business Income</option>
-                                                    <option value="Investment">Investment</option>
-                                                    <option value="Rental">Rental Income</option>
-                                                    <option value="Bonus">Bonus</option>
-                                                    <option value="Commission">Commission</option>
-                                                    <option value="Other">Other</option>
+                                                    <option value="Salary" <%= (typeof formData !== 'undefined' && formData.source === 'Salary') ? 'selected' : '' %>>Salary</option>
+                                                    <option value="Freelance" <%= (typeof formData !== 'undefined' && formData.source === 'Freelance') ? 'selected' : '' %>>Freelance Work</option>
+                                                    <option value="Business" <%= (typeof formData !== 'undefined' && formData.source === 'Business') ? 'selected' : '' %>>Business Income</option>
+                                                    <option value="Investment" <%= (typeof formData !== 'undefined' && formData.source === 'Investment') ? 'selected' : '' %>>Investment</option>
+                                                    <option value="Rental" <%= (typeof formData !== 'undefined' && formData.source === 'Rental') ? 'selected' : '' %>>Rental Income</option>
+                                                    <option value="Bonus" <%= (typeof formData !== 'undefined' && formData.source === 'Bonus') ? 'selected' : '' %>>Bonus</option>
+                                                    <option value="Commission" <%= (typeof formData !== 'undefined' && formData.source === 'Commission') ? 'selected' : '' %>>Commission</option>
+                                                    <option value="Other" <%= (typeof formData !== 'undefined' && formData.source === 'Other') ? 'selected' : '' %>>Other</option>
                                                 </select>
                                                 <div class="form-text">Where did this income come from?</div>
                                             </div>
@@ -101,13 +120,13 @@
                                                 <label for="category" class="form-label">Category</label>
                                                 <select class="form-select" id="category" name="category">
                                                     <option value="">Select Category</option>
-                                                    <option value="Regular Income">Regular Income</option>
-                                                    <option value="One-time Payment">One-time Payment</option>
-                                                    <option value="Passive Income">Passive Income</option>
-                                                    <option value="Investment Return">Investment Return</option>
-                                                    <option value="Gift">Gift</option>
-                                                    <option value="Refund">Refund</option>
-                                                    <option value="Other">Other</option>
+                                                    <option value="Regular Income" <%= (typeof formData !== 'undefined' && formData.category === 'Regular Income') ? 'selected' : '' %>>Regular Income</option>
+                                                    <option value="One-time Payment" <%= (typeof formData !== 'undefined' && formData.category === 'One-time Payment') ? 'selected' : '' %>>One-time Payment</option>
+                                                    <option value="Passive Income" <%= (typeof formData !== 'undefined' && formData.category === 'Passive Income') ? 'selected' : '' %>>Passive Income</option>
+                                                    <option value="Investment Return" <%= (typeof formData !== 'undefined' && formData.category === 'Investment Return') ? 'selected' : '' %>>Investment Return</option>
+                                                    <option value="Gift" <%= (typeof formData !== 'undefined' && formData.category === 'Gift') ? 'selected' : '' %>>Gift</option>
+                                                    <option value="Refund" <%= (typeof formData !== 'undefined' && formData.category === 'Refund') ? 'selected' : '' %>>Refund</option>
+                                                    <option value="Other" <%= (typeof formData !== 'undefined' && formData.category === 'Other') ? 'selected' : '' %>>Other</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -116,23 +135,24 @@
                                     <div class="mb-3">
                                         <label for="description" class="form-label">Description</label>
                                         <textarea class="form-control" id="description" name="description" 
-                                                  rows="3" placeholder="Additional details about this income..."></textarea>
+                                                  rows="3" placeholder="Additional details about this income..."><%= typeof formData !== 'undefined' ? formData.description : '' %></textarea>
                                     </div>
 
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="mb-3">
                                                 <label for="received_date" class="form-label">Received Date *</label>
-                                                <input type="date" class="form-control" id="received_date" name="received_date" required>
+                                                <input type="date" class="form-control" id="received_date" name="received_date" required
+                                                       value="<%= typeof formData !== 'undefined' ? formData.received_date : new Date().toISOString().split('T')[0] %>">
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="mb-3">
                                                 <label for="status" class="form-label">Status</label>
                                                 <select class="form-select" id="status" name="status">
-                                                    <option value="cleared">Cleared</option>
-                                                    <option value="pending">Pending</option>
-                                                    <option value="cancelled">Cancelled</option>
+                                                    <option value="cleared" <%= (typeof formData !== 'undefined' && formData.status === 'cleared') ? 'selected' : '' %>>Cleared</option>
+                                                    <option value="pending" <%= (typeof formData !== 'undefined' && formData.status === 'pending') ? 'selected' : '' %>>Pending</option>
+                                                    <option value="cancelled" <%= (typeof formData !== 'undefined' && formData.status === 'cancelled') ? 'selected' : '' %>>Cancelled</option>
                                                 </select>
                                                 <div class="form-text">
                                                     <span class="text-success">Cleared</span> - Income has been received<br>
@@ -165,7 +185,7 @@
                             <div class="card-body">
                                 <div class="mb-3">
                                     <small class="text-muted">This Month's Income</small>
-                                    <h5 id="monthlyIncome">$0.00</h5>
+                                    <h5 id="monthlyIncome">Ksh 0.00</h5>
                                 </div>
                                 <div class="mb-3">
                                     <small class="text-muted">Last Income</small>
@@ -184,13 +204,14 @@
                         <div class="card">
                             <div class="card-body">
                                 <div class="d-grid gap-2">
-                                    <button type="button" class="btn btn-primary btn-lg" onclick="saveIncome()">
+                                    <!-- Updated buttons to use form submission -->
+                                    <button type="submit" form="incomeForm" class="btn btn-primary btn-lg">
                                         <i class="fas fa-save"></i> Save Income
                                     </button>
                                     <button type="button" class="btn btn-outline-secondary" onclick="saveAndAddAnother()">
                                         <i class="fas fa-plus-circle"></i> Save & Add Another
                                     </button>
-                                    <a href="/incomes" class="btn btn-outline-danger">
+                                    <a href="/user/incomes" class="btn btn-outline-danger">
                                         <i class="fas fa-times"></i> Cancel
                                     </a>
                                 </div>
@@ -202,7 +223,7 @@
         </div>
     </div>
 
-    <!-- Success Modal -->
+    <!-- Success Modal (keeping for potential future use) -->
     <div class="modal fade" id="successModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -215,7 +236,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <a href="/incomes" class="btn btn-primary">View All Incomes</a>
+                    <a href="/user/incomes" class="btn btn-primary">View All Incomes</a>
                 </div>
             </div>
         </div>
@@ -223,18 +244,20 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Set default date to today
-        document.getElementById('received_date').valueAsDate = new Date();
-
-        // Load teams and stats
+        // Set default date to today if not already set by server
         document.addEventListener('DOMContentLoaded', function() {
+            const receivedDate = document.getElementById('received_date');
+            if (!receivedDate.value) {
+                receivedDate.valueAsDate = new Date();
+            }
+            
             loadTeams();
             loadQuickStats();
         });
 
         async function loadTeams() {
             try {
-                const response = await fetch('/api/teams'); // Adjust endpoint as needed
+                const response = await fetch('/api/teams');
                 const result = await response.json();
                 
                 if (result.success) {
@@ -265,7 +288,7 @@
                     );
                     
                     if (monthlyData) {
-                        document.getElementById('monthlyIncome').textContent = `$${parseFloat(monthlyData.total_amount).toFixed(2)}`;
+                        document.getElementById('monthlyIncome').textContent = `Ksh ${parseFloat(monthlyData.total_amount).toFixed(2)}`;
                     }
 
                     // Update last income
@@ -274,7 +297,7 @@
                     
                     if (lastIncomeResult.success && lastIncomeResult.data.length > 0) {
                         const lastIncome = lastIncomeResult.data[0];
-                        document.getElementById('lastIncome').textContent = `${lastIncome.title} - $${parseFloat(lastIncome.amount).toFixed(2)}`;
+                        document.getElementById('lastIncome').textContent = `${lastIncome.title} - Ksh ${parseFloat(lastIncome.amount).toFixed(2)}`;
                     }
                 }
             } catch (error) {
@@ -282,51 +305,23 @@
             }
         }
 
-        async function saveIncome(redirect = true) {
-            const form = document.getElementById('incomeForm');
-            const formData = new FormData(form);
-            const data = Object.fromEntries(formData);
-
-            // Validate required fields
-            if (!data.title || !data.amount || !data.received_date) {
-                alert('Please fill in all required fields');
-                return;
-            }
-
-            try {
-                const response = await fetch('/api/incomes', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data)
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    if (redirect) {
-                        // Show success modal
-                        const modal = new bootstrap.Modal(document.getElementById('successModal'));
-                        document.getElementById('successMessage').textContent = result.message;
-                        modal.show();
-                    } else {
-                        // Reset form for adding another
-                        form.reset();
-                        document.getElementById('received_date').valueAsDate = new Date();
-                        alert('Income added successfully!');
-                    }
-                } else {
-                    alert('Error: ' + result.message);
-                }
-            } catch (error) {
-                console.error('Error saving income:', error);
-                alert('Error saving income. Please try again.');
-            }
-        }
-
+        // Function to handle "Save & Add Another" - uses form submission but stays on page
         function saveAndAddAnother() {
-            saveIncome(false);
+            const form = document.getElementById('incomeForm');
+            
+            // Create a hidden input to indicate "add another"
+            let addAnotherInput = document.getElementById('addAnother');
+            if (!addAnotherInput) {
+                addAnotherInput = document.createElement('input');
+                addAnotherInput.type = 'hidden';
+                addAnotherInput.name = 'addAnother';
+                addAnotherInput.id = 'addAnother';
+                addAnotherInput.value = 'true';
+                form.appendChild(addAnotherInput);
+            }
+            
+            // Submit the form
+            form.submit();
         }
 
         // Add some dynamic behavior
@@ -334,8 +329,16 @@
             if (this.value === 'Other') {
                 const customSource = prompt('Please specify the income source:');
                 if (customSource) {
-                    // You might want to handle this differently based on your needs
-                    console.log('Custom source:', customSource);
+                    // Create a hidden input for custom source
+                    let customSourceInput = document.getElementById('customSource');
+                    if (!customSourceInput) {
+                        customSourceInput = document.createElement('input');
+                        customSourceInput.type = 'hidden';
+                        customSourceInput.name = 'customSource';
+                        customSourceInput.id = 'customSource';
+                        document.getElementById('incomeForm').appendChild(customSourceInput);
+                    }
+                    customSourceInput.value = customSource;
                 }
             }
         });
@@ -344,6 +347,31 @@
         document.getElementById('amount').addEventListener('blur', function() {
             if (this.value) {
                 this.value = parseFloat(this.value).toFixed(2);
+            }
+        });
+
+        // Client-side validation before form submission
+        document.getElementById('incomeForm').addEventListener('submit', function(e) {
+            const title = document.getElementById('title').value.trim();
+            const amount = document.getElementById('amount').value;
+            const receivedDate = document.getElementById('received_date').value;
+            
+            if (!title) {
+                alert('Please enter an income title');
+                e.preventDefault();
+                return;
+            }
+            
+            if (!amount || parseFloat(amount) <= 0) {
+                alert('Please enter a valid amount greater than 0');
+                e.preventDefault();
+                return;
+            }
+            
+            if (!receivedDate) {
+                alert('Please select a received date');
+                e.preventDefault();
+                return;
             }
         });
     </script>
