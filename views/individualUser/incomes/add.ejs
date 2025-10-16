@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Income - FinMate</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .card {
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            border: 1px solid rgba(0, 0, 0, 0.125);
+        }
+        .form-section {
+            margin-bottom: 2rem;
+        }
+        .section-title {
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+            color: #007bff;
+        }
+        .btn-back {
+            background-color: #6c757d;
+            border-color: #6c757d;
+            color: white;
+        }
+        .btn-back:hover {
+            background-color: #5a6268;
+            border-color: #545b62;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <%- include('../../partials/sidebar') %>
+
+            <!-- Main Content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h1 class="h3 mb-1">Add New Income</h1>
+                        <p class="text-muted">Record a new income transaction</p>
+                    </div>
+                    <a href="/incomes" class="btn btn-back">
+                        <i class="fas fa-arrow-left"></i> Back to Incomes
+                    </a>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">Income Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="incomeForm">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="title" class="form-label">Income Title *</label>
+                                                <input type="text" class="form-control" id="title" name="title" required 
+                                                       placeholder="e.g., Salary, Freelance Work, Bonus">
+                                                <div class="form-text">A descriptive name for this income</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="amount" class="form-label">Amount *</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text">$</span>
+                                                    <input type="number" class="form-control" id="amount" name="amount" 
+                                                           step="0.01" min="0.01" required placeholder="0.00">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="source" class="form-label">Income Source</label>
+                                                <select class="form-select" id="source" name="source">
+                                                    <option value="">Select Source</option>
+                                                    <option value="Salary">Salary</option>
+                                                    <option value="Freelance">Freelance Work</option>
+                                                    <option value="Business">Business Income</option>
+                                                    <option value="Investment">Investment</option>
+                                                    <option value="Rental">Rental Income</option>
+                                                    <option value="Bonus">Bonus</option>
+                                                    <option value="Commission">Commission</option>
+                                                    <option value="Other">Other</option>
+                                                </select>
+                                                <div class="form-text">Where did this income come from?</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="category" class="form-label">Category</label>
+                                                <select class="form-select" id="category" name="category">
+                                                    <option value="">Select Category</option>
+                                                    <option value="Regular Income">Regular Income</option>
+                                                    <option value="One-time Payment">One-time Payment</option>
+                                                    <option value="Passive Income">Passive Income</option>
+                                                    <option value="Investment Return">Investment Return</option>
+                                                    <option value="Gift">Gift</option>
+                                                    <option value="Refund">Refund</option>
+                                                    <option value="Other">Other</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="description" class="form-label">Description</label>
+                                        <textarea class="form-control" id="description" name="description" 
+                                                  rows="3" placeholder="Additional details about this income..."></textarea>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="received_date" class="form-label">Received Date *</label>
+                                                <input type="date" class="form-control" id="received_date" name="received_date" required>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="status" class="form-label">Status</label>
+                                                <select class="form-select" id="status" name="status">
+                                                    <option value="cleared">Cleared</option>
+                                                    <option value="pending">Pending</option>
+                                                    <option value="cancelled">Cancelled</option>
+                                                </select>
+                                                <div class="form-text">
+                                                    <span class="text-success">Cleared</span> - Income has been received<br>
+                                                    <span class="text-warning">Pending</span> - Expected but not yet received<br>
+                                                    <span class="text-danger">Cancelled</span> - Income was cancelled
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="team_id" class="form-label">Team (Optional)</label>
+                                        <select class="form-select" id="team_id" name="team_id">
+                                            <option value="">Personal Income</option>
+                                            <!-- Teams will be populated dynamically -->
+                                        </select>
+                                        <div class="form-text">Assign this income to a team if applicable</div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <!-- Quick Stats -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">Quick Stats</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <small class="text-muted">This Month's Income</small>
+                                    <h5 id="monthlyIncome">$0.00</h5>
+                                </div>
+                                <div class="mb-3">
+                                    <small class="text-muted">Last Income</small>
+                                    <h6 id="lastIncome">No records</h6>
+                                </div>
+                                <div>
+                                    <small class="text-muted">Income Sources</small>
+                                    <div id="incomeSources" class="mt-1">
+                                        <!-- Will be populated dynamically -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-grid gap-2">
+                                    <button type="button" class="btn btn-primary btn-lg" onclick="saveIncome()">
+                                        <i class="fas fa-save"></i> Save Income
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary" onclick="saveAndAddAnother()">
+                                        <i class="fas fa-plus-circle"></i> Save & Add Another
+                                    </button>
+                                    <a href="/incomes" class="btn btn-outline-danger">
+                                        <i class="fas fa-times"></i> Cancel
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal fade" id="successModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">Success!</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="successMessage">Income has been added successfully!</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <a href="/incomes" class="btn btn-primary">View All Incomes</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Set default date to today
+        document.getElementById('received_date').valueAsDate = new Date();
+
+        // Load teams and stats
+        document.addEventListener('DOMContentLoaded', function() {
+            loadTeams();
+            loadQuickStats();
+        });
+
+        async function loadTeams() {
+            try {
+                const response = await fetch('/api/teams'); // Adjust endpoint as needed
+                const result = await response.json();
+                
+                if (result.success) {
+                    const teamSelect = document.getElementById('team_id');
+                    result.data.forEach(team => {
+                        const option = document.createElement('option');
+                        option.value = team.id;
+                        option.textContent = team.name;
+                        teamSelect.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading teams:', error);
+            }
+        }
+
+        async function loadQuickStats() {
+            try {
+                const response = await fetch('/api/incomes/stats/summary');
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Update monthly income
+                    const currentMonth = new Date().getMonth() + 1;
+                    const currentYear = new Date().getFullYear();
+                    const monthlyData = result.data.monthlyBreakdown.find(month => 
+                        month.month === currentMonth && month.year === currentYear
+                    );
+                    
+                    if (monthlyData) {
+                        document.getElementById('monthlyIncome').textContent = `$${parseFloat(monthlyData.total_amount).toFixed(2)}`;
+                    }
+
+                    // Update last income
+                    const lastIncomeResponse = await fetch('/api/incomes?limit=1');
+                    const lastIncomeResult = await lastIncomeResponse.json();
+                    
+                    if (lastIncomeResult.success && lastIncomeResult.data.length > 0) {
+                        const lastIncome = lastIncomeResult.data[0];
+                        document.getElementById('lastIncome').textContent = `${lastIncome.title} - $${parseFloat(lastIncome.amount).toFixed(2)}`;
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading quick stats:', error);
+            }
+        }
+
+        async function saveIncome(redirect = true) {
+            const form = document.getElementById('incomeForm');
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData);
+
+            // Validate required fields
+            if (!data.title || !data.amount || !data.received_date) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/incomes', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    if (redirect) {
+                        // Show success modal
+                        const modal = new bootstrap.Modal(document.getElementById('successModal'));
+                        document.getElementById('successMessage').textContent = result.message;
+                        modal.show();
+                    } else {
+                        // Reset form for adding another
+                        form.reset();
+                        document.getElementById('received_date').valueAsDate = new Date();
+                        alert('Income added successfully!');
+                    }
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error saving income:', error);
+                alert('Error saving income. Please try again.');
+            }
+        }
+
+        function saveAndAddAnother() {
+            saveIncome(false);
+        }
+
+        // Add some dynamic behavior
+        document.getElementById('source').addEventListener('change', function() {
+            if (this.value === 'Other') {
+                const customSource = prompt('Please specify the income source:');
+                if (customSource) {
+                    // You might want to handle this differently based on your needs
+                    console.log('Custom source:', customSource);
+                }
+            }
+        });
+
+        // Auto-format amount input
+        document.getElementById('amount').addEventListener('blur', function() {
+            if (this.value) {
+                this.value = parseFloat(this.value).toFixed(2);
+            }
+        });
+    </script>
+</body>
+</html>

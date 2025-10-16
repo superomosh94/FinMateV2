@@ -15,7 +15,7 @@ const authenticate = async (req, res, next) => {
 
     console.log('🔑 Token found, verifying...');
     const decoded = verifyToken(token);
-    console.log('✅ Token decoded, user ID:', decoded.userId);
+    // console.log('✅ Token decoded, user ID:', decoded.userId);
     
     // Get user with role information
     const [users] = await db.pool.execute(
@@ -26,7 +26,7 @@ const authenticate = async (req, res, next) => {
       [decoded.userId]
     );
 
-    console.log('📊 Database query result - users found:', users.length);
+    // console.log('📊 Database query result - users found:', users.length);
 
     if (users.length === 0) {
       console.log('❌ User not found or inactive, clearing token');
@@ -35,12 +35,12 @@ const authenticate = async (req, res, next) => {
     }
 
     req.user = users[0];
-    console.log('✅ User authenticated:', {
-      id: req.user.id,
-      email: req.user.email,
-      role_name: req.user.role_name,
-      is_active: req.user.is_active
-    });
+    // console.log('✅ User authenticated:', {
+    //   id: req.user.id,
+    //   email: req.user.email,
+    //   role_name: req.user.role_name,
+    //   is_active: req.user.is_active
+    // });
     
     next();
   } catch (error) {
@@ -53,11 +53,11 @@ const authenticate = async (req, res, next) => {
 
 const authorize = (allowedRoles = []) => {
   return (req, res, next) => {
-    console.log('🎯 Authorization check:', {
-      path: req.path,
-      userRole: req.user?.role_name,
-      allowedRoles: allowedRoles
-    });
+    // console.log('🎯 Authorization check:', {
+    //   path: req.path,
+    //   userRole: req.user?.role_name,
+    //   allowedRoles: allowedRoles
+    // });
 
     if (!req.user) {
       console.log('❌ No user in request for authorization');
@@ -75,18 +75,18 @@ const authorize = (allowedRoles = []) => {
       });
     }
 
-    console.log('✅ Authorization granted for role:', req.user.role_name);
+    // console.log('✅ Authorization granted for role:', req.user.role_name);
     next();
   };
 };
 
 const requireRole = (role) => {
-  console.log('🔧 requireRole created for:', role);
+  // console.log('🔧 requireRole created for:', role);
   return authorize([role]);
 };
 
 const requireAnyRole = (roles) => {
-  console.log('🔧 requireAnyRole created for:', roles);
+  // console.log('🔧 requireAnyRole created for:', roles);
   return authorize(roles);
 };
 

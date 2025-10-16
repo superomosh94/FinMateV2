@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Planned Purchase - FinMate</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .card {
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            border: 1px solid rgba(0, 0, 0, 0.125);
+        }
+        .cost-preview {
+            background-color: #f8f9fa;
+            border-radius: 0.375rem;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        .period-option {
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid #dee2e6;
+        }
+        .period-option:hover {
+            background-color: #f8f9fa;
+            border-color: #adb5bd;
+        }
+        .period-option.selected {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+        .period-option.selected .text-muted {
+            color: rgba(255, 255, 255, 0.8) !important;
+        }
+        .btn-back {
+            background-color: #6c757d;
+            border-color: #6c757d;
+            color: white;
+        }
+        .btn-back:hover {
+            background-color: #5a6268;
+            border-color: #545b62;
+        }
+        .period-input {
+            position: absolute;
+            opacity: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <%- include('../../partials/sidebar') %>
+
+            <!-- Main Content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h1 class="h3 mb-1">Add Planned Purchase</h1>
+                        <p class="text-muted">Plan your future purchases and track your spending goals</p>
+                    </div>
+                    <a href="/user/planned-purchases" class="btn btn-back">
+                        <i class="fas fa-arrow-left"></i> Back to Planned Purchases
+                    </a>
+                </div>
+
+                <!-- Flash Messages -->
+                <% if (error) { %>
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle"></i> <%= error %>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                <% } %>
+
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">Purchase Details</h5>
+                            </div>
+                            <div class="card-body">
+                                <form method="POST" action="/user/planned-purchases" id="purchaseForm">
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <div class="mb-3">
+                                                <label for="title" class="form-label">Item Name *</label>
+                                                <input type="text" class="form-control" id="title" name="title" required 
+                                                       value="<%= formData.title || '' %>"
+                                                       placeholder="e.g., New Laptop, Groceries, Vacation">
+                                                <div class="form-text">What do you plan to purchase?</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="mb-3">
+                                                <label for="category" class="form-label">Category</label>
+                                                <select class="form-select" id="category" name="category">
+                                                    <option value="">Select Category</option>
+                                                    <option value="Electronics" <%= formData.category === 'Electronics' ? 'selected' : '' %>>Electronics</option>
+                                                    <option value="Clothing" <%= formData.category === 'Clothing' ? 'selected' : '' %>>Clothing</option>
+                                                    <option value="Food" <%= formData.category === 'Food' ? 'selected' : '' %>>Food & Dining</option>
+                                                    <option value="Entertainment" <%= formData.category === 'Entertainment' ? 'selected' : '' %>>Entertainment</option>
+                                                    <option value="Transportation" <%= formData.category === 'Transportation' ? 'selected' : '' %>>Transportation</option>
+                                                    <option value="Health" <%= formData.category === 'Health' ? 'selected' : '' %>>Health & Fitness</option>
+                                                    <option value="Education" <%= formData.category === 'Education' ? 'selected' : '' %>>Education</option>
+                                                    <option value="Home" <%= formData.category === 'Home' ? 'selected' : '' %>>Home & Garden</option>
+                                                    <option value="Travel" <%= formData.category === 'Travel' ? 'selected' : '' %>>Travel</option>
+                                                    <option value="Other" <%= formData.category === 'Other' ? 'selected' : '' %>>Other</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="description" class="form-label">Description</label>
+                                        <textarea class="form-control" id="description" name="description" 
+                                                  rows="3" placeholder="Details about this purchase, features you want, or reasons for buying..."><%= formData.description || '' %></textarea>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="planned_amount" class="form-label">Estimated Price *</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text">$</span>
+                                                    <input type="number" class="form-control" id="planned_amount" 
+                                                           name="planned_amount" step="0.01" min="0.01" required 
+                                                           value="<%= formData.planned_amount || '' %>"
+                                                           placeholder="0.00" oninput="updateTotalCost()">
+                                                </div>
+                                                <div class="form-text">Your estimated cost per item</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="quantity" class="form-label">Quantity</label>
+                                                <input type="number" class="form-control" id="quantity" name="quantity" 
+                                                       value="<%= formData.quantity || '1' %>" min="1" oninput="updateTotalCost()">
+                                                <div class="form-text">How many units do you need?</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Total Cost Preview -->
+                                    <div class="cost-preview">
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <strong>Unit Price:</strong>
+                                                <div id="unitPriceDisplay">$0.00</div>
+                                            </div>
+                                            <div class="col-6">
+                                                <strong>Total Cost:</strong>
+                                                <div id="totalCostDisplay" class="text-primary fw-bold">$0.00</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label class="form-label">Planning Period *</label>
+                                        <div class="row g-2" id="periodOptions">
+                                            <div class="col-md-4">
+                                                <label class="period-option card text-center p-3 <%= formData.period === 'week' ? 'selected border-primary' : '' %>">
+                                                    <input type="radio" name="period" value="week" class="period-input" <%= formData.period === 'week' ? 'checked' : '' %> required>
+                                                    <i class="fas fa-calendar-week fa-2x mb-2"></i>
+                                                    <h6>Weekly</h6>
+                                                    <small class="text-muted">Within 7 days</small>
+                                                </label>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="period-option card text-center p-3 <%= formData.period === 'month' ? 'selected border-primary' : '' %>">
+                                                    <input type="radio" name="period" value="month" class="period-input" <%= formData.period === 'month' ? 'checked' : '' %> required>
+                                                    <i class="fas fa-calendar-alt fa-2x mb-2"></i>
+                                                    <h6>Monthly</h6>
+                                                    <small class="text-muted">Within 30 days</small>
+                                                </label>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="period-option card text-center p-3 <%= formData.period === 'year' ? 'selected border-primary' : '' %>">
+                                                    <input type="radio" name="period" value="year" class="period-input" <%= formData.period === 'year' ? 'checked' : '' %> required>
+                                                    <i class="fas fa-calendar fa-2x mb-2"></i>
+                                                    <h6>Yearly</h6>
+                                                    <small class="text-muted">Long-term goal</small>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="form-text mt-2">Select when you plan to make this purchase</div>
+                                    </div>
+
+                                    <!-- Action Buttons inside the form -->
+                                    <div class="d-flex justify-content-between mt-4">
+                                        <a href="/user/planned-purchases" class="btn btn-outline-secondary">
+                                            <i class="fas fa-arrow-left"></i> Back to List
+                                        </a>
+                                        <div>
+                                            <button type="submit" class="btn btn-primary btn-lg">
+                                                <i class="fas fa-save"></i> Save Plan
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <!-- Budget Impact -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">Budget Impact</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <small class="text-muted">Total Planned This Month</small>
+                                    <h5 id="monthlyPlanned">$0.00</h5>
+                                </div>
+                                <div class="mb-3">
+                                    <small class="text-muted">Active Plans</small>
+                                    <h5 id="activePlans">0</h5>
+                                </div>
+                                <div>
+                                    <small class="text-muted">Most Common Category</small>
+                                    <h6 id="commonCategory">None</h6>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tips Card -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-info text-white">
+                                <h6 class="card-title mb-0"><i class="fas fa-lightbulb"></i> Planning Tips</h6>
+                            </div>
+                            <div class="card-body">
+                                <ul class="list-unstyled small">
+                                    <li class="mb-2">✅ Research prices before setting estimates</li>
+                                    <li class="mb-2">✅ Consider waiting for sales or discounts</li>
+                                    <li class="mb-2">✅ Set realistic timelines for purchases</li>
+                                    <li class="mb-2">✅ Prioritize needs over wants</li>
+                                    <li>✅ Review your planned purchases regularly</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Quick Help Card -->
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                <h6 class="card-title mb-0"><i class="fas fa-question-circle"></i> Quick Help</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="small">
+                                    <p><strong>Required Fields:</strong></p>
+                                    <ul class="list-unstyled">
+                                        <li>• Item Name</li>
+                                        <li>• Estimated Price</li>
+                                        <li>• Planning Period</li>
+                                    </ul>
+                                    <p class="mt-2"><strong>Optional Fields:</strong></p>
+                                    <ul class="list-unstyled">
+                                        <li>• Category</li>
+                                        <li>• Description</li>
+                                        <li>• Quantity (defaults to 1)</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateTotalCost();
+            initializePeriodSelection();
+        });
+
+        function initializePeriodSelection() {
+            // Add click handlers to all period options
+            document.querySelectorAll('.period-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    const radioInput = this.querySelector('input[type="radio"]');
+                    radioInput.checked = true;
+                    selectPeriod(radioInput.value);
+                });
+            });
+
+            // Check if any period is already selected (from formData)
+            const selectedRadio = document.querySelector('input[name="period"]:checked');
+            if (selectedRadio) {
+                selectPeriod(selectedRadio.value);
+            }
+        }
+
+        function selectPeriod(period) {
+            // Remove selected class from all options
+            document.querySelectorAll('.period-option').forEach(option => {
+                option.classList.remove('selected');
+                option.classList.remove('border-primary');
+                option.classList.add('border');
+            });
+            
+            // Add selected class to clicked option
+            const selectedOption = document.querySelector(`input[value="${period}"]`).parentElement;
+            selectedOption.classList.add('selected');
+            selectedOption.classList.add('border-primary');
+            selectedOption.classList.remove('border');
+            
+            console.log('Period selected:', period);
+        }
+
+        function updateTotalCost() {
+            const unitPrice = parseFloat(document.getElementById('planned_amount').value) || 0;
+            const quantity = parseInt(document.getElementById('quantity').value) || 1;
+            const totalCost = unitPrice * quantity;
+
+            document.getElementById('unitPriceDisplay').textContent = `$${unitPrice.toFixed(2)}`;
+            document.getElementById('totalCostDisplay').textContent = `$${totalCost.toFixed(2)}`;
+        }
+
+        // Auto-format amount inputs
+        document.getElementById('planned_amount').addEventListener('blur', function() {
+            if (this.value) {
+                this.value = parseFloat(this.value).toFixed(2);
+                updateTotalCost();
+            }
+        });
+
+        // Add category suggestion based on title
+        document.getElementById('title').addEventListener('blur', function() {
+            const title = this.value.toLowerCase();
+            const categorySelect = document.getElementById('category');
+            
+            if (categorySelect.value === '') {
+                if (title.includes('laptop') || title.includes('phone') || title.includes('tablet') || title.includes('computer')) {
+                    categorySelect.value = 'Electronics';
+                } else if (title.includes('shirt') || title.includes('dress') || title.includes('shoes') || title.includes('clothes')) {
+                    categorySelect.value = 'Clothing';
+                } else if (title.includes('food') || title.includes('grocery') || title.includes('restaurant') || title.includes('meal')) {
+                    categorySelect.value = 'Food';
+                } else if (title.includes('movie') || title.includes('game') || title.includes('concert') || title.includes('entertain')) {
+                    categorySelect.value = 'Entertainment';
+                }
+            }
+        });
+
+        // Form validation
+        document.getElementById('purchaseForm').addEventListener('submit', function(e) {
+            const title = document.getElementById('title').value.trim();
+            const amount = document.getElementById('planned_amount').value;
+            const period = document.querySelector('input[name="period"]:checked');
+
+            if (!title) {
+                e.preventDefault();
+                alert('Please enter an item name');
+                document.getElementById('title').focus();
+                return false;
+            }
+
+            if (!amount || amount <= 0) {
+                e.preventDefault();
+                alert('Please enter a valid estimated price');
+                document.getElementById('planned_amount').focus();
+                return false;
+            }
+
+            if (!period) {
+                e.preventDefault();
+                alert('Please select a planning period');
+                return false;
+            }
+
+            // Show loading state
+            const submitBtn = document.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+            
+            console.log('Form submitted with period:', period.value);
+        });
+
+        // Debug: Log period changes
+        document.querySelectorAll('input[name="period"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                console.log('Period changed to:', this.value);
+            });
+        });
+    </script>
+</body>
+</html>

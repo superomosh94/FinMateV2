@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Upcoming Expense - FinMate</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <%- include('../../partials/sidebar') %>
+
+            <!-- Main Content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">Edit Upcoming Expense</h1>
+                    <a href="/user/upcoming-expenses" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to List
+                    </a>
+                </div>
+
+                <!-- Flash Messages -->
+                <% if (success) { %>
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-check-circle"></i> <%= message %>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                <% } %>
+                <% if (error) { %>
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle"></i> <%= error %>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                <% } %>
+
+                <div class="row">
+                    <div class="col-md-8 mx-auto">
+                        <div class="card">
+                            <div class="card-body">
+                                <% if (typeof purchase !== 'undefined' && purchase && purchase.id) { %>
+                                    <form method="POST" action="/user/upcoming-expenses/update/<%= purchase.id %>">
+                                        <input type="hidden" name="_method" value="PUT">
+                                        
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label for="title" class="form-label">Title *</label>
+                                                <input type="text" class="form-control" id="title" name="title" 
+                                                       value="<%= purchase.title || '' %>" required>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="category" class="form-label">Category</label>
+                                                <select class="form-select" id="category" name="category">
+                                                    <option value="">Select Category</option>
+                                                    <option value="Food" <%= (purchase.category === 'Food') ? 'selected' : '' %>>Food</option>
+                                                    <option value="Transportation" <%= (purchase.category === 'Transportation') ? 'selected' : '' %>>Transportation</option>
+                                                    <option value="Entertainment" <%= (purchase.category === 'Entertainment') ? 'selected' : '' %>>Entertainment</option>
+                                                    <option value="Utilities" <%= (purchase.category === 'Utilities') ? 'selected' : '' %>>Utilities</option>
+                                                    <option value="Healthcare" <%= (purchase.category === 'Healthcare') ? 'selected' : '' %>>Healthcare</option>
+                                                    <option value="Electronics" <%= (purchase.category === 'Electronics') ? 'selected' : '' %>>Electronics</option>
+                                                    <option value="Clothing" <%= (purchase.category === 'Clothing') ? 'selected' : '' %>>Clothing</option>
+                                                    <option value="Education" <%= (purchase.category === 'Education') ? 'selected' : '' %>>Education</option>
+                                                    <option value="Other" <%= (purchase.category === 'Other') ? 'selected' : '' %>>Other</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="description" class="form-label">Description</label>
+                                            <textarea class="form-control" id="description" name="description" 
+                                                      rows="3"><%= purchase.description || '' %></textarea>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label for="planned_amount" class="form-label">Planned Amount *</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text">$</span>
+                                                    <input type="number" class="form-control" id="planned_amount" 
+                                                           name="planned_amount" step="0.01" min="0" 
+                                                           value="<%= parseFloat(purchase.planned_amount || 0).toFixed(2) %>" required>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="quantity" class="form-label">Quantity *</label>
+                                                <input type="number" class="form-control" id="quantity" name="quantity" 
+                                                       value="<%= purchase.quantity || 1 %>" min="1" required>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="period" class="form-label">Period *</label>
+                                            <select class="form-select" id="period" name="period" required>
+                                                <option value="week" <%= (purchase.period === 'week') ? 'selected' : '' %>>Weekly</option>
+                                                <option value="month" <%= (purchase.period === 'month') ? 'selected' : '' %>>Monthly</option>
+                                                <option value="year" <%= (purchase.period === 'year') ? 'selected' : '' %>>Yearly</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="status" name="status" 
+                                                       value="1" <%= (purchase.status) ? 'checked' : '' %>>
+                                                <label class="form-check-label" for="status">
+                                                    Mark as completed
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                            <a href="/user/upcoming-expenses" class="btn btn-secondary me-md-2">Cancel</a>
+                                            <button type="submit" class="btn btn-primary">Update Expense</button>
+                                        </div>
+                                    </form>
+                                <% } else { %>
+                                    <div class="alert alert-danger">
+                                        <i class="fas fa-exclamation-triangle"></i> 
+                                        Expense data not found or invalid. Please go back and try again.
+                                    </div>
+                                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                        <a href="/user/upcoming-expenses" class="btn btn-primary">Back to Expenses</a>
+                                    </div>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

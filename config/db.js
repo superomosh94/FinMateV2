@@ -30,8 +30,8 @@ const dbConfig = {
 };
 
 // Log which environment is active
-console.log(`🔧 Database Configuration: ${isProduction ? 'Production (Aiven Cloud)' : 'Development (Local)'}`);
-console.log(`📊 Database: ${dbConfig.database}`);
+// console.log(`🔧 Database Configuration: ${isProduction ? 'Production (Aiven Cloud)' : 'Development (Local)'}`);
+// console.log(`📊 Database: ${dbConfig.database}`);
 
 const pool = mysql.createPool(dbConfig);
 
@@ -61,7 +61,7 @@ const execute = async (sql, params = []) => {
 const testConnection = async () => {
   try {
     const connection = await pool.getConnection();
-    console.log('✅ Database connected successfully');
+    // console.log('✅ Database connected successfully');
     connection.release();
     return true;
   } catch (error) {
@@ -73,12 +73,12 @@ const testConnection = async () => {
 // Initialize database tables
 const initDatabase = async () => {
   try {
-    console.log('📦 Initializing database tables...');
+    // console.log('📦 Initializing database tables...');
 
     if (!isProduction) {
       try {
         await execute(`CREATE DATABASE IF NOT EXISTS \`${dbConfig.database}\``);
-        console.log(`✅ Database ${dbConfig.database} ready`);
+        // console.log(`✅ Database ${dbConfig.database} ready`);
       } catch {
         console.log('ℹ️ Database already exists or creation not needed');
       }
@@ -225,7 +225,7 @@ const initDatabase = async () => {
       (4,4),(4,5),(4,6),
       (5,3),(5,4),(5,5),(5,6)`);
 
-    console.log('✅ Database tables initialized successfully');
+    // console.log('✅ Database tables initialized successfully');
 
   } catch (error) {
     console.error('❌ Error initializing database:', error.message);
