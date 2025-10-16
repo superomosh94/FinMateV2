@@ -1411,6 +1411,427 @@ router.post('/notifications/clear-all', asyncHandler(async (req, res) => {
   }
 }));
 
+
+// ======== INCOME ROUTES ========
+
+// Common income sources and categories
+const INCOME_SOURCES = [
+    'salary', 'freelance', 'business', 'investment', 'rental', 
+    'dividends', 'interest', 'gift', 'refund', 'bonus', 'other'
+];
+
+const INCOME_CATEGORIES = [
+    'wages', 'bonus', 'commission', 'royalties', 'capital-gains',
+    'rent', 'interest-income', 'dividend-income', 'gift', 'other-income'
+];
+
+// GET User incomes with filtering and pagination
+router.get('/incomes', asyncHandler(async (req, res) => {
+    const userId = req.user.id;
+    const db = require('../config/db');
+
+    try {
+        const { 
+            page = 1, 
+            limit = 10, 
+            status, 
+            source, 
+            category, 
+            start_date, 
+            end_date,
+            sort_by = 'received_date',
+            sort_order = 'DESC'
+        } = req.query;
+
+        const offset = (page - 1) * limit;
+        
+        // Build WHERE clause
+        let whereClause = 'WHERE user_id = ?';
+        const queryParams = [userId];
+        
+        if (status) {
+            whereClause += ' AND status = ?';
+            queryParams.push(status);
+        }
+        if (source) {
+            whereClause += ' AND source = ?';
+            queryParams.push(source);
+        }
+        if (category) {
+            whereClause += ' AND category = ?';
+            queryParams.push(category);
+        }
+        if (start_date) {
+            whereClause += ' AND received_date >= ?';
+            queryParams.push(start_date);
+        }
+        if (end_date) {
+            whereClause += ' AND received_date <= ?';
+            queryParams.push(end_date);
+        }
+
+        // Get total count
+        const countResult = await db.execute(
+            `SELECT COUNT(*) AS total FROM incomes ${whereClause}`,
+            queryParams
+        );
+        const totalCount = getFirstRow(countResult)?.total || 0;
+
+        // Get incomes with pagination
+        const incomesResult = await db.execute(
+            `SELECT * FROM incomes 
+             ${whereClause} 
+             ORDER BY ${sort_by} ${sort_order} 
+             LIMIT ? OFFSET ?`,
+            [...queryParams, parseInt(limit), offset]
+        );
+
+        const incomes = handleMySQL2Result(incomesResult);
+
+        // Calculate summary statistics
+        const summaryResult = await db.execute(
+            `SELECT 
+                COUNT(*) as total_incomes,
+                COALESCE(SUM(amount), 0) as total_amount,
+                COALESCE(SUM(CASE WHEN status = 'pending' THEN amount ELSE 0 END), 0) as pending_amount,
+                COALESCE(SUM(CASE WHEN status = 'cleared' THEN amount ELSE 0 END), 0) as cleared_amount
+             FROM incomes 
+             WHERE user_id = ?`,
+            [userId]
+        );
+
+        const summary = getFirstRow(summaryResult);
+
+        // Get notification count
+        const notificationCount = await getNotificationCount(userId);
+
+        res.render('individualUser/incomes/list', {
+            title: 'My Income',
+            user: req.user,
+            currentPage: 'incomes',
+            incomes: incomes,
+            summary: summary,
+            filters: req.query,
+            pagination: {
+                current: parseInt(page),
+                pages: Math.ceil(totalCount / limit),
+                total: totalCount
+            },
+            sources: INCOME_SOURCES,
+            categories: INCOME_CATEGORIES,
+            notificationCount: notificationCount,
+            success: req.query.success || false,
+            message: req.query.message || '',
+            error: req.query.error || ''
+        });
+
+    } catch (error) {
+        console.error('❌ Incomes route error:', error);
+        
+        const notificationCount = await getNotificationCount(userId);
+        
+        res.render('individualUser/incomes/list', {
+            title: 'My Income',
+            user: req.user,
+            currentPage: 'incomes',
+            incomes: [],
+            summary: { total_incomes: 0, total_amount: 0, pending_amount: 0, cleared_amount: 0 },
+            filters: {},
+            pagination: { current: 1, pages: 1, total: 0 },
+            sources: INCOME_SOURCES,
+            categories: INCOME_CATEGORIES,
+            notificationCount: notificationCount,
+            error: 'Unable to load income data'
+        });
+    }
+}));
+
+// GET Add Income page
+router.get('/incomes/add', asyncHandler(async (req, res) => {
+    const userId = req.user.id;
+    const db = require('../config/db');
+
+    try {
+        const notificationCount = await getNotificationCount(userId);
+
+        res.render('individualUser/incomes/add', {
+            title: 'Add Income',
+            user: req.user,
+            currentPage: 'incomes',
+            formData: {},
+            sources: INCOME_SOURCES,
+            categories: INCOME_CATEGORIES,
+            notificationCount: notificationCount,
+            error: req.query.error || ''
+        });
+
+    } catch (error) {
+        console.error('❌ Add income page error:', error);
+        res.redirect('/user/incomes?error=Failed to load add income page');
+    }
+}));
+
+// POST Add Income
+router.post('/incomes/add', asyncHandler(async (req, res) => {
+    const userId = req.user.id;
+    const { title, amount, description, source, category, received_date, status } = req.body;
+
+    console.log('📝 Add income request:', {
+        userId,
+        title,
+        amount,
+        source,
+        category,
+        received_date,
+        status
+    });
+
+    try {
+        const db = require('../config/db');
+        
+        const result = await db.execute(
+            `INSERT INTO incomes (user_id, title, amount, description, source, category, received_date, status)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+                userId, 
+                title, 
+                parseFloat(amount), 
+                description || null, 
+                source || null, 
+                category || null, 
+                received_date || new Date().toISOString().split('T')[0],
+                status || 'cleared'
+            ]
+        );
+
+        if (result.affectedRows > 0) {
+            console.log('🎉 Income created successfully');
+            return res.redirect('/user/incomes?success=true&message=Income added successfully');
+        } else {
+            throw new Error('No rows were affected - income not created');
+        }
+        
+    } catch (error) {
+        console.error('❌ Add income error:', error);
+        
+        let errorMessage = 'Failed to add income';
+        if (error.code === 'ER_DUP_ENTRY') {
+            errorMessage = 'An income with this title already exists';
+        } else if (error.sqlMessage) {
+            errorMessage = `Database error: ${error.sqlMessage}`;
+        }
+
+        const notificationCount = await getNotificationCount(userId);
+
+        res.render('individualUser/incomes/add', {
+            title: 'Add Income',
+            user: req.user,
+            currentPage: 'incomes',
+            formData: req.body,
+            sources: INCOME_SOURCES,
+            categories: INCOME_CATEGORIES,
+            notificationCount: notificationCount,
+            error: errorMessage
+        });
+    }
+}));
+
+// GET Edit Income page
+router.get('/incomes/edit/:id', asyncHandler(async (req, res) => {
+    const incomeId = req.params.id;
+    const userId = req.user.id;
+
+    console.log('🔍 Fetching income for edit:', { incomeId, userId });
+
+    try {
+        const db = require('../config/db');
+        
+        const incomesResult = await db.execute(
+            `SELECT * FROM incomes WHERE id = ? AND user_id = ?`,
+            [incomeId, userId]
+        );
+
+        const incomeData = handleMySQL2Result(incomesResult);
+
+        if (incomeData.length === 0) {
+            console.log('❌ Income not found');
+            return res.redirect('/user/incomes?error=Income not found');
+        }
+
+        const notificationCount = await getNotificationCount(userId);
+
+        res.render('individualUser/incomes/edit', {
+            title: 'Edit Income',
+            user: req.user,
+            currentPage: 'incomes',
+            income: incomeData[0],
+            sources: INCOME_SOURCES,
+            categories: INCOME_CATEGORIES,
+            notificationCount: notificationCount,
+            error: req.query.error || ''
+        });
+
+    } catch (error) {
+        console.error('❌ Edit income error:', error);
+        res.redirect('/user/incomes?error=Failed to load income');
+    }
+}));
+
+// POST Update Income
+router.post('/incomes/edit/:id', asyncHandler(async (req, res) => {
+    const incomeId = req.params.id;
+    const userId = req.user.id;
+    const { title, amount, description, source, category, received_date, status } = req.body;
+
+    console.log('📝 Edit income request:', {
+        incomeId,
+        userId,
+        title,
+        amount,
+        source,
+        category,
+        received_date,
+        status
+    });
+
+    try {
+        const db = require('../config/db');
+        
+        const result = await db.execute(
+            `UPDATE incomes 
+             SET title = ?, amount = ?, description = ?, source = ?, category = ?, 
+                 received_date = ?, status = ?, updated_at = NOW()
+             WHERE id = ? AND user_id = ?`,
+            [
+                title, 
+                parseFloat(amount), 
+                description || null, 
+                source || null, 
+                category || null, 
+                received_date,
+                status,
+                incomeId, 
+                userId
+            ]
+        );
+
+        if (result.affectedRows > 0) {
+            console.log('🎉 Income updated successfully');
+            return res.redirect('/user/incomes?success=true&message=Income updated successfully');
+        } else {
+            throw new Error('Income not found or no changes made');
+        }
+        
+    } catch (error) {
+        console.error('❌ Update income error:', error);
+        res.redirect(`/user/incomes/edit/${incomeId}?error=Failed to update income: ${error.message}`);
+    }
+}));
+
+// POST Delete Income
+router.post('/incomes/delete/:id', asyncHandler(async (req, res) => {
+    const incomeId = req.params.id;
+    const userId = req.user.id;
+
+    console.log('🗑️ Delete income:', { incomeId, userId });
+
+    try {
+        const db = require('../config/db');
+        
+        const result = await db.execute(
+            `DELETE FROM incomes WHERE id = ? AND user_id = ?`,
+            [incomeId, userId]
+        );
+
+        if (result.affectedRows > 0) {
+            console.log('🎉 Income deleted successfully');
+            return res.redirect('/user/incomes?success=true&message=Income deleted successfully');
+        }
+
+        throw new Error('Income not deleted');
+        
+    } catch (error) {
+        console.error('❌ Delete income error:', error);
+        res.redirect('/user/incomes?error=Failed to delete income');
+    }
+}));
+
+// GET Income Summary/Reports
+router.get('/incomes/summary', asyncHandler(async (req, res) => {
+    const userId = req.user.id;
+    const db = require('../config/db');
+
+    try {
+        // Get monthly income summary
+        const monthlySummary = await db.execute(
+            `SELECT 
+                DATE_FORMAT(received_date, '%Y-%m') as month,
+                COUNT(*) as count,
+                COALESCE(SUM(amount), 0) as total_amount,
+                COALESCE(SUM(CASE WHEN status = 'cleared' THEN amount ELSE 0 END), 0) as cleared_amount
+             FROM incomes 
+             WHERE user_id = ? 
+             GROUP BY DATE_FORMAT(received_date, '%Y-%m')
+             ORDER BY month DESC
+             LIMIT 12`,
+            [userId]
+        );
+
+        // Get income by source
+        const sourceSummary = await db.execute(
+            `SELECT 
+                source,
+                COUNT(*) as count,
+                COALESCE(SUM(amount), 0) as total_amount
+             FROM incomes 
+             WHERE user_id = ? 
+             GROUP BY source
+             ORDER BY total_amount DESC`,
+            [userId]
+        );
+
+        // Get income by category
+        const categorySummary = await db.execute(
+            `SELECT 
+                category,
+                COUNT(*) as count,
+                COALESCE(SUM(amount), 0) as total_amount
+             FROM incomes 
+             WHERE user_id = ? 
+             GROUP BY category
+             ORDER BY total_amount DESC`,
+            [userId]
+        );
+
+        const notificationCount = await getNotificationCount(userId);
+
+        res.render('individualUser/incomes/summary', {
+            title: 'Income Summary',
+            user: req.user,
+            currentPage: 'incomes',
+            monthlySummary: handleMySQL2Result(monthlySummary),
+            sourceSummary: handleMySQL2Result(sourceSummary),
+            categorySummary: handleMySQL2Result(categorySummary),
+            notificationCount: notificationCount
+        });
+
+    } catch (error) {
+        console.error('❌ Income summary error:', error);
+        
+        const notificationCount = await getNotificationCount(userId);
+        
+        res.render('individualUser/incomes/summary', {
+            title: 'Income Summary',
+            user: req.user,
+            currentPage: 'incomes',
+            monthlySummary: [],
+            sourceSummary: [],
+            categorySummary: [],
+            notificationCount: notificationCount,
+            error: 'Unable to load income summary'
+        });
+    }
+}));
 // ======== DEBUG ROUTES ========
 
 // Debug route to check MySQL2 structure

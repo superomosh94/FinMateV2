@@ -298,14 +298,15 @@
                                                     </span>
                                                 </td>
                                                 <td>
-                                                    <small class="text-muted">
-                                                        <%= new Date(expense.date).toLocaleDateString('en-US', { 
-                                                            year: 'numeric', 
-                                                            month: 'short', 
-                                                            day: 'numeric' 
-                                                        }) %>
-                                                    </small>
-                                                </td>
+    <small class="text-muted">
+        <%= new Date(expense.date).toLocaleDateString('en-US', { 
+            weekday: 'short', 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric' 
+        }) %>
+    </small>
+</td>
                                                 <td>
                                                     <div class="btn-group btn-group-sm">
                                                         <a href="/user/expenses/edit/<%= expense.id %>" class="btn btn-outline-primary" title="Edit">
