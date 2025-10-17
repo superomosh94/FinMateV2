@@ -11,6 +11,24 @@ const getFirstRow = (result) => {
   return rows.length > 0 ? rows[0] : null;
 };
 
+// Get notification count helper
+const getNotificationCount = async (userId) => {
+  try {
+    const db = getDb();
+    const notificationRows = await db.execute(
+      `SELECT COUNT(*) AS notificationCount 
+       FROM notifications 
+       WHERE user_id = ? AND is_read = 0`,
+      [userId]
+    );
+    const notificationData = getFirstRow(notificationRows);
+    return parseInt(notificationData?.notificationCount, 10) || 0;
+  } catch (error) {
+    console.error('Error getting notification count:', error);
+    return 0;
+  }
+};
+
 // Create a new planned purchase
 const createPlannedPurchase = async (req, res) => {
   try {
@@ -18,18 +36,16 @@ const createPlannedPurchase = async (req, res) => {
     const userId = req.user.id;
     const { title, description, category, planned_amount, quantity, period } = req.body;
 
-    console.log('📝 Creating planned purchase:', {
-      userId,
-      title,
-      planned_amount,
-      period
-    });
-
     // Validate required fields
     if (!title || !planned_amount || !period) {
-      return res.status(400).json({
-        success: false,
-        message: 'Title, planned amount, and period are required fields'
+      const notificationCount = await getNotificationCount(userId);
+      return res.render('individualUser/upcoming-expenses/add', { // Changed to upcoming-expenses
+        title: 'Add Upcoming Expense',
+        user: req.user,
+        currentPage: 'upcoming-expenses', // Changed current page
+        formData: req.body,
+        notificationCount: notificationCount,
+        error: 'Title, planned amount, and period are required fields'
       });
     }
 
@@ -50,18 +66,8 @@ const createPlannedPurchase = async (req, res) => {
     );
 
     if (result && result.affectedRows > 0) {
-      console.log('🎉 Planned purchase created successfully, ID:', result.insertId);
-      
-      return res.status(201).json({
-        success: true,
-        message: 'Planned purchase created successfully',
-        data: {
-          id: result.insertId,
-          title,
-          planned_amount,
-          period
-        }
-      });
+      // Redirect to upcoming expenses list with success message
+      return res.redirect('/user/upcoming-expenses?success=true&message=Upcoming expense created successfully'); // Changed to upcoming-expenses
     } else {
       throw new Error('No rows were affected - planned purchase not created');
     }
@@ -69,21 +75,28 @@ const createPlannedPurchase = async (req, res) => {
   } catch (error) {
     console.error('❌ Create planned purchase error:', error);
     
-    let errorMessage = 'Failed to create planned purchase';
+    let errorMessage = 'Failed to create upcoming expense';
     if (error.code === 'ER_DUP_ENTRY') {
-      errorMessage = 'A planned purchase with this title already exists';
+      errorMessage = 'An upcoming expense with this title already exists';
     } else if (error.sqlMessage) {
       errorMessage = `Database error: ${error.sqlMessage}`;
     }
 
-    res.status(500).json({
-      success: false,
-      message: errorMessage
+    const notificationCount = await getNotificationCount(req.user.id);
+
+    // Render the add form with error
+    res.render('individualUser/upcoming-expenses/add', { // Changed to upcoming-expenses
+      title: 'Add Upcoming Expense',
+      user: req.user,
+      currentPage: 'upcoming-expenses', // Changed current page
+      formData: req.body,
+      notificationCount: notificationCount,
+      error: errorMessage
     });
   }
 };
 
-// Get all planned purchases for a user
+// Get all planned purchases for a user - Render HTML page
 const getPlannedPurchases = async (req, res) => {
   try {
     const db = getDb();
@@ -113,22 +126,57 @@ const getPlannedPurchases = async (req, res) => {
     const result = await db.execute(query, params);
     const purchases = handleMySQL2Result(result);
 
-    res.json({
-      success: true,
-      data: purchases,
-      count: purchases.length
+    // Calculate summary statistics
+    const totalPlanned = purchases.reduce((sum, purchase) => {
+      return sum + (parseFloat(purchase.planned_amount || 0) * parseInt(purchase.quantity || 1));
+    }, 0);
+
+    const pendingCount = purchases.filter(p => !p.status).length;
+    const completedCount = purchases.filter(p => p.status).length;
+
+    const notificationCount = await getNotificationCount(userId);
+
+    // Render the HTML page - CHANGED TO upcoming-expenses
+    res.render('individualUser/upcoming-expenses/list', { // Changed to upcoming-expenses
+      title: 'Upcoming Expenses', // Changed title
+      user: req.user,
+      currentPage: 'upcoming-expenses', // Changed current page
+      purchases: purchases,
+      totalPlanned: totalPlanned,
+      pendingCount: pendingCount,
+      completedCount: completedCount,
+      statusFilter: status || '',
+      periodFilter: period || '',
+      showCompleted: showCompleted === 'true',
+      notificationCount: notificationCount,
+      success: req.query.success || false,
+      message: req.query.message || '',
+      error: req.query.error || ''
     });
 
   } catch (error) {
     console.error('❌ Get planned purchases error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch planned purchases'
+    
+    const notificationCount = await getNotificationCount(req.user.id);
+    
+    res.render('individualUser/upcoming-expenses/list', { // Changed to upcoming-expenses
+      title: 'Upcoming Expenses', // Changed title
+      user: req.user,
+      currentPage: 'upcoming-expenses', // Changed current page
+      purchases: [],
+      totalPlanned: 0,
+      pendingCount: 0,
+      completedCount: 0,
+      statusFilter: '',
+      periodFilter: '',
+      showCompleted: true,
+      notificationCount: notificationCount,
+      error: 'Unable to load upcoming expenses' // Changed error message
     });
   }
 };
 
-// Get a single planned purchase by ID
+// Get a single planned purchase by ID - Render edit page
 const getPlannedPurchaseById = async (req, res) => {
   try {
     const db = getDb();
@@ -143,23 +191,26 @@ const getPlannedPurchaseById = async (req, res) => {
     const purchase = getFirstRow(result);
 
     if (!purchase) {
-      return res.status(404).json({
-        success: false,
-        message: 'Planned purchase not found'
-      });
+      return res.redirect('/user/upcoming-expenses?error=Upcoming expense not found'); // Changed to upcoming-expenses
     }
 
-    res.json({
-      success: true,
-      data: purchase
+    const notificationCount = await getNotificationCount(userId);
+
+    // Render the edit page - CHANGED TO upcoming-expenses
+    res.render('individualUser/upcoming-expenses/edit', { // Changed to upcoming-expenses
+      title: 'Edit Upcoming Expense', // Changed title
+      user: req.user,
+      currentPage: 'upcoming-expenses', // Changed current page
+      purchase: purchase,
+      notificationCount: notificationCount,
+      success: req.query.success || false,
+      message: req.query.message || '',
+      error: req.query.error || ''
     });
 
   } catch (error) {
     console.error('❌ Get planned purchase by ID error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch planned purchase'
-    });
+    res.redirect('/user/upcoming-expenses?error=Failed to load upcoming expense'); // Changed to upcoming-expenses
   }
 };
 
@@ -171,14 +222,6 @@ const updatePlannedPurchase = async (req, res) => {
     const userId = req.user.id;
     const { title, description, category, planned_amount, quantity, period, status } = req.body;
 
-    console.log('📝 Updating planned purchase:', {
-      purchaseId,
-      userId,
-      title,
-      planned_amount,
-      period
-    });
-
     // Check if purchase exists and belongs to user
     const checkResult = await db.execute(
       `SELECT id FROM planned_purchases WHERE id = ? AND user_id = ?`,
@@ -187,10 +230,7 @@ const updatePlannedPurchase = async (req, res) => {
 
     const existingPurchase = getFirstRow(checkResult);
     if (!existingPurchase) {
-      return res.status(404).json({
-        success: false,
-        message: 'Planned purchase not found'
-      });
+      return res.redirect('/user/upcoming-expenses?error=Upcoming expense not found'); // Changed to upcoming-expenses
     }
 
     // Update the purchase
@@ -213,12 +253,8 @@ const updatePlannedPurchase = async (req, res) => {
     );
 
     if (result && result.affectedRows > 0) {
-      console.log('✅ Planned purchase updated successfully');
-      
-      return res.json({
-        success: true,
-        message: 'Planned purchase updated successfully'
-      });
+      // Redirect to upcoming expenses list with success message
+      return res.redirect('/user/upcoming-expenses?success=true&message=Upcoming expense updated successfully'); // Changed to upcoming-expenses
     } else {
       throw new Error('Failed to update planned purchase');
     }
@@ -226,17 +262,14 @@ const updatePlannedPurchase = async (req, res) => {
   } catch (error) {
     console.error('❌ Update planned purchase error:', error);
     
-    let errorMessage = 'Failed to update planned purchase';
+    let errorMessage = 'Failed to update upcoming expense';
     if (error.code === 'ER_DUP_ENTRY') {
-      errorMessage = 'A planned purchase with this title already exists';
+      errorMessage = 'An upcoming expense with this title already exists';
     } else if (error.sqlMessage) {
       errorMessage = `Database error: ${error.sqlMessage}`;
     }
 
-    res.status(500).json({
-      success: false,
-      message: errorMessage
-    });
+    res.redirect(`/user/upcoming-expenses/edit/${req.params.id}?error=${encodeURIComponent(errorMessage)}`); // Changed to upcoming-expenses
   }
 };
 
@@ -247,33 +280,21 @@ const deletePlannedPurchase = async (req, res) => {
     const purchaseId = req.params.id;
     const userId = req.user.id;
 
-    console.log('🗑️ Deleting planned purchase:', { purchaseId, userId });
-
     const result = await db.execute(
       `DELETE FROM planned_purchases WHERE id = ? AND user_id = ?`,
       [purchaseId, userId]
     );
 
     if (result && result.affectedRows > 0) {
-      console.log('✅ Planned purchase deleted successfully');
-      
-      return res.json({
-        success: true,
-        message: 'Planned purchase deleted successfully'
-      });
+      // Redirect to upcoming expenses list with success message
+      return res.redirect('/user/upcoming-expenses?success=true&message=Upcoming expense deleted successfully'); // Changed to upcoming-expenses
     } else {
-      return res.status(404).json({
-        success: false,
-        message: 'Planned purchase not found'
-      });
+      return res.redirect('/user/upcoming-expenses?error=Upcoming expense not found'); // Changed to upcoming-expenses
     }
     
   } catch (error) {
     console.error('❌ Delete planned purchase error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to delete planned purchase'
-    });
+    res.redirect('/user/upcoming-expenses?error=Failed to delete upcoming expense'); // Changed to upcoming-expenses
   }
 };
 
@@ -284,8 +305,6 @@ const togglePurchaseStatus = async (req, res) => {
     const purchaseId = req.params.id;
     const userId = req.user.id;
 
-    console.log('🔄 Toggling purchase status:', { purchaseId, userId });
-
     // Get current status
     const currentResult = await db.execute(
       `SELECT status FROM planned_purchases WHERE id = ? AND user_id = ?`,
@@ -294,10 +313,7 @@ const togglePurchaseStatus = async (req, res) => {
 
     const currentData = getFirstRow(currentResult);
     if (!currentData) {
-      return res.status(404).json({
-        success: false,
-        message: 'Planned purchase not found'
-      });
+      return res.redirect('/user/upcoming-expenses?error=Upcoming expense not found'); // Changed to upcoming-expenses
     }
 
     const newStatus = currentData.status ? 0 : 1;
@@ -308,23 +324,16 @@ const togglePurchaseStatus = async (req, res) => {
     );
 
     if (result && result.affectedRows > 0) {
-      const message = newStatus ? 'Purchase marked as completed' : 'Purchase marked as pending';
-      console.log('✅ Purchase status toggled:', message);
-      
-      return res.json({
-        success: true,
-        message: message
-      });
+      const message = newStatus ? 'Upcoming expense marked as completed' : 'Upcoming expense marked as pending';
+      // Redirect to upcoming expenses list with success message
+      return res.redirect(`/user/upcoming-expenses?success=true&message=${encodeURIComponent(message)}`); // Changed to upcoming-expenses
     }
 
     throw new Error('Failed to update purchase status');
     
   } catch (error) {
     console.error('❌ Toggle purchase status error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to update purchase status'
-    });
+    res.redirect('/user/upcoming-expenses?error=Failed to update upcoming expense status'); // Changed to upcoming-expenses
   }
 };
 
