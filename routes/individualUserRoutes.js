@@ -1931,6 +1931,637 @@ router.post('/notifications/clear-all', asyncHandler(async (req, res) => {
     res.redirect('/user/notifications?error=Failed to clear all notifications');
   }
 }));
+// ======== FINANCIAL VISUALIZATION ROUTES ========
+
+// Helper functions for analytics
+const getFinancialAnalyticsData = async (userId, period = 'month', category = 'all', startDate, endDate) => {
+  try {
+    const db = require('../config/db');
+    
+    // Date range calculation
+    const dateRange = calculateDateRange(period, startDate, endDate);
+    
+    const results = await Promise.all([
+      getExpenseTrends(userId, dateRange),
+      getCategoryBreakdown(userId, dateRange),
+      getIncomeVsExpense(userId, dateRange),
+      getMonthlyComparison(userId),
+      getBudgetProgress(userId)
+    ]);
+
+    return {
+      expenseTrends: results[0],
+      categoryBreakdown: results[1],
+      incomeVsExpense: results[2],
+      monthlyComparison: results[3],
+      budgetProgress: results[4],
+      dateRange: dateRange
+    };
+
+  } catch (error) {
+    console.error('❌ getFinancialAnalyticsData error:', error);
+    // Return empty data structure instead of throwing
+    return {
+      expenseTrends: [],
+      categoryBreakdown: [],
+      incomeVsExpense: [],
+      monthlyComparison: [],
+      budgetProgress: []
+    };
+  }
+};
+
+// Calculate date range based on period
+const calculateDateRange = (period, startDate, endDate) => {
+  const now = new Date();
+  let start = new Date();
+  let end = new Date();
+
+  if (startDate && endDate) {
+    return { 
+      start: new Date(startDate), 
+      end: new Date(endDate) 
+    };
+  }
+
+  switch (period) {
+    case 'week':
+      start = new Date(now);
+      start.setDate(now.getDate() - 7);
+      break;
+    case 'month':
+      start = new Date(now.getFullYear(), now.getMonth(), 1);
+      end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      break;
+    case 'quarter':
+      start = new Date(now.getFullYear(), now.getMonth() - 3, 1);
+      break;
+    case 'year':
+      start = new Date(now.getFullYear(), 0, 1);
+      end = new Date(now.getFullYear(), 11, 31);
+      break;
+    default:
+      start = new Date(now.getFullYear(), now.getMonth(), 1);
+      end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  }
+
+  return { start, end };
+};
+
+// Get expense trends over time - FIXED QUERY
+const getExpenseTrends = async (userId, dateRange) => {
+  try {
+    const db = require('../config/db');
+    
+    const trends = await db.execute(
+      `SELECT 
+        DATE(date) as date,
+        COALESCE(SUM(amount), 0) as total_amount,
+        COUNT(*) as transaction_count
+       FROM expenses 
+       WHERE user_id = ? 
+         AND date BETWEEN ? AND ?
+       GROUP BY DATE(date)
+       ORDER BY date ASC`,
+      [userId, dateRange.start, dateRange.end]
+    );
+
+    console.log('📈 Expense trends data:', trends); // Debug log
+
+    // Use your existing helper function
+    const result = handleMySQL2Result(trends);
+    return result.map(item => ({
+      date: item.date ? new Date(item.date).toISOString().split('T')[0] : '',
+      amount: parseFloat(item.total_amount) || 0,
+      count: parseInt(item.transaction_count) || 0
+    }));
+  } catch (error) {
+    console.error('❌ getExpenseTrends error:', error);
+    return [];
+  }
+};
+
+// Get category breakdown - FIXED QUERY
+const getCategoryBreakdown = async (userId, dateRange) => {
+  try {
+    const db = require('../config/db');
+    
+    // First get total expenses for percentage calculation
+    const totalResult = await db.execute(
+      `SELECT COALESCE(SUM(amount), 0) as total 
+       FROM expenses 
+       WHERE user_id = ? AND date BETWEEN ? AND ?`,
+      [userId, dateRange.start, dateRange.end]
+    );
+    
+    const totalData = getFirstRow(totalResult);
+    const totalExpenses = parseFloat(totalData?.total) || 1; // Avoid division by zero
+
+    const breakdown = await db.execute(
+      `SELECT 
+        COALESCE(category, 'Uncategorized') as category,
+        COALESCE(SUM(amount), 0) as total_amount,
+        COUNT(*) as transaction_count
+       FROM expenses 
+       WHERE user_id = ? 
+         AND date BETWEEN ? AND ?
+       GROUP BY category
+       ORDER BY total_amount DESC`,
+      [userId, dateRange.start, dateRange.end]
+    );
+
+    console.log('🥧 Category breakdown data:', breakdown); // Debug log
+
+    const result = handleMySQL2Result(breakdown);
+    return result.map(item => ({
+      category: item.category || 'Uncategorized',
+      amount: parseFloat(item.total_amount) || 0,
+      count: parseInt(item.transaction_count) || 0,
+      percentage: totalExpenses > 0 ? (parseFloat(item.total_amount) / totalExpenses) * 100 : 0
+    }));
+  } catch (error) {
+    console.error('❌ getCategoryBreakdown error:', error);
+    return [];
+  }
+};
+
+// Get income vs expense comparison - FIXED QUERY
+const getIncomeVsExpense = async (userId, dateRange) => {
+  try {
+    const db = require('../config/db');
+    
+    const incomeResult = await db.execute(
+      `SELECT 
+        DATE_FORMAT(received_date, '%Y-%m') as month,
+        COALESCE(SUM(amount), 0) as total_income
+       FROM incomes 
+       WHERE user_id = ? 
+         AND received_date BETWEEN ? AND ?
+       GROUP BY DATE_FORMAT(received_date, '%Y-%m')
+       ORDER BY month ASC`,
+      [userId, dateRange.start, dateRange.end]
+    );
+
+    const expenseResult = await db.execute(
+      `SELECT 
+        DATE_FORMAT(date, '%Y-%m') as month,
+        COALESCE(SUM(amount), 0) as total_expenses
+       FROM expenses 
+       WHERE user_id = ? 
+         AND date BETWEEN ? AND ?
+       GROUP BY DATE_FORMAT(date, '%Y-%m')
+       ORDER BY month ASC`,
+      [userId, dateRange.start, dateRange.end]
+    );
+
+    console.log('⚖️ Income data:', incomeResult); // Debug log
+    console.log('⚖️ Expense data:', expenseResult); // Debug log
+
+    const incomeData = handleMySQL2Result(incomeResult);
+    const expenseData = handleMySQL2Result(expenseResult);
+
+    // Combine data by month
+    const monthlyData = {};
+    
+    incomeData.forEach(item => {
+      monthlyData[item.month] = {
+        month: item.month,
+        income: parseFloat(item.total_income) || 0,
+        expenses: 0
+      };
+    });
+
+    expenseData.forEach(item => {
+      if (monthlyData[item.month]) {
+        monthlyData[item.month].expenses = parseFloat(item.total_expenses) || 0;
+      } else {
+        monthlyData[item.month] = {
+          month: item.month,
+          income: 0,
+          expenses: parseFloat(item.total_expenses) || 0
+        };
+      }
+    });
+
+    return Object.values(monthlyData);
+  } catch (error) {
+    console.error('❌ getIncomeVsExpense error:', error);
+    return [];
+  }
+};
+
+// Get monthly comparison - FIXED QUERY
+const getMonthlyComparison = async (userId) => {
+  try {
+    const db = require('../config/db');
+    
+    const comparison = await db.execute(
+      `SELECT 
+        DATE_FORMAT(date, '%Y-%m') as month,
+        COALESCE(SUM(amount), 0) as total_expenses,
+        COUNT(*) as transaction_count
+       FROM expenses 
+       WHERE user_id = ? 
+         AND date >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
+       GROUP BY DATE_FORMAT(date, '%Y-%m')
+       ORDER BY month ASC
+       LIMIT 6`,
+      [userId]
+    );
+
+    console.log('📊 Monthly comparison data:', comparison); // Debug log
+
+    const result = handleMySQL2Result(comparison);
+    return result.map(item => ({
+      month: item.month,
+      expenses: parseFloat(item.total_expenses) || 0,
+      count: parseInt(item.transaction_count) || 0
+    }));
+  } catch (error) {
+    console.error('❌ getMonthlyComparison error:', error);
+    return [];
+  }
+};
+
+// Get budget progress - FIXED QUERY
+const getBudgetProgress = async (userId) => {
+  try {
+    const db = require('../config/db');
+    
+    const progress = await db.execute(
+      `SELECT 
+        b.category,
+        b.amount as budget_amount,
+        COALESCE((
+          SELECT SUM(e.amount) 
+          FROM expenses e 
+          WHERE e.user_id = b.user_id 
+            AND e.category = b.category 
+            AND e.date BETWEEN COALESCE(b.start_date, DATE_FORMAT(NOW(), '%Y-%m-01')) 
+            AND COALESCE(b.end_date, LAST_DAY(NOW()))
+        ), 0) as spent_amount
+       FROM budgets b
+       WHERE b.user_id = ?
+       HAVING budget_amount > 0
+       ORDER BY (spent_amount / budget_amount) DESC`,
+      [userId]
+    );
+
+    console.log('🎯 Budget progress data:', progress); // Debug log
+
+    const result = handleMySQL2Result(progress);
+    return result.map(item => ({
+      category: item.category,
+      budget: parseFloat(item.budget_amount) || 0,
+      spent: parseFloat(item.spent_amount) || 0,
+      percentage: parseFloat(item.budget_amount) > 0 ? 
+        (parseFloat(item.spent_amount) / parseFloat(item.budget_amount)) * 100 : 0,
+      remaining: (parseFloat(item.budget_amount) || 0) - (parseFloat(item.spent_amount) || 0)
+    }));
+  } catch (error) {
+    console.error('❌ getBudgetProgress error:', error);
+    return [];
+  }
+};
+
+// GET Financial Analytics Dashboard
+router.get('/analytics', asyncHandler(async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { period = 'month', category = 'all', start_date, end_date } = req.query;
+    const db = require('../config/db');
+
+    console.log('🔍 Analytics request for user:', userId, 'period:', period); // Debug log
+
+    // Get notification count
+    const notificationCount = await getNotificationCount(userId);
+
+    // Get financial data for charts
+    const financialData = await getFinancialAnalyticsData(userId, period, category, start_date, end_date);
+
+    console.log('📊 Final financial data structure:', { // Debug log
+      expenseTrendsCount: financialData.expenseTrends.length,
+      categoryBreakdownCount: financialData.categoryBreakdown.length,
+      incomeVsExpenseCount: financialData.incomeVsExpense.length,
+      budgetProgressCount: financialData.budgetProgress.length
+    });
+
+    res.render('individualUser/analytics/dashboard', {
+      title: 'Financial Analytics',
+      user: req.user,
+      currentPage: 'analytics',
+      notificationCount: notificationCount,
+      financialData: financialData,
+      period: period,
+      category: category,
+      start_date: start_date || '',
+      end_date: end_date || '',
+      success: req.query.success || false,
+      message: req.query.message || '',
+      error: req.query.error || ''
+    });
+
+  } catch (error) {
+    console.error('❌ Analytics route error:', error);
+    
+    // Fallback data
+    const fallbackData = {
+      expenseTrends: [],
+      categoryBreakdown: [],
+      incomeVsExpense: [],
+      monthlyComparison: [],
+      budgetProgress: []
+    };
+
+    res.render('individualUser/analytics/dashboard', {
+      title: 'Financial Analytics',
+      user: req.user,
+      currentPage: 'analytics',
+      notificationCount: 0,
+      financialData: fallbackData,
+      period: 'month',
+      category: 'all',
+      error: 'Unable to load analytics data: ' + error.message
+    });
+  }
+}));
+
+// GET Category-wise Analytics
+router.get('/analytics/categories', asyncHandler(async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { period = 'month' } = req.query;
+    const db = require('../config/db');
+
+    const notificationCount = await getNotificationCount(userId);
+    
+    // Get category analytics
+    const dateRange = calculateDateRange(period);
+    const categoryData = await getCategoryBreakdown(userId, dateRange);
+
+    res.render('individualUser/analytics/categories', {
+      title: 'Category Analytics',
+      user: req.user,
+      currentPage: 'analytics',
+      notificationCount: notificationCount,
+      categoryData: categoryData,
+      period: period
+    });
+
+  } catch (error) {
+    console.error('❌ Category analytics error:', error);
+    res.redirect('/user/analytics?error=Failed to load category analytics');
+  }
+}));
+
+// GET Trends Over Time
+router.get('/analytics/trends', asyncHandler(async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { type = 'expenses', months = '6' } = req.query;
+    const db = require('../config/db');
+
+    const notificationCount = await getNotificationCount(userId);
+    
+    // Get trend data
+    const table = type === 'income' ? 'incomes' : 'expenses';
+    const dateField = type === 'income' ? 'received_date' : 'date';
+    
+    const trends = await db.execute(
+      `SELECT 
+        DATE_FORMAT(${dateField}, '%Y-%m') as month,
+        SUM(amount) as total_amount,
+        COUNT(*) as transaction_count
+       FROM ${table} 
+       WHERE user_id = ? 
+         AND ${dateField} >= DATE_SUB(CURDATE(), INTERVAL ? MONTH)
+       GROUP BY DATE_FORMAT(${dateField}, '%Y-%m')
+       ORDER BY month ASC`,
+      [userId, parseInt(months)]
+    );
+
+    const trendData = handleMySQL2Result(trends).map(item => ({
+      month: item.month,
+      amount: parseFloat(item.total_amount) || 0,
+      count: parseInt(item.transaction_count) || 0
+    }));
+
+    res.render('individualUser/analytics/trends', {
+      title: 'Financial Trends',
+      user: req.user,
+      currentPage: 'analytics',
+      notificationCount: notificationCount,
+      trendData: trendData,
+      type: type,
+      months: months
+    });
+
+  } catch (error) {
+    console.error('❌ Trends analytics error:', error);
+    res.redirect('/user/analytics?error=Failed to load trend data');
+  }
+}));
+
+// TEMPORARY: Add test data route (remove after testing)
+router.get('/analytics/test-data', asyncHandler(async (req, res) => {
+  const userId = req.user.id;
+  const db = require('../config/db');
+  
+  try {
+    // Add some test expenses for the current month
+    const testExpenses = [
+      { amount: 150.00, category: 'Food', description: 'Groceries', date: new Date() },
+      { amount: 75.50, category: 'Transport', description: 'Gas', date: new Date() },
+      { amount: 200.00, category: 'Entertainment', description: 'Dinner', date: new Date() },
+      { amount: 45.00, category: 'Shopping', description: 'Clothes', date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000) },
+      { amount: 120.00, category: 'Food', description: 'Restaurant', date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000) },
+      { amount: 89.99, category: 'Utilities', description: 'Internet', date: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000) },
+      { amount: 65.00, category: 'Health', description: 'Medication', date: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000) }
+    ];
+
+    for (const expense of testExpenses) {
+      await db.execute(
+        `INSERT INTO expenses (user_id, amount, description, category, date, status) 
+         VALUES (?, ?, ?, ?, ?, 'approved')`,
+        [userId, expense.amount, expense.description, expense.category, expense.date]
+      );
+    }
+
+    // Add test incomes
+    const testIncomes = [
+      { amount: 2500.00, title: 'Salary', source: 'salary', received_date: new Date() },
+      { amount: 300.00, title: 'Freelance', source: 'freelance', received_date: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) }
+    ];
+
+    for (const income of testIncomes) {
+      await db.execute(
+        `INSERT INTO incomes (user_id, title, amount, source, received_date, status) 
+         VALUES (?, ?, ?, ?, ?, 'cleared')`,
+        [userId, income.title, income.amount, income.source, income.received_date]
+      );
+    }
+
+    // Add test budget
+    await db.execute(
+      `INSERT INTO budgets (user_id, category, amount, period) 
+       VALUES (?, 'Food', 500, 'month')`,
+      [userId]
+    );
+
+    await db.execute(
+      `INSERT INTO budgets (user_id, category, amount, period) 
+       VALUES (?, 'Entertainment', 300, 'month')`,
+      [userId]
+    );
+
+    res.redirect('/user/analytics?success=true&message=Test data added successfully');
+  } catch (error) {
+    console.error('Test data error:', error);
+    res.redirect('/user/analytics?error=Failed to add test data: ' + error.message);
+  }
+}));
+
+
+// API endpoint for financial trends data (for the line graph)
+router.post('/api/analytics/trends', asyncHandler(async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { startDate, endDate } = req.body;
+    
+    console.log('📈 API Trends request:', { userId, startDate, endDate }); // Debug log
+
+    // Validate date range
+    if (!startDate || !endDate) {
+      return res.status(400).json({ 
+        error: 'Start date and end date are required' 
+      });
+    }
+
+    // Calculate date range
+    const dateRange = {
+      start: new Date(startDate),
+      end: new Date(endDate)
+    };
+
+    // Get data for the line graph
+    const [expenseTrends, incomeTrends] = await Promise.all([
+      getExpenseTrends(userId, dateRange),
+      getIncomeTrends(userId, dateRange)
+    ]);
+
+    // Process data for the chart
+    const chartData = processChartData(expenseTrends, incomeTrends, dateRange);
+
+    console.log('📊 API Response data:', { // Debug log
+      labelsCount: chartData.labels.length,
+      incomeDataCount: chartData.income.length,
+      expenseDataCount: chartData.expenses.length
+    });
+
+    res.json(chartData);
+
+  } catch (error) {
+    console.error('❌ API Trends error:', error);
+    res.status(500).json({ 
+      error: 'Failed to fetch trends data',
+      details: error.message 
+    });
+  }
+}));
+
+// Helper function to get income trends
+const getIncomeTrends = async (userId, dateRange) => {
+  try {
+    const db = require('../config/db');
+    
+    const incomes = await db.execute(
+      `SELECT 
+        DATE(received_date) as date,
+        COALESCE(SUM(amount), 0) as total_amount,
+        COUNT(*) as transaction_count
+       FROM incomes 
+       WHERE user_id = ? 
+         AND received_date BETWEEN ? AND ?
+         AND status = 'cleared'
+       GROUP BY DATE(received_date)
+       ORDER BY date ASC`,
+      [userId, dateRange.start, dateRange.end]
+    );
+
+    console.log('💰 Income trends raw data:', incomes); // Debug log
+
+    const result = handleMySQL2Result(incomes);
+    return result.map(item => ({
+      date: item.date ? new Date(item.date).toISOString().split('T')[0] : '',
+      amount: parseFloat(item.total_amount) || 0,
+      count: parseInt(item.transaction_count) || 0
+    }));
+  } catch (error) {
+    console.error('❌ getIncomeTrends error:', error);
+    return [];
+  }
+};
+
+// Helper function to process chart data
+const processChartData = (expenseTrends, incomeTrends, dateRange) => {
+  // Create a map of all dates in the range
+  const allDates = new Map();
+  const currentDate = new Date(dateRange.start);
+  const endDate = new Date(dateRange.end);
+  
+  // Generate all dates in the range
+  while (currentDate <= endDate) {
+    const dateStr = currentDate.toISOString().split('T')[0];
+    allDates.set(dateStr, {
+      date: dateStr,
+      income: 0,
+      expenses: 0
+    });
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+
+  // Fill in expense data
+  expenseTrends.forEach(expense => {
+    if (allDates.has(expense.date)) {
+      allDates.get(expense.date).expenses = expense.amount;
+    }
+  });
+
+  // Fill in income data
+  incomeTrends.forEach(income => {
+    if (allDates.has(income.date)) {
+      allDates.get(income.date).income = income.amount;
+    }
+  });
+
+  // Convert to arrays and calculate savings
+  const sortedDates = Array.from(allDates.values()).sort((a, b) => 
+    new Date(a.date) - new Date(b.date)
+  );
+
+  const labels = sortedDates.map(item => {
+    const date = new Date(item.date);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  });
+
+  const incomeData = sortedDates.map(item => item.income);
+  const expenseData = sortedDates.map(item => item.expenses);
+  const savingsData = sortedDates.map(item => item.income - item.expenses);
+
+  console.log('📈 Processed chart data:', { // Debug log
+    totalDays: labels.length,
+    totalIncome: incomeData.reduce((a, b) => a + b, 0),
+    totalExpenses: expenseData.reduce((a, b) => a + b, 0),
+    totalSavings: savingsData.reduce((a, b) => a + b, 0)
+  });
+
+  return {
+    labels: labels,
+    income: incomeData,
+    expenses: expenseData,
+    savings: savingsData
+  };
+};
 
 // ======== MOUNT IMPORTED ROUTES ========
 // These will handle /user/incomes/* and /user/planned-purchases/* routes
