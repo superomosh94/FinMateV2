@@ -645,21 +645,20 @@ const INCOME_CATEGORIES = [
 ];
 
 // GET User incomes
-// Incomes list route - GET /user/incomes
-router.get('/incomes', asyncHandler(async (req, res) => {
-  const userId = req.user.id;
-  const db = require('../config/db');
-
+router.get('/incomes', async (req, res) => {
   try {
+    const userId = req.user.id;
+    const db = require('../config/db');
+
     console.log('💰 Fetching incomes for user:', userId);
     
     // Get query parameters for filtering
-    const { status, period, showCompleted = 'true' } = req.query;
+    const { status, period, showCompleted = 'true', success, message, error } = req.query;
     
     let query = `SELECT * FROM incomes WHERE user_id = ?`;
     const params = [userId];
     
-    // Apply filters (adjust based on your income table structure)
+    // Apply filters
     if (status !== undefined) {
       query += ` AND status = ?`;
       params.push(status);
@@ -671,23 +670,34 @@ router.get('/incomes', asyncHandler(async (req, res) => {
     }
     
     if (showCompleted === 'false') {
-      query += ` AND status = 0`;
+      query += ` AND status = 'pending'`;
     }
     
     query += ` ORDER BY created_at DESC`;
     
-    const [incomes] = await db.execute(query, params);
-    const incomesArray = Array.isArray(incomes) ? incomes : [incomes].filter(Boolean);
+    console.log('📝 Executing query:', query);
+    console.log('🔧 With params:', params);
+    
+    // EXECUTE QUERY - result is ALREADY the full array!
+    const result = await db.execute(query, params);
+    console.log('🔍 Full MySQL2 result:', result);
+    
+    // CRITICAL FIX: The result IS the array of incomes - use it directly!
+    const incomesArray = result;
+    console.log('✅ Using result directly as incomes array');
+    
+    console.log('🔍 Final incomes array length:', incomesArray.length);
+    console.log('📄 All income IDs:', incomesArray.map(inc => inc.id));
+    console.log('📄 All income titles:', incomesArray.map(inc => inc.title));
 
-    console.log('✅ Incomes loaded:', { count: incomesArray.length });
-
-    // Calculate summary statistics for incomes
+    // Calculate summary statistics
     const totalPlanned = incomesArray.reduce((sum, income) => {
       return sum + (parseFloat(income.amount || 0));
     }, 0);
 
-    const pendingCount = incomesArray.filter(i => !i.status).length;
-    const completedCount = incomesArray.filter(i => i.status).length;
+    // Fixed status filtering
+    const pendingCount = incomesArray.filter(i => i.status === 'pending').length;
+    const completedCount = incomesArray.filter(i => i.status === 'cleared').length;
 
     // Get notification count
     const [notificationRows] = await db.execute(
@@ -698,21 +708,29 @@ router.get('/incomes', asyncHandler(async (req, res) => {
     );
     const notificationCount = notificationRows && notificationRows[0] ? notificationRows[0].notificationCount : 0;
 
+    console.log('🚀 SENDING TO FRONTEND:', {
+      incomesCount: incomesArray.length,
+      totalAmount: totalPlanned,
+      pendingCount: pendingCount,
+      completedCount: completedCount
+    });
+
+    // Render with ALL required template variables
     res.render('individualUser/incomes/list', {
       title: 'Incomes',
       user: req.user,
       currentPage: 'incomes',
-      incomes: incomesArray,
-      totalPlanned: totalPlanned, // Make sure this is passed
+      incomes: incomesArray, // This should now contain ALL 7 incomes
+      totalPlanned: totalPlanned,
       pendingCount: pendingCount,
       completedCount: completedCount,
       statusFilter: status || '',
       periodFilter: period || '',
       showCompleted: showCompleted === 'true',
       notificationCount: notificationCount,
-      success: req.query.success || false,
-      message: req.query.message || '',
-      error: req.query.error || ''
+      success: success === 'true',
+      message: message || '',
+      error: error || ''
     });
 
   } catch (error) {
@@ -724,25 +742,36 @@ router.get('/incomes', asyncHandler(async (req, res) => {
       user: req.user,
       currentPage: 'incomes',
       incomes: [],
-      totalPlanned: 0, // Make sure this is passed even in error case
+      totalPlanned: 0,
       pendingCount: 0,
       completedCount: 0,
       statusFilter: '',
       periodFilter: '',
       showCompleted: true,
       notificationCount: 0,
+      success: false,
+      message: '',
       error: 'Unable to load incomes'
     });
   }
-}));
-
+});
 // GET Add Income page
-router.get('/incomes/add', asyncHandler(async (req, res) => {
-    const userId = req.user.id;
-    const db = require('../config/db');
-
+// GET Add Income page - SIMPLE VERSION
+router.get('/incomes/add', async (req, res) => {
     try {
-        const notificationCount = await getNotificationCount(userId);
+        const userId = req.user.id;
+        const db = require('../config/db');
+
+        console.log('📝 Loading add income page for user:', userId);
+
+        // Get notification count
+        const [notificationRows] = await db.execute(
+            `SELECT COUNT(*) AS notificationCount 
+             FROM notifications 
+             WHERE user_id = ? AND is_read = 0`,
+            [userId]
+        );
+        const notificationCount = notificationRows && notificationRows[0] ? notificationRows[0].notificationCount : 0;
 
         res.render('individualUser/incomes/add', {
             title: 'Add Income',
@@ -759,7 +788,7 @@ router.get('/incomes/add', asyncHandler(async (req, res) => {
         console.error('❌ Add income page error:', error);
         res.redirect('/user/incomes?error=Failed to load add income page');
     }
-}));
+});
 
 // POST Add Income
 router.post('/incomes/add', asyncHandler(async (req, res) => {
