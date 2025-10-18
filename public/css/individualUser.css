@@ -180,10 +180,15 @@
 @media (max-width: 768px) {
     .sidebar {
         position: fixed;
+        top: 0;
+        left: 0;
         width: 280px;
+        height: 100vh;
         transform: translateX(-100%);
         transition: transform 0.3s ease;
-        z-index: 1050;
+        z-index: 1040;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
     }
     
     .sidebar.show {
@@ -196,6 +201,29 @@
     
     .stat-card .h5 {
         font-size: 1.1rem;
+    }
+    
+    /* Sidebar overlay */
+    .sidebar-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 1030;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+    .sidebar-overlay.show {
+        opacity: 1;
+        visibility: visible;
+    }
+    
+    /* Prevent body scroll when sidebar is open */
+    body.sidebar-open {
+        overflow: hidden;
     }
 }
 

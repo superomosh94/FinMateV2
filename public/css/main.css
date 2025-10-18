@@ -81,8 +81,14 @@ body {
 @media (max-width: 768px) {
     .sidebar {
         position: fixed;
-        z-index: 1000;
-        width: 250px;
+        top: 0;
+        left: 0;
+        z-index: 1040;
+        width: 260px;
+        height: 100vh;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        background: inherit;
         transform: translateX(-100%);
         transition: transform 0.3s ease;
     }
@@ -93,6 +99,56 @@ body {
     
     .navbar-toggler {
         display: block;
+    }
+    
+    /* Ensure main content uses full width on mobile */
+    .main-content {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    
+    /* Make tables horizontally scrollable */
+    .table-responsive, .table {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Reduce header spacing on small screens */
+    .pt-3.pb-2.mb-3.border-bottom {
+        padding-top: 0.75rem !important;
+        padding-bottom: 0.5rem !important;
+        margin-bottom: 0.75rem !important;
+    }
+    
+    /* Stack toolbar buttons */
+    .btn-toolbar {
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    
+    /* Make cards and grids breathe */
+    .row > [class^="col-"] {
+        margin-bottom: 1rem;
+    }
+
+    /* Dim background when sidebar is open */
+    .sidebar-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 1030;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+    .sidebar-overlay.show {
+        opacity: 1;
+        visibility: visible;
     }
 }
 

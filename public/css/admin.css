@@ -103,9 +103,19 @@
 @media (max-width: 768px) {
     .sidebar {
         position: fixed;
-        width: 100%;
-        height: auto;
-        z-index: 1000;
+        top: 0;
+        left: 0;
+        width: 280px;
+        height: 100vh;
+        z-index: 1040;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .sidebar.show {
+        transform: translateX(0);
     }
     
     .table-responsive {
@@ -114,6 +124,45 @@
     
     .btn-group .btn {
         margin-bottom: 0.25rem;
+    }
+    
+    /* Improve grid spacing */
+    .row > [class^="col-"] {
+        margin-bottom: 1rem;
+    }
+    
+    /* Compact card headers */
+    .card-header {
+        padding: 0.5rem 0.75rem;
+    }
+    
+    /* Wrap long nav items */
+    .sidebar .nav-link {
+        white-space: normal;
+        line-height: 1.2;
+    }
+    
+    /* Sidebar overlay */
+    .sidebar-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 1030;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+    .sidebar-overlay.show {
+        opacity: 1;
+        visibility: visible;
+    }
+    
+    /* Prevent body scroll when sidebar is open */
+    body.sidebar-open {
+        overflow: hidden;
     }
 }
 
