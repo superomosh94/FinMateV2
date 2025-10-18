@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            margin: 0 auto;
+            border: 4px solid #fff;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .activity-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        .activity-card:hover {
+            transform: translateY(-5px);
+        }
+        .activity-item {
+            border-left: 4px solid #0d6efd;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .activity-item.expense {
+            border-left-color: #dc3545;
+        }
+        .activity-item.budget {
+            border-left-color: #198754;
+        }
+        .activity-item.savings {
+            border-left-color: #ffc107;
+        }
+        .stat-card {
+            transition: transform 0.2s;
+        }
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+        .filter-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .activity-type-badge {
+            font-size: 0.7rem;
+            padding: 4px 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <%- include('../../partials/admin-sidebar') -%>
+
+            <!-- Main content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4" style="margin-left: 280px;">
+                <!-- Header -->
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <div>
+                        <h1 class="h2">
+                            <i class="fas fa-history me-2"></i>
+                            User Activity & Analytics
+                        </h1>
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="/admin/dashboard">Dashboard</a></li>
+                                <li class="breadcrumb-item"><a href="/admin/users">User Management</a></li>
+                                <li class="breadcrumb-item"><a href="/admin/users/edit/<%= userData.id %>"><%= userData.username %></a></li>
+                                <li class="breadcrumb-item active">Activity</li>
+                            </ol>
+                        </nav>
+                    </div>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <a href="/admin/users/edit/<%= userData.id %>" class="btn btn-outline-secondary me-2">
+                            <i class="fas fa-arrow-left me-1"></i>
+                            Back to User
+                        </a>
+                        <button class="btn btn-outline-primary" onclick="exportActivity()">
+                            <i class="fas fa-download me-1"></i>
+                            Export
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Success/Error Messages -->
+                <% if (locals.success) { %>
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-check-circle me-2"></i>
+                        <%= locals.success %>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                <% } %>
+                
+                <% if (locals.error) { %>
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        <%= locals.error %>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                <% } %>
+
+                <div class="row">
+                    <!-- User Info Sidebar -->
+                    <div class="col-md-4 mb-4">
+                        <div class="card activity-card">
+                            <div class="card-body text-center">
+                                <div class="user-avatar mb-3">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <h4 class="card-title"><%= userData.first_name || 'No Name' %> <%= userData.last_name || '' %></h4>
+                                <p class="text-muted">@<%= userData.username %></p>
+                                
+                                <div class="d-flex justify-content-center mb-3">
+                                    <span class="badge <%= userData.is_active ? 'bg-success' : 'bg-danger' %> me-2">
+                                        <i class="fas fa-circle me-1"></i>
+                                        <%= userData.is_active ? 'Active' : 'Inactive' %>
+                                    </span>
+                                    <span class="badge bg-info">
+                                        <i class="fas fa-user-tag me-1"></i>
+                                        <%= userData.role_name || 'No Role' %>
+                                    </span>
+                                </div>
+
+                                <div class="row text-start mt-4">
+                                    <div class="col-12 mb-2">
+                                        <span class="text-muted">Email:</span>
+                                        <div class="fw-bold"><%= userData.email %></div>
+                                    </div>
+                                    <div class="col-12 mb-2">
+                                        <span class="text-muted">User ID:</span>
+                                        <div class="fw-bold">#<%= userData.id %></div>
+                                    </div>
+                                    <div class="col-12">
+                                        <span class="text-muted">Member Since:</span>
+                                        <div class="fw-bold"><%= new Date(userData.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Statistics -->
+                        <div class="card activity-card mt-4">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">
+                                    <i class="fas fa-chart-bar me-2"></i>
+                                    Quick Statistics
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row text-center">
+                                    <div class="col-6 mb-3">
+                                        <div class="text-primary stat-card">
+                                            <i class="fas fa-receipt fa-2x mb-2"></i>
+                                            <h5><%= statistics.expenses.total_count || 0 %></h5>
+                                            <small class="text-muted">Total Expenses</small>
+                                            <% if (statistics.expenses.total_amount > 0) { %>
+                                                <div class="small text-muted">$<%= parseFloat(statistics.expenses.total_amount).toFixed(2) %></div>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 mb-3">
+                                        <div class="text-success stat-card">
+                                            <i class="fas fa-wallet fa-2x mb-2"></i>
+                                            <h5><%= statistics.budgets.total_count || 0 %></h5>
+                                            <small class="text-muted">Total Budgets</small>
+                                            <% if (statistics.budgets.total_amount > 0) { %>
+                                                <div class="small text-muted">$<%= parseFloat(statistics.budgets.total_amount).toFixed(2) %></div>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="text-warning stat-card">
+                                            <i class="fas fa-clock fa-2x mb-2"></i>
+                                            <h5><%= statistics.expenses.pending_count || 0 %></h5>
+                                            <small class="text-muted">Pending</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="text-info stat-card">
+                                            <i class="fas fa-check-circle fa-2x mb-2"></i>
+                                            <h5><%= statistics.expenses.approved_count || 0 %></h5>
+                                            <small class="text-muted">Approved</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Activity Summary -->
+                        <div class="card activity-card mt-4">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">
+                                    <i class="fas fa-chart-pie me-2"></i>
+                                    Activity Summary
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row small">
+                                    <div class="col-12 mb-2">
+                                        <span class="text-muted">Total Activities:</span>
+                                        <span class="fw-bold float-end"><%= activities.length %></span>
+                                    </div>
+                                    <div class="col-12 mb-2">
+                                        <span class="text-muted">Expenses:</span>
+                                        <span class="fw-bold float-end"><%= activities.filter(a => a.activity_type === 'expense').length %></span>
+                                    </div>
+                                    <div class="col-12 mb-2">
+                                        <span class="text-muted">Budgets:</span>
+                                        <span class="fw-bold float-end"><%= activities.filter(a => a.activity_type === 'budget').length %></span>
+                                    </div>
+                                    <div class="col-12">
+                                        <span class="text-muted">Savings Goals:</span>
+                                        <span class="fw-bold float-end"><%= activities.filter(a => a.activity_type === 'savings_goal').length %></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Main Activity Content -->
+                    <div class="col-md-8">
+                        <!-- Filters -->
+                        <div class="filter-section">
+                            <h5 class="mb-3">
+                                <i class="fas fa-filter me-2"></i>
+                                Filter Activities
+                            </h5>
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Activity Type</label>
+                                    <select class="form-select" id="activityTypeFilter">
+                                        <option value="all">All Types</option>
+                                        <option value="expense">Expenses</option>
+                                        <option value="budget">Budgets</option>
+                                        <option value="savings_goal">Savings Goals</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Time Period</label>
+                                    <select class="form-select" id="timePeriodFilter">
+                                        <option value="all">All Time</option>
+                                        <option value="today">Today</option>
+                                        <option value="week">This Week</option>
+                                        <option value="month">This Month</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Status</label>
+                                    <select class="form-select" id="statusFilter">
+                                        <option value="all">All Status</option>
+                                        <option value="pending">Pending</option>
+                                        <option value="approved">Approved</option>
+                                        <option value="rejected">Rejected</option>
+                                        <option value="active">Active</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <button class="btn btn-primary" onclick="applyFilters()">
+                                    <i class="fas fa-search me-1"></i>
+                                    Apply Filters
+                                </button>
+                                <button class="btn btn-outline-secondary" onclick="clearFilters()">
+                                    <i class="fas fa-times me-1"></i>
+                                    Clear
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Activity List -->
+                        <div class="card activity-card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-list-alt me-2"></i>
+                                    Recent Activity Timeline
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="activityList">
+                                    <% if (activities && activities.length > 0) { %>
+                                        <% activities.forEach(activity => { %>
+                                        <div class="activity-item <%= activity.activity_type %>" 
+                                             data-type="<%= activity.activity_type %>"
+                                             data-status="<%= activity.status %>"
+                                             data-date="<%= activity.activity_date || activity.created_at %>">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div class="flex-grow-1">
+                                                    <div class="d-flex align-items-center mb-2">
+                                                        <span class="badge activity-type-badge bg-<%= getActivityTypeColor(activity.activity_type) %> me-2">
+                                                            <%= getActivityTypeLabel(activity.activity_type) %>
+                                                        </span>
+                                                        <strong><%= activity.description %></strong>
+                                                    </div>
+                                                    <% if (activity.amount) { %>
+                                                    <div class="text-success fw-bold mb-1">
+                                                        $<%= parseFloat(activity.amount).toFixed(2) %>
+                                                    </div>
+                                                    <% } %>
+                                                    <div class="text-muted small">
+                                                        <i class="fas fa-clock me-1"></i>
+                                                        <%= new Date(activity.activity_date || activity.created_at).toLocaleDateString('en-US', { 
+                                                            year: 'numeric', 
+                                                            month: 'short', 
+                                                            day: 'numeric',
+                                                            hour: '2-digit',
+                                                            minute: '2-digit'
+                                                        }) %>
+                                                    </div>
+                                                </div>
+                                                <div class="text-end">
+                                                    <span class="badge bg-<%= getStatusColor(activity.status) %>">
+                                                        <%= activity.status %>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <% }); %>
+                                    <% } else { %>
+                                        <div class="text-center py-4">
+                                            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                                            <h5 class="text-muted">No Activity Found</h5>
+                                            <p class="text-muted">This user hasn't performed any activities yet.</p>
+                                        </div>
+                                    <% } %>
+                                </div>
+
+                                <!-- Load More -->
+                                <div class="text-center mt-4">
+                                    <button class="btn btn-outline-primary" onclick="loadMoreActivities()">
+                                        <i class="fas fa-redo me-1"></i>
+                                        Load More Activities
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Activity Statistics -->
+                        <div class="card activity-card mt-4">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-chart-line me-2"></i>
+                                    Activity Statistics
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row text-center">
+                                    <div class="col-md-3 mb-3">
+                                        <div class="border rounded p-3">
+                                            <div class="text-primary">
+                                                <i class="fas fa-chart-bar fa-2x mb-2"></i>
+                                                <h4><%= activities.length %></h4>
+                                                <small class="text-muted">Total Activities</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <div class="border rounded p-3">
+                                            <div class="text-success">
+                                                <i class="fas fa-money-bill-wave fa-2x mb-2"></i>
+                                                <h4>$<%= calculateTotalAmount(activities) %></h4>
+                                                <small class="text-muted">Total Amount</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <div class="border rounded p-3">
+                                            <div class="text-warning">
+                                                <i class="fas fa-clock fa-2x mb-2"></i>
+                                                <h4><%= activities.filter(a => a.status === 'pending').length %></h4>
+                                                <small class="text-muted">Pending Items</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <div class="border rounded p-3">
+                                            <div class="text-info">
+                                                <i class="fas fa-calendar-alt fa-2x mb-2"></i>
+                                                <h4><%= getActivityDays(activities) %></h4>
+                                                <small class="text-muted">Active Days</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Helper functions for EJS template
+        function getActivityTypeColor(type) {
+            const typeMap = {
+                'expense': 'danger',
+                'budget': 'success',
+                'savings_goal': 'warning'
+            };
+            return typeMap[type] || 'secondary';
+        }
+
+        function getActivityTypeLabel(type) {
+            const labelMap = {
+                'expense': 'Expense',
+                'budget': 'Budget',
+                'savings_goal': 'Savings Goal'
+            };
+            return labelMap[type] || 'Activity';
+        }
+
+        function calculateTotalAmount(activities) {
+            const total = activities.reduce((sum, activity) => sum + (parseFloat(activity.amount) || 0), 0);
+            return total.toFixed(2);
+        }
+
+        function getActivityDays(activities) {
+            const uniqueDays = new Set(activities.map(activity => 
+                new Date(activity.activity_date || activity.created_at).toDateString()
+            ));
+            return uniqueDays.size;
+        }
+
+        // Client-side functionality
+        function applyFilters() {
+            const typeFilter = document.getElementById('activityTypeFilter').value;
+            const timeFilter = document.getElementById('timePeriodFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+
+            const activityItems = document.querySelectorAll('.activity-item');
+            
+            activityItems.forEach(item => {
+                let showItem = true;
+                
+                // Type filter
+                if (typeFilter !== 'all' && item.dataset.type !== typeFilter) {
+                    showItem = false;
+                }
+                
+                // Status filter
+                if (statusFilter !== 'all' && item.dataset.status !== statusFilter) {
+                    showItem = false;
+                }
+                
+                // Time filter (simplified client-side implementation)
+                if (timeFilter !== 'all') {
+                    const activityDate = new Date(item.dataset.date);
+                    const now = new Date();
+                    
+                    switch(timeFilter) {
+                        case 'today':
+                            if (activityDate.toDateString() !== now.toDateString()) {
+                                showItem = false;
+                            }
+                            break;
+                        case 'week':
+                            const weekAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
+                            if (activityDate < weekAgo) {
+                                showItem = false;
+                            }
+                            break;
+                        case 'month':
+                            const monthAgo = new Date(now - 30 * 24 * 60 * 60 * 1000);
+                            if (activityDate < monthAgo) {
+                                showItem = false;
+                            }
+                            break;
+                    }
+                }
+                
+                item.style.display = showItem ? 'block' : 'none';
+            });
+
+            // Show message if no results
+            const visibleItems = document.querySelectorAll('.activity-item[style="display: block"]');
+            if (visibleItems.length === 0) {
+                document.getElementById('activityList').innerHTML = `
+                    <div class="text-center py-4">
+                        <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No matching activities found</h5>
+                        <p class="text-muted">Try adjusting your filters.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function clearFilters() {
+            document.getElementById('activityTypeFilter').value = 'all';
+            document.getElementById('timePeriodFilter').value = 'all';
+            document.getElementById('statusFilter').value = 'all';
+            
+            const activityItems = document.querySelectorAll('.activity-item');
+            activityItems.forEach(item => {
+                item.style.display = 'block';
+            });
+        }
+
+        function loadMoreActivities() {
+            // This would typically make an API call to load more activities
+            showToast('Loading more activities...', 'info');
+            // Implementation for pagination would go here
+        }
+
+        function exportActivity() {
+            showToast('Exporting activity data...', 'info');
+            // Implementation for CSV/PDF export would go here
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast align-items-center text-white bg-${type === 'error' ? 'danger' : type} border-0`;
+            toast.setAttribute('role', 'alert');
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'exclamation-triangle' : 'info'}-circle me-2"></i>
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            `;
+            
+            let toastContainer = document.querySelector('.toast-container');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+                document.body.appendChild(toastContainer);
+            }
+            
+            toastContainer.appendChild(toast);
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+            
+            toast.addEventListener('hidden.bs.toast', () => {
+                toast.remove();
+            });
+        }
+
+        // Auto-dismiss alerts after 5 seconds
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => {
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                }
+            }, 5000);
+        });
+    </script>
+</body>
+</html>

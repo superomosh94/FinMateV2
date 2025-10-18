@@ -1507,7 +1507,36 @@ router.get('/users/activity/:id', async (req, res) => {
     res.json({ activities: [] });
   }
 });
+// Password Change Page - GET
+router.get('/users/change-password/:id', async (req, res) => {
+  try {
+    const [users] = await db.pool.execute(`
+      SELECT u.*, r.name as role_name, t.name as team_name
+      FROM users u 
+      LEFT JOIN roles r ON u.role_id = r.id 
+      LEFT JOIN teams t ON u.team_id = t.id 
+      WHERE u.id = ?`, 
+      [req.params.id]
+    );
+    
+    if (users.length === 0) {
+      return res.redirect('/admin/users?error=User not found');
+    }
 
+    const userData = users[0];
+
+    res.render('admin/users/change-password', {
+      title: 'Change Password - FinMate',
+      user: req.user,
+      userData: userData,
+      success: req.query.success,
+      error: req.query.error
+    });
+  } catch (error) {
+    console.error('Change password page error:', error);
+    res.redirect('/admin/users?error=Failed to load password change page');
+  }
+});
 // Test API route
 router.get('/test', (req, res) => {
   res.json({
@@ -1517,7 +1546,100 @@ router.get('/test', (req, res) => {
   });
 });
 
-module.exports = router;
+// User Activity Page - GET
+router.get('/users/activity/:id', async (req, res) => {
+  try {
+    const [users] = await db.pool.execute(`
+      SELECT u.*, r.name as role_name, t.name as team_name
+      FROM users u 
+      LEFT JOIN roles r ON u.role_id = r.id 
+      LEFT JOIN teams t ON u.team_id = t.id 
+      WHERE u.id = ?`, 
+      [req.params.id]
+    );
+    
+    if (users.length === 0) {
+      return res.redirect('/admin/users?error=User not found');
+    }
+
+    const userData = users[0];
+
+    // Get comprehensive activity data
+    const [recentActivities] = await db.pool.execute(`
+      (SELECT 
+        'expense' as activity_type,
+        description,
+        amount,
+        date as activity_date,
+        status,
+        created_at,
+        NULL as category
+       FROM expenses WHERE user_id = ?)
+      
+      UNION ALL
+      
+      (SELECT 
+        'budget' as activity_type,
+        category as description,
+        amount,
+        start_date as activity_date,
+        'active' as status,
+        created_at,
+        category
+       FROM budgets WHERE user_id = ?)
+      
+      UNION ALL
+      
+      (SELECT 
+        'savings_goal' as activity_type,
+        name as description,
+        target_amount as amount,
+        target_date as activity_date,
+        status,
+        created_at,
+        NULL as category
+       FROM savings_goals WHERE user_id = ?)
+      
+      ORDER BY created_at DESC 
+      LIMIT 50
+    `, [req.params.id, req.params.id, req.params.id]);
+
+    // Get financial statistics
+    const [expenseStats] = await db.pool.execute(`
+      SELECT 
+        COUNT(*) as total_count,
+        SUM(amount) as total_amount,
+        COUNT(CASE WHEN status = 'pending' THEN 1 END) as pending_count,
+        COUNT(CASE WHEN status = 'approved' THEN 1 END) as approved_count
+      FROM expenses 
+      WHERE user_id = ?
+    `, [req.params.id]);
+
+    const [budgetStats] = await db.pool.execute(`
+      SELECT 
+        COUNT(*) as total_count,
+        SUM(amount) as total_amount
+      FROM budgets 
+      WHERE user_id = ?
+    `, [req.params.id]);
+
+    res.render('admin/users/activity', {
+      title: 'User Activity - FinMate',
+      user: req.user,
+      userData: userData,
+      activities: recentActivities || [],
+      statistics: {
+        expenses: expenseStats[0] || {},
+        budgets: budgetStats[0] || {}
+      },
+      success: req.query.success,
+      error: req.query.error
+    });
+  } catch (error) {
+    console.error('User activity page error:', error);
+    res.redirect('/admin/users?error=Failed to load user activity');
+  }
+});
 
 // User activity API endpoint (optional)
 router.get('/users/activity/:id', async (req, res) => {
