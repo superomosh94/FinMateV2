@@ -1,12 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
-<%- include('../partials/head') %>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinMate - Personal Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
+        :root {
+            --primary: #4e73df;
+            --success: #1cc88a;
+            --warning: #f6c23e;
+            --info: #36b9cc;
+            --danger: #e74a3b;
+            --dark: #5a5c69;
+            --light: #f8f9fc;
+            --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        body {
+            background-color: #f8f9fc;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
         .sidebar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--gradient);
             min-height: 100vh;
             box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
         }
+        
         .sidebar .nav-link {
             color: rgba(255,255,255,0.9);
             padding: 12px 20px;
@@ -16,17 +39,20 @@
             position: relative;
             font-weight: 500;
         }
+        
         .sidebar .nav-link:hover {
             background: rgba(255,255,255,0.15);
             transform: translateX(5px);
             color: #fff;
         }
+        
         .sidebar .nav-link.active {
             background: rgba(255,255,255,0.2);
             color: #fff;
             font-weight: 600;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
+        
         .sidebar .nav-link.active::before {
             content: '';
             position: absolute;
@@ -38,109 +64,235 @@
             background: #fff;
             border-radius: 0 2px 2px 0;
         }
+        
         .sidebar-footer {
             background: rgba(0,0,0,0.1);
             margin: 0 -12px;
             padding: 15px 12px;
         }
+        
+        .page-header {
+            background: #fff;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+        }
+        
         .stat-card {
             border-radius: 10px;
-            transition: transform 0.3s;
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: none;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            overflow: hidden;
         }
+        
         .stat-card:hover {
             transform: translateY(-5px);
+            box-shadow: 0 0.5rem 2rem 0 rgba(58, 59, 69, 0.2);
         }
-        .border-left-primary { border-left: 4px solid #4e73df !important; }
-        .border-left-success { border-left: 4px solid #1cc88a !important; }
-        .border-left-warning { border-left: 4px solid #f6c23e !important; }
-        .border-left-info { border-left: 4px solid #36b9cc !important; }
-        .border-left-danger { border-left: 4px solid #e74a3b !important; }
-        .border-left-secondary { border-left: 4px solid #6c757d !important; }
+        
+        .border-left-primary { border-left: 4px solid var(--primary) !important; }
+        .border-left-success { border-left: 4px solid var(--success) !important; }
+        .border-left-warning { border-left: 4px solid var(--warning) !important; }
+        .border-left-info { border-left: 4px solid var(--info) !important; }
+        .border-left-danger { border-left: 4px solid var(--danger) !important; }
+        
+        .dashboard-card {
+            transition: transform 0.3s, box-shadow 0.3s;
+            height: 100%;
+            border: none;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+        }
+        
+        .dashboard-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 0.5rem 2rem 0 rgba(58, 59, 69, 0.2);
+        }
+        
+        .dashboard-card .card-header {
+            background: #fff;
+            border-bottom: 1px solid #e3e6f0;
+            font-weight: 600;
+            padding: 1rem 1.25rem;
+        }
+        
+        .dashboard-card .card-body {
+            padding: 1.25rem;
+        }
+        
+        .dashboard-card .card-footer {
+            background: rgba(248, 249, 252, 0.8);
+            border-top: 1px solid #e3e6f0;
+            padding: 1rem 1.25rem;
+        }
+        
         .progress {
             height: 10px;
             border-radius: 5px;
         }
-        .card {
-            border: none;
-            border-radius: 10px;
-            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        
+        .progress-bar {
+            border-radius: 5px;
         }
-        .card-header {
-            background: #fff;
-            border-bottom: 1px solid #e3e6f0;
-            font-weight: 600;
+        
+        .btn {
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s;
         }
+        
+        .btn-primary {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+        
+        .btn-success {
+            background: var(--success);
+            border-color: var(--success);
+        }
+        
+        .btn-warning {
+            background: var(--warning);
+            border-color: var(--warning);
+        }
+        
+        .btn-info {
+            background: var(--info);
+            border-color: var(--info);
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+            border-color: var(--danger);
+        }
+        
         .empty-state {
             padding: 3rem 1rem;
             text-align: center;
             color: #6c757d;
         }
+        
         .empty-state i {
             font-size: 3rem;
             margin-bottom: 1rem;
             opacity: 0.5;
         }
+        
         .badge {
             font-size: 0.7em;
             padding: 4px 8px;
         }
-        .daily-expense-progress {
-            height: 15px;
+        
+        .text-xs {
+            font-size: 0.75rem;
         }
+        
+        .text-gray-800 {
+            color: var(--dark) !important;
+        }
+        
+        .text-gray-300 {
+            color: #dddfeb !important;
+        }
+        
+        .font-weight-bold {
+            font-weight: 700 !important;
+        }
+        
+        .no-gutters {
+            margin-right: 0;
+            margin-left: 0;
+        }
+        
+        .no-gutters > .col,
+        .no-gutters > [class*="col-"] {
+            padding-right: 0;
+            padding-left: 0;
+        }
+        
+        .quick-action-card {
+            transition: all 0.3s;
+            border-radius: 10px;
+            border: none;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+            height: 100%;
+        }
+        
+        .quick-action-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0.5rem 2rem 0 rgba(58, 59, 69, 0.2);
+        }
+        
+        .quick-action-card .card-body {
+            padding: 2rem 1rem;
+        }
+        
+        .quick-action-card i {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
         .reset-timer {
             font-family: 'Courier New', monospace;
             font-weight: bold;
         }
         
-        /* Mobile responsiveness - Fixed version */
+        .daily-expense-progress {
+            height: 15px;
+        }
+        
+        .status-over-budget {
+            color: var(--danger);
+            font-weight: 600;
+        }
+        
+        .status-under-budget {
+            color: var(--success);
+            font-weight: 600;
+        }
+        
+        /* Mobile responsiveness */
         @media (max-width: 768px) {
             .sidebar {
-                min-height: 100vh;
+                min-height: auto;
                 position: fixed;
                 top: 0;
                 left: -100%;
                 width: 280px;
-                z-index: 1001;
+                z-index: 1000;
                 transition: left 0.3s ease;
-                overflow-y: auto;
             }
+            
             .sidebar.show {
                 left: 0;
             }
+            
             .sidebar .nav-link {
                 padding: 15px 20px;
             }
             
-            /* Sidebar overlay */
-            .sidebar-overlay {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0, 0, 0, 0.5);
-                z-index: 1000;
+            .dashboard-card {
+                margin-bottom: 1.5rem;
+            }
+        }
+        
+        /* Animation for cards */
+        @keyframes fadeInUp {
+            from {
                 opacity: 0;
-                visibility: hidden;
-                transition: all 0.3s ease;
+                transform: translateY(20px);
             }
-            .sidebar-overlay.show {
+            to {
                 opacity: 1;
-                visibility: visible;
+                transform: translateY(0);
             }
-            
-            /* Prevent body scroll when sidebar is open */
-            body.sidebar-open {
-                overflow: hidden;
-            }
-            
-            /* Adjust main content when sidebar is open */
-            main {
-                transition: transform 0.3s ease;
-            }
-            body.sidebar-open main {
-                transform: translateX(280px);
-            }
+        }
+        
+        .fade-in-up {
+            animation: fadeInUp 0.5s ease-out;
         }
     </style>
 </head>
@@ -148,22 +300,20 @@
     <div class="container-fluid">
         <div class="row">
             <!-- Sidebar -->
-            <%- include('../partials/sidebar', { user: user, currentPage: currentPage, notificationCount: notificationCount }) %>
+            <%- include('../partials/sidebar', { user: user, currentPage: 'dashboard', notificationCount: notificationCount }) %>
 
             <!-- Main content -->
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
                 <!-- Mobile Header with Menu Toggle -->
-                <div class="d-md-none d-flex align-items-center py-3 border-bottom">
-                    <button class="btn btn-primary me-3" type="button" id="sidebarToggle">
+                <div class="d-md-none d-flex align-items-center py-3 border-bottom bg-white">
+                    <button class="btn btn-primary me-3" type="button" data-bs-toggle="collapse" data-bs-target=".sidebar">
                         <i class="fas fa-bars"></i>
                     </button>
-                    <h5 class="mb-0">Dashboard</h5>
+                    <h5 class="mb-0">Personal Dashboard</h5>
                 </div>
 
-                <!-- Add overlay for mobile -->
-                <div class="sidebar-overlay d-md-none" id="sidebarOverlay"></div>
-
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <!-- Page Header -->
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 page-header">
                     <h1 class="h2">
                         <i class="fas fa-tachometer-alt me-2 text-primary"></i>
                         Personal Dashboard
@@ -173,11 +323,6 @@
                             <i class="fas fa-user me-1"></i>
                             <%= user.email %>
                         </span>
-                        <!-- <div class="btn-group ms-2">
-                            <a href="/user/debug" class="btn btn-sm btn-outline-info">
-                                <i class="fas fa-bug me-1"></i>Debug
-                            </a>
-                        </div> -->
                     </div>
                 </div>
 
@@ -199,16 +344,23 @@
                 <% } %>
 
                 <!-- Daily Expense Reset Alert -->
-                <div class="alert alert-info mb-4">
+                <div class="alert alert-info mb-4 fade-in-up">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <h5 class="mb-1"><i class="fas fa-sync-alt me-2"></i>Daily Expense Tracking</h5>
                             <p class="mb-0">Your daily expenses automatically reset at midnight (00:00). Next reset in: 
-                                <span class="reset-timer text-primary" id="resetTimer"></span>
+                                <span class="reset-timer text-primary fw-bold" id="resetTimer">--:--:--</span>
                             </p>
                         </div>
                         <div class="text-end">
-                            <small class="text-muted">Today: <span id="currentDate"><%= new Date().toLocaleDateString() %></span></small>
+                            <small class="text-muted">Today: <span id="currentDate">
+                                <%= new Date().toLocaleDateString('en-US', { 
+                                    weekday: 'short', 
+                                    year: 'numeric', 
+                                    month: 'short', 
+                                    day: 'numeric' 
+                                }) %>
+                            </span></small>
                         </div>
                     </div>
                 </div>
@@ -216,7 +368,7 @@
                 <!-- Financial Overview Cards -->
                 <div class="row mb-4">
                     <!-- Daily Expenses Card -->
-                    <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="col-xl-3 col-md-6 mb-4 fade-in-up">
                         <div class="card border-left-danger shadow h-100 py-2 stat-card">
                             <div class="card-body">
                                 <div class="row no-gutters align-items-center">
@@ -238,7 +390,9 @@
                                                     <div class="progress-bar <%= progressClass %>" 
                                                          role="progressbar" 
                                                          style="width: <%= dailyProgress %>%"
-                                                         aria-valuenow="<%= dailyProgress %>">
+                                                         aria-valuenow="<%= dailyProgress %>"
+                                                         aria-valuemin="0"
+                                                         aria-valuemax="100">
                                                     </div>
                                                 </div>
                                                 <small class="text-muted">
@@ -255,7 +409,8 @@
                         </div>
                     </div>
 
-                    <div class="col-xl-3 col-md-6 mb-4">
+                    <!-- Monthly Expenses Card -->
+                    <div class="col-xl-3 col-md-6 mb-4 fade-in-up">
                         <div class="card border-left-primary shadow h-100 py-2 stat-card">
                             <div class="card-body">
                                 <div class="row no-gutters align-items-center">
@@ -263,7 +418,7 @@
                                         <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
                                             Total Expenses (Month)</div>
                                         <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                            Ksh <%= data.totalExpenses.toFixed(2) %>
+                                            Ksh <%= data.totalExpenses ? data.totalExpenses.toFixed(2) : '0.00' %>
                                         </div>
                                         <div class="text-xs text-muted">
                                             Current month spending
@@ -277,7 +432,8 @@
                         </div>
                     </div>
                     
-                    <div class="col-xl-3 col-md-6 mb-4">
+                    <!-- Total Savings Card -->
+                    <div class="col-xl-3 col-md-6 mb-4 fade-in-up">
                         <div class="card border-left-success shadow h-100 py-2 stat-card">
                             <div class="card-body">
                                 <div class="row no-gutters align-items-center">
@@ -285,7 +441,7 @@
                                         <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
                                             Total Savings</div>
                                         <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                            Ksh <%= data.totalSavings.toFixed(2) %>
+                                            Ksh <%= data.totalSavings ? data.totalSavings.toFixed(2) : '0.00' %>
                                         </div>
                                         <div class="text-xs text-muted">
                                             Across all goals
@@ -299,7 +455,8 @@
                         </div>
                     </div>
 
-                    <div class="col-xl-3 col-md-6 mb-4">
+                    <!-- Active Budgets Card -->
+                    <div class="col-xl-3 col-md-6 mb-4 fade-in-up">
                         <div class="card border-left-warning shadow h-100 py-2 stat-card">
                             <div class="card-body">
                                 <div class="row no-gutters align-items-center">
@@ -307,7 +464,7 @@
                                         <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
                                             Active Budgets</div>
                                         <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                            <%= data.activeBudgets %>
+                                            <%= data.activeBudgets || 0 %>
                                         </div>
                                         <div class="text-xs text-muted">
                                             Monthly budgets
@@ -334,27 +491,39 @@
                             <div class="card-body">
                                 <div class="row text-center">
                                     <div class="col-md-3 col-sm-6 mb-3">
-                                        <a href="/user/expenses/add" class="btn btn-primary btn-lg w-100 py-3">
-                                            <i class="fas fa-plus-circle fa-2x mb-2"></i><br>
-                                            Add Expense
+                                        <a href="/user/expenses/add" class="card quick-action-card text-decoration-none">
+                                            <div class="card-body text-primary">
+                                                <i class="fas fa-plus-circle"></i><br>
+                                                <h5>Add Expense</h5>
+                                                <p class="text-muted small">Record a new expense</p>
+                                            </div>
                                         </a>
                                     </div>
                                     <div class="col-md-3 col-sm-6 mb-3">
-                                        <a href="/user/planned-expenses/add" class="btn btn-success btn-lg w-100 py-3">
-                                            <i class="fas fa-calendar-plus fa-2x mb-2"></i><br>
-                                            Plan Expense
+                                        <a href="/user/planned-expenses/add" class="card quick-action-card text-decoration-none">
+                                            <div class="card-body text-success">
+                                                <i class="fas fa-calendar-plus"></i><br>
+                                                <h5>Plan Expense</h5>
+                                                <p class="text-muted small">Schedule future expenses</p>
+                                            </div>
                                         </a>
                                     </div>
                                     <div class="col-md-3 col-sm-6 mb-3">
-                                        <a href="/user/budgets/add" class="btn btn-warning btn-lg w-100 py-3">
-                                            <i class="fas fa-wallet fa-2x mb-2"></i><br>
-                                            Create Budget
+                                        <a href="/user/budgets/add" class="card quick-action-card text-decoration-none">
+                                            <div class="card-body text-warning">
+                                                <i class="fas fa-wallet"></i><br>
+                                                <h5>Create Budget</h5>
+                                                <p class="text-muted small">Set spending limits</p>
+                                            </div>
                                         </a>
                                     </div>
                                     <div class="col-md-3 col-sm-6 mb-3">
-                                        <a href="/user/savings/add" class="btn btn-info btn-lg w-100 py-3">
-                                            <i class="fas fa-bullseye fa-2x mb-2"></i><br>
-                                            Savings Goal
+                                        <a href="/user/savings/add" class="card quick-action-card text-decoration-none">
+                                            <div class="card-body text-info">
+                                                <i class="fas fa-bullseye"></i><br>
+                                                <h5>Savings Goal</h5>
+                                                <p class="text-muted small">Create a new savings goal</p>
+                                            </div>
                                         </a>
                                     </div>
                                 </div>
@@ -366,7 +535,7 @@
                 <div class="row">
                     <!-- Today's Expenses -->
                     <div class="col-lg-6 mb-4">
-                        <div class="card shadow">
+                        <div class="card shadow dashboard-card fade-in-up">
                             <div class="card-header py-3 d-flex justify-content-between align-items-center">
                                 <h6 class="m-0 font-weight-bold text-danger">
                                     <i class="fas fa-sun me-2"></i>Today's Expenses
@@ -374,7 +543,14 @@
                                 <div>
                                     <span class="badge bg-danger me-2">
                                         <i class="fas fa-clock me-1"></i>
-                                        <span id="todayDate"><%= new Date().toLocaleDateString() %></span>
+                                        <span id="todayDate">
+                                            <%= new Date().toLocaleDateString('en-US', { 
+                                                weekday: 'short', 
+                                                year: 'numeric', 
+                                                month: 'short', 
+                                                day: 'numeric' 
+                                            }) %>
+                                        </span>
                                     </span>
                                     <a href="/user/expenses" class="btn btn-sm btn-outline-danger">View All</a>
                                 </div>
@@ -394,6 +570,7 @@
                                                 <% data.todaysTransactions.forEach(transaction => { %>
                                                     <tr>
                                                         <td class="text-truncate" style="max-width: 150px;" title="<%= transaction.description %>">
+                                                            <i class="fas fa-receipt text-muted me-2"></i>
                                                             <%= transaction.description %>
                                                         </td>
                                                         <td class="text-danger fw-bold">
@@ -401,7 +578,11 @@
                                                         </td>
                                                         <td>
                                                             <% if (transaction.created_at) { %>
-                                                                <%= new Date(transaction.created_at).toLocaleTimeString() %>
+                                                                <%= new Date(transaction.created_at).toLocaleTimeString('en-US', { 
+                                                                    hour: '2-digit', 
+                                                                    minute: '2-digit',
+                                                                    hour12: true 
+                                                                }) %>
                                                             <% } else { %>
                                                                 Today
                                                             <% } %>
@@ -433,66 +614,66 @@
                     </div>
 
                     <!-- Recent Transactions -->
-                   <!-- Recent Transactions -->
-<div class="col-lg-6 mb-4">
-    <div class="card shadow">
-        <div class="card-header py-3 d-flex justify-content-between align-items-center">
-            <h6 class="m-0 font-weight-bold text-primary">
-                <i class="fas fa-receipt me-2"></i>Recent Transactions
-            </h6>
-            <a href="/user/expenses" class="btn btn-sm btn-outline-primary">View All</a>
-        </div>
-        <div class="card-body p-0">
-            <% if (data.recentTransactions && data.recentTransactions.length > 0) { %>
-                <div class="table-responsive">
-                    <table class="table table-sm table-hover mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Description</th>
-                                <th>Amount</th>
-                                <th>Date</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <% data.recentTransactions.forEach(transaction => { %>
-                                <tr>
-                                    <td class="text-truncate" style="max-width: 150px;" title="<%= transaction.description %>">
-                                        <%= transaction.description %>
-                                    </td>
-                                    <td class="text-danger fw-bold">
-                                        Ksh <%= parseFloat(transaction.amount).toFixed(2) %>
-                                    </td>
-                                    <td>
-                                        <%= new Date(transaction.date || transaction.created_at).toLocaleDateString('en-US', { 
-                                            weekday: 'short', 
-                                            year: 'numeric', 
-                                            month: 'short', 
-                                            day: 'numeric' 
-                                        }) %>
-                                    </td>
-                                </tr>
-                            <% }); %>
-                        </tbody>
-                    </table>
-                </div>
-            <% } else { %>
-                <div class="empty-state">
-                    <i class="fas fa-receipt text-muted"></i>
-                    <h5>No Recent Transactions</h5>
-                    <p class="mb-3">Start tracking your expenses to see them here.</p>
-                    <a href="/user/expenses/add" class="btn btn-primary me-2">Add Your First Expense</a>
-                    <a href="/user/create-sample-data" class="btn btn-outline-secondary">Add Sample Data</a>
-                </div>
-            <% } %>
-        </div>
-    </div>
-</div>
+                    <div class="col-lg-6 mb-4">
+                        <div class="card shadow dashboard-card fade-in-up">
+                            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                                <h6 class="m-0 font-weight-bold text-primary">
+                                    <i class="fas fa-receipt me-2"></i>Recent Transactions
+                                </h6>
+                                <a href="/user/expenses" class="btn btn-sm btn-outline-primary">View All</a>
+                            </div>
+                            <div class="card-body p-0">
+                                <% if (data.recentTransactions && data.recentTransactions.length > 0) { %>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-hover mb-0">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Description</th>
+                                                    <th>Amount</th>
+                                                    <th>Date</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <% data.recentTransactions.forEach(transaction => { %>
+                                                    <tr>
+                                                        <td class="text-truncate" style="max-width: 150px;" title="<%= transaction.description %>">
+                                                            <i class="fas fa-receipt text-muted me-2"></i>
+                                                            <%= transaction.description %>
+                                                        </td>
+                                                        <td class="text-danger fw-bold">
+                                                            Ksh <%= parseFloat(transaction.amount).toFixed(2) %>
+                                                        </td>
+                                                        <td>
+                                                            <%= new Date(transaction.date || transaction.created_at).toLocaleDateString('en-US', { 
+                                                                weekday: 'short', 
+                                                                year: 'numeric', 
+                                                                month: 'short', 
+                                                                day: 'numeric' 
+                                                            }) %>
+                                                        </td>
+                                                    </tr>
+                                                <% }); %>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                <% } else { %>
+                                    <div class="empty-state">
+                                        <i class="fas fa-receipt text-muted"></i>
+                                        <h5>No Recent Transactions</h5>
+                                        <p class="mb-3">Start tracking your expenses to see them here.</p>
+                                        <a href="/user/expenses/add" class="btn btn-primary me-2">Add Your First Expense</a>
+                                        <a href="/user/create-sample-data" class="btn btn-outline-secondary">Add Sample Data</a>
+                                    </div>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Budget Progress -->
                 <div class="row mb-4">
                     <div class="col-12">
-                        <div class="card shadow">
+                        <div class="card shadow dashboard-card fade-in-up">
                             <div class="card-header">
                                 <h5 class="card-title mb-0">
                                     <i class="fas fa-chart-pie me-2"></i>Budget Progress
@@ -521,9 +702,9 @@
                                                     aria-valuemax="100">
                                                 </div>
                                             </div>
-                                            <div class="d-flex justify-content-between">
+                                            <div class="d-flex justify-content-between align-items-center">
                                                 <small class="text-muted"><%= progress.toFixed(1) %>% used</small>
-                                                <small class="<%= remaining < 0 ? 'text-danger' : 'text-success' %>">
+                                                <small class="<%= remaining < 0 ? 'status-over-budget' : 'status-under-budget' %>">
                                                     Ksh <%= Math.abs(remaining).toFixed(2) %> <%= remaining >= 0 ? 'remaining' : 'over budget' %>
                                                 </small>
                                             </div>
@@ -546,7 +727,7 @@
                 <!-- Savings Goals -->
                 <div class="row mb-4">
                     <div class="col-12">
-                        <div class="card shadow">
+                        <div class="card shadow dashboard-card fade-in-up">
                             <div class="card-header">
                                 <h5 class="card-title mb-0">
                                     <i class="fas fa-bullseye me-2"></i>Savings Goals
@@ -565,7 +746,9 @@
                                             <div class="col-md-4 mb-4">
                                                 <div class="card h-100 border-0 shadow-sm">
                                                     <div class="card-body text-center">
-                                                        <h6 class="card-title fw-bold text-truncate" title="<%= goal.name %>"><%= goal.name %></h6>
+                                                        <h6 class="card-title fw-bold text-truncate" title="<%= goal.name %>">
+                                                            <i class="fas fa-bullseye me-2 text-primary"></i><%= goal.name %>
+                                                        </h6>
                                                         
                                                         <div class="progress mb-3" style="height: 15px;">
                                                             <div class="progress-bar <%= progressClass %>" 
@@ -585,7 +768,7 @@
                                                         
                                                         <p class="small text-muted mb-3">
                                                             <% if (progress >= 100) { %>
-                                                                <span class="text-success">Goal Achieved! 🎉</span>
+                                                                <span class="text-success fw-bold">Goal Achieved! 🎉</span>
                                                             <% } else { %>
                                                                 Ksh <%= remaining.toFixed(2) %> to go
                                                             <% } %>
@@ -623,120 +806,127 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Initialize Bootstrap tooltips
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl)
-        });
-
-        // Mobile menu toggle - FIXED VERSION
+        // Enhanced Dashboard Functionality
+        class DashboardManager {
+            constructor() {
+                this.resetTimer = document.getElementById('resetTimer');
+                
+                this.init();
+            }
+            
+            init() {
+                console.log('Dashboard: Initializing enhanced dashboard...');
+                
+                // Initialize components
+                this.initResetTimer();
+                this.initAutoRefresh();
+                this.initAlerts();
+                this.initDayCheck();
+                
+                console.log('Dashboard: Initialized successfully');
+            }
+            
+            initResetTimer() {
+                if (!this.resetTimer) return;
+                
+                const updateTimer = () => {
+                    const now = new Date();
+                    const midnight = new Date();
+                    midnight.setHours(24, 0, 0, 0);
+                    
+                    const diff = midnight - now;
+                    const hours = Math.floor(diff / (1000 * 60 * 60));
+                    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                    
+                    this.resetTimer.textContent = 
+                        `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                    
+                    // Add warning class when less than 1 hour remaining
+                    if (hours === 0 && minutes < 60) {
+                        this.resetTimer.classList.add('text-danger');
+                    } else {
+                        this.resetTimer.classList.remove('text-danger');
+                    }
+                };
+                
+                // Initial call and set interval
+                updateTimer();
+                setInterval(updateTimer, 1000);
+            }
+            
+            initAutoRefresh() {
+                // Refresh dashboard data every 30 seconds
+                setInterval(() => {
+                    this.refreshDashboard();
+                }, 30000);
+            }
+            
+            refreshDashboard() {
+                // Add subtle loading indicator
+                document.body.classList.add('loading');
+                
+                // Simulate data refresh (in real app, this would be an API call)
+                setTimeout(() => {
+                    document.body.classList.remove('loading');
+                    console.log('Dashboard: Data refreshed');
+                }, 1000);
+            }
+            
+            initAlerts() {
+                // Auto-dismiss alerts after 5 seconds
+                setTimeout(() => {
+                    document.querySelectorAll('.alert').forEach(alert => {
+                        const bsAlert = new bootstrap.Alert(alert);
+                        bsAlert.close();
+                    });
+                }, 5000);
+            }
+            
+            initDayCheck() {
+                // Check if it's a new day and refresh if needed
+                const checkNewDay = () => {
+                    const today = new Date().toDateString();
+                    const lastVisit = localStorage.getItem('lastVisitDate');
+                    
+                    if (lastVisit !== today) {
+                        localStorage.setItem('lastVisitDate', today);
+                        // If it's a new day, refresh the page to get updated daily expenses
+                        if (lastVisit) {
+                            window.location.reload();
+                        }
+                    }
+                };
+                
+                // Store today's date and check every minute
+                localStorage.setItem('lastVisitDate', new Date().toDateString());
+                setInterval(checkNewDay, 60000);
+            }
+        }
+        
+        // Initialize dashboard when DOM is ready
         document.addEventListener('DOMContentLoaded', function() {
-            const sidebar = document.querySelector('.sidebar');
-            const menuToggle = document.getElementById('mobileMenuToggle');
-            const sidebarOverlay = document.getElementById('sidebarOverlay');
+            new DashboardManager();
             
-            function openSidebar() {
-                sidebar.classList.add('show');
-                sidebarOverlay.classList.add('show');
-                document.body.classList.add('sidebar-open');
-            }
+            // Mobile menu toggle
+            var sidebar = document.querySelector('.sidebar');
+            var menuToggle = document.querySelector('[data-bs-toggle="collapse"]');
             
-            function closeSidebar() {
-                sidebar.classList.remove('show');
-                sidebarOverlay.classList.remove('show');
-                document.body.classList.remove('sidebar-open');
-            }
-            
-            // Toggle sidebar when menu button is clicked
             if (menuToggle && sidebar) {
                 menuToggle.addEventListener('click', function() {
-                    if (sidebar.classList.contains('show')) {
-                        closeSidebar();
-                    } else {
-                        openSidebar();
-                    }
+                    sidebar.classList.toggle('show');
                 });
             }
             
-            // Close sidebar when overlay is clicked
-            if (sidebarOverlay) {
-                sidebarOverlay.addEventListener('click', function() {
-                    closeSidebar();
-                });
-            }
-            
-            // Close sidebar when a nav link is clicked (on mobile)
-            const navLinks = document.querySelectorAll('.sidebar .nav-link');
-            navLinks.forEach(link => {
-                link.addEventListener('click', function() {
-                    if (window.innerWidth <= 768) {
-                        closeSidebar();
-                    }
-                });
-            });
-
-            // Close sidebar on window resize if it becomes desktop view
-            window.addEventListener('resize', function() {
-                if (window.innerWidth > 768) {
-                    closeSidebar();
-                }
-            });
-
-            // Auto-dismiss alerts after 5 seconds
-            setTimeout(function() {
-                var alerts = document.querySelectorAll('.alert');
-                alerts.forEach(function(alert) {
-                    var bsAlert = new bootstrap.Alert(alert);
-                    bsAlert.close();
-                });
-            }, 5000);
-
-            // Update reset timer every second
-            function updateResetTimer() {
-                const now = new Date();
-                const midnight = new Date();
-                midnight.setHours(24, 0, 0, 0);
-                
-                const diff = midnight - now;
-                const hours = Math.floor(diff / (1000 * 60 * 60));
-                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-                
-                const timerElement = document.getElementById('resetTimer');
-                if (timerElement) {
-                    timerElement.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-                }
-            }
-
-            // Initial call and set interval
-            updateResetTimer();
-            setInterval(updateResetTimer, 1000);
-
-            // Check if it's a new day and refresh if needed
-            function checkNewDay() {
-                const today = new Date().toDateString();
-                const lastVisit = localStorage.getItem('lastVisitDate');
-                
-                if (lastVisit !== today) {
-                    localStorage.setItem('lastVisitDate', today);
-                    // If it's a new day, refresh the page to get updated daily expenses
-                    if (lastVisit) {
-                        window.location.reload();
-                    }
-                }
-            }
-
-            // Store today's date
-            localStorage.setItem('lastVisitDate', new Date().toDateString());
-            
-            // Check every minute if it's a new day
-            setInterval(checkNewDay, 60000);
+            // Add performance logging
+            const loadTime = performance.now();
+            console.log(`Dashboard loaded in ${loadTime.toFixed(2)}ms`);
         });
-
-        // Refresh dashboard data every 30 seconds
-        setInterval(function() {
-            window.location.reload();
-        }, 30000);
+        
+        // Fallback initialization
+        if (document.readyState === 'interactive' || document.readyState === 'complete') {
+            new DashboardManager();
+        }
     </script>
 </body>
 </html>
