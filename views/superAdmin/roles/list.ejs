@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        :root {
+            --primary-color: #4e73df;
+            --success-color: #1cc88a;
+            --warning-color: #f6c23e;
+            --danger-color: #e74a3b;
+            --info-color: #36b9cc;
+            --dark-color: #5a5c69;
+        }
+        
+        .stat-card {
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            border: none;
+            border-left: 4px solid transparent;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+        
+        .border-left-primary { border-left-color: var(--primary-color) !important; }
+        .border-left-success { border-left-color: var(--success-color) !important; }
+        .border-left-info { border-left-color: var(--info-color) !important; }
+        .border-left-warning { border-left-color: var(--warning-color) !important; }
+        
+        .role-table {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(0,0,0,0.06);
+        }
+        
+        .role-table thead {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        }
+        
+        .role-table thead th {
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 1.25rem 1rem;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .role-table tbody tr {
+            transition: all 0.2s ease;
+        }
+        
+        .role-table tbody tr:hover {
+            background-color: #f8f9fe;
+            transform: scale(1.01);
+        }
+        
+        .role-badge {
+            font-size: 0.75rem;
+            padding: 0.5em 0.9em;
+            border-radius: 50px;
+            font-weight: 600;
+        }
+        
+        .role-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 1.2rem;
+        }
+        
+        .page-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 16px;
+            padding: 2.5rem 2rem;
+            margin-bottom: 2.5rem;
+            color: white;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+            opacity: 0.3;
+        }
+        
+        .empty-state {
+            padding: 4rem 2rem;
+            text-align: center;
+            color: #6c757d;
+        }
+        
+        .empty-state i {
+            font-size: 5rem;
+            margin-bottom: 1.5rem;
+            opacity: 0.4;
+        }
+        
+        .search-box {
+            border-radius: 25px;
+            border: 1px solid #e3e6f0;
+            padding: 0.75rem 1.5rem;
+            transition: all 0.3s;
+            background: rgba(255,255,255,0.9);
+        }
+        
+        .search-box:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.3rem rgba(78, 115, 223, 0.15);
+            background: white;
+        }
+        
+        .role-priority {
+            width: 8px;
+            height: 40px;
+            border-radius: 4px;
+            margin-right: 15px;
+        }
+        
+        .priority-super-admin { background: linear-gradient(135deg, #ff6b6b, #ee5a24); }
+        .priority-admin { background: linear-gradient(135deg, #74b9ff, #0984e3); }
+        .priority-team-leader { background: linear-gradient(135deg, #55efc4, #00b894); }
+        .priority-team-member { background: linear-gradient(135deg, #a29bfe, #6c5ce7); }
+        .priority-individual { background: linear-gradient(135deg, #fd79a8, #e84393); }
+        
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .action-btn {
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+    </style>
+</head>
+<body style="background: linear-gradient(135deg, #f8f9fc 0%, #e9ecef 100%); min-height: 100vh;">
+    <div class="container-fluid">
+        <div class="row">
+            <%- include('../../partials/superadmin-sidebar') %>
+            
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+                <!-- Page Header -->
+                <div class="page-header animate__animated animate__fadeIn">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h1 class="h2 mb-2">
+                                <i class="fas fa-user-tag me-3"></i>
+                                Role Management
+                            </h1>
+                            <p class="mb-0 opacity-85 fs-5">Manage system roles, permissions, and access levels</p>
+                        </div>
+                        <div class="col-auto">
+                            <div class="bg-white bg-opacity-20 rounded-pill px-4 py-2">
+                                <i class="fas fa-users me-2"></i>
+                                <span class="fw-semibold fs-6"><%= roles ? roles.length : 0 %> System Roles</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Statistics Overview -->
+                <div class="row mb-4">
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card stat-card border-left-primary shadow-sm animate__animated animate__fadeInUp">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <div class="text-xs fw-bold text-primary text-uppercase mb-1">
+                                            Total Roles
+                                        </div>
+                                        <div class="h2 mb-0 fw-bold text-gray-800">
+                                            <%= roles ? roles.length : 0 %>
+                                        </div>
+                                        <div class="mt-2 text-xs text-muted">
+                                            <i class="fas fa-arrow-up text-success me-1"></i>
+                                            System defined
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <div class="role-icon bg-primary bg-opacity-10 text-primary">
+                                            <i class="fas fa-layer-group"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card stat-card border-left-success shadow-sm animate__animated animate__fadeInUp animate__delay-1s">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <div class="text-xs fw-bold text-success text-uppercase mb-1">
+                                            Total Users
+                                        </div>
+                                        <div class="h2 mb-0 fw-bold text-gray-800">
+                                            <%= roles ? roles.reduce((total, role) => total + (role.user_count || 0), 0) : 0 %>
+                                        </div>
+                                        <div class="mt-2 text-xs text-muted">
+                                            <i class="fas fa-users text-success me-1"></i>
+                                            Across all roles
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <div class="role-icon bg-success bg-opacity-10 text-success">
+                                            <i class="fas fa-users"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card stat-card border-left-info shadow-sm animate__animated animate__fadeInUp animate__delay-2s">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <div class="text-xs fw-bold text-info text-uppercase mb-1">
+                                            Avg. Users/Role
+                                        </div>
+                                        <div class="h2 mb-0 fw-bold text-gray-800">
+                                            <%= roles && roles.length > 0 ? (roles.reduce((sum, role) => sum + (role.user_count || 0), 0) / roles.length).toFixed(1) : 0 %>
+                                        </div>
+                                        <div class="mt-2 text-xs text-muted">
+                                            <i class="fas fa-chart-bar text-info me-1"></i>
+                                            Distribution
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <div class="role-icon bg-info bg-opacity-10 text-info">
+                                            <i class="fas fa-chart-pie"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card stat-card border-left-warning shadow-sm animate__animated animate__fadeInUp animate__delay-3s">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <div class="text-xs fw-bold text-warning text-uppercase mb-1">
+                                            Active System
+                                        </div>
+                                        <div class="h2 mb-0 fw-bold text-gray-800">
+                                            Operational
+                                        </div>
+                                        <div class="mt-2 text-xs text-muted">
+                                            <i class="fas fa-check-circle text-success me-1"></i>
+                                            All systems normal
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <div class="role-icon bg-warning bg-opacity-10 text-warning">
+                                            <i class="fas fa-shield-alt"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alerts -->
+                <% if (typeof error !== 'undefined' && error) { %>
+                    <div class="alert alert-danger alert-dismissible fade show animate__animated animate__shakeX" role="alert">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-exclamation-triangle me-3 fa-lg"></i>
+                            <div>
+                                <h6 class="alert-heading mb-1">Action Required</h6>
+                                <p class="mb-0"><%= error %></p>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                <% } %>
+                <% if (typeof success !== 'undefined' && success) { %>
+                    <div class="alert alert-success alert-dismissible fade show animate__animated animate__bounceIn" role="alert">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-check-circle me-3 fa-lg"></i>
+                            <div>
+                                <h6 class="alert-heading mb-1">Success</h6>
+                                <p class="mb-0"><%= success %></p>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                <% } %>
+
+                <!-- Roles Table -->
+                <div class="card shadow border-0 animate__animated animate__fadeIn">
+                    <div class="card-header bg-white py-4 border-0">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <h5 class="card-title mb-0 text-dark fs-4">
+                                    <i class="fas fa-list-alt me-3 text-primary"></i>
+                                    System Roles Overview
+                                </h5>
+                            </div>
+                            <div class="col-auto">
+                                <div class="input-group" style="width: 300px;">
+                                    <span class="input-group-text bg-light border-0">
+                                        <i class="fas fa-search text-muted"></i>
+                                    </span>
+                                    <input type="text" class="form-control search-box" placeholder="Search roles..." id="searchRoles">
+                                    <button class="btn btn-primary px-3">
+                                        <i class="fas fa-filter"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-body p-0">
+                        <% if (typeof roles !== 'undefined' && roles && roles.length > 0) { %>
+                            <div class="table-responsive">
+                                <table class="table table-hover role-table mb-0" id="rolesTable">
+                                    <thead>
+                                        <tr>
+                                            <th width="25%">Role Details</th>
+                                            <th width="40%">Description</th>
+                                            <th width="15%" class="text-center">Users</th>
+                                            <th width="20%" class="text-center">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% roles.forEach(role => { 
+                                            const userCount = role.user_count || 0;
+                                            let priorityClass = '';
+                                            let badgeClass = 'bg-secondary';
+                                            let roleIcon = 'fa-user';
+                                            
+                                            // Determine styling based on role name
+                                            if (role.name.includes('super_admin') || role.name.includes('super admin')) {
+                                                priorityClass = 'priority-super-admin';
+                                                badgeClass = 'bg-danger';
+                                                roleIcon = 'fa-crown';
+                                            } else if (role.name.includes('admin')) {
+                                                priorityClass = 'priority-admin';
+                                                badgeClass = 'bg-primary';
+                                                roleIcon = 'fa-user-shield';
+                                            } else if (role.name.includes('leader')) {
+                                                priorityClass = 'priority-team-leader';
+                                                badgeClass = 'bg-success';
+                                                roleIcon = 'fa-user-tie';
+                                            } else if (role.name.includes('member')) {
+                                                priorityClass = 'priority-team-member';
+                                                badgeClass = 'bg-info';
+                                                roleIcon = 'fa-users';
+                                            } else {
+                                                priorityClass = 'priority-individual';
+                                                badgeClass = 'bg-warning text-dark';
+                                                roleIcon = 'fa-user';
+                                            }
+                                            
+                                            if (userCount >= 10) badgeClass = 'bg-success';
+                                            else if (userCount >= 5) badgeClass = 'bg-primary';
+                                            else if (userCount >= 1) badgeClass = 'bg-info';
+                                            else badgeClass = 'bg-secondary';
+                                        %>
+                                            <tr class="role-row">
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="role-priority <%= priorityClass %>"></div>
+                                                        <div class="role-icon <%= badgeClass.replace('bg-', 'bg-').replace(' text-dark', '') %>-subtle text-<%= badgeClass.replace('bg-', '').split(' ')[0] %>">
+                                                            <i class="fas <%= roleIcon %>"></i>
+                                                        </div>
+                                                        <div>
+                                                            <div class="fw-bold text-dark fs-6"><%= role.name %></div>
+                                                            <small class="text-muted">
+                                                                <i class="fas fa-id-card me-1"></i>
+                                                                ID: <%= role.id %>
+                                                            </small>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <p class="mb-1 text-dark"><%= role.description || 'No description provided for this role' %></p>
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-calendar me-1"></i>
+                                                        Created: <%= new Date(role.created_at).toLocaleDateString('en-US', { 
+                                                            year: 'numeric', 
+                                                            month: 'long', 
+                                                            day: 'numeric' 
+                                                        }) %>
+                                                    </small>
+                                                </td>
+                                                <td class="text-center">
+                                                    <div class="d-flex align-items-center justify-content-center">
+                                                        <span class="badge role-badge <%= badgeClass %> me-2">
+                                                            <i class="fas fa-user me-1"></i>
+                                                            <%= userCount %>
+                                                        </span>
+                                                        <% if (userCount > 0) { %>
+                                                            <div class="user-avatar">
+                                                                <%= userCount %>
+                                                            </div>
+                                                        <% } %>
+                                                    </div>
+                                                </td>
+                                                <td class="text-center">
+                                                    <div class="btn-group" role="group">
+                                                        <button class="btn btn-outline-primary btn-sm action-btn" title="Edit Role">
+                                                            <i class="fas fa-edit"></i>
+                                                        </button>
+                                                        <button class="btn btn-outline-info btn-sm action-btn" title="View Permissions">
+                                                            <i class="fas fa-key"></i>
+                                                        </button>
+                                                        <button class="btn btn-outline-warning btn-sm action-btn" title="Manage Users">
+                                                            <i class="fas fa-users"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        <% }); %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <% } else { %>
+                            <div class="empty-state">
+                                <i class="fas fa-user-tag"></i>
+                                <h3 class="text-muted mb-3">No Roles Configured</h3>
+                                <p class="text-muted mb-4">There are no roles defined in the system yet. Start by creating your first role.</p>
+                                <button class="btn btn-primary btn-lg">
+                                    <i class="fas fa-plus me-2"></i>
+                                    Create First Role
+                                </button>
+                            </div>
+                        <% } %>
+                    </div>
+                    
+                    <% if (typeof roles !== 'undefined' && roles && roles.length > 0) { %>
+                        <div class="card-footer bg-white py-3 border-0">
+                            <div class="row align-items-center">
+                                <div class="col">
+                                    <small class="text-muted">
+                                        Displaying <strong><%= roles.length %></strong> role<%= roles.length !== 1 ? 's' : '' %> • 
+                                        <strong><%= roles.reduce((total, role) => total + (role.user_count || 0), 0) %></strong> total users
+                                    </small>
+                                </div>
+                                <div class="col-auto">
+                                    <small class="text-muted">
+                                        <i class="fas fa-database me-1"></i>
+                                        System managed • Updated just now
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    <% } %>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Search functionality
+        document.getElementById('searchRoles')?.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const rows = document.querySelectorAll('.role-row');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        });
+
+        // Auto-dismiss alerts after 5 seconds
+        setTimeout(() => {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+
+        // Add hover effects to action buttons
+        document.querySelectorAll('.action-btn').forEach(btn => {
+            btn.addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.1)';
+            });
+            btn.addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        :root {
+            --primary-color: #4e73df;
+            --success-color: #1cc88a;
+            --warning-color: #f6c23e;
+            --danger-color: #e74a3b;
+            --info-color: #36b9cc;
+            --dark-color: #5a5c69;
+        }
+        
+        .page-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 16px;
+            padding: 2.5rem 2rem;
+            margin-bottom: 2.5rem;
+            color: white;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+        }
+        
+        .log-table {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(0,0,0,0.06);
+        }
+        
+        .log-table thead {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        }
+        
+        .log-table thead th {
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 1.25rem 1rem;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .action-badge {
+            font-size: 0.75rem;
+            padding: 0.5em 0.9em;
+            border-radius: 50px;
+            font-weight: 600;
+        }
+        
+        .log-row {
+            transition: all 0.2s ease;
+        }
+        
+        .log-row:hover {
+            background-color: #f8f9fe;
+            transform: scale(1.01);
+        }
+        
+        .search-box {
+            border-radius: 25px;
+            border: 1px solid #e3e6f0;
+            padding: 0.75rem 1.5rem;
+            transition: all 0.3s;
+        }
+        
+        .search-box:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.3rem rgba(78, 115, 223, 0.15);
+        }
+        
+        .empty-state {
+            padding: 4rem 2rem;
+            text-align: center;
+            color: #6c757d;
+        }
+        
+        .empty-state i {
+            font-size: 5rem;
+            margin-bottom: 1.5rem;
+            opacity: 0.4;
+        }
+    </style>
+</head>
+<body style="background: linear-gradient(135deg, #f8f9fc 0%, #e9ecef 100%); min-height: 100vh;">
+    <div class="container-fluid">
+        <div class="row">
+            <%- include('../../partials/superadmin-sidebar') %>
+            
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+                <!-- Page Header -->
+                <div class="page-header animate__animated animate__fadeIn">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h1 class="h2 mb-2">
+                                <i class="fas fa-clipboard-list me-3"></i>
+                                Audit Logs
+                            </h1>
+                            <p class="mb-0 opacity-85 fs-5">Track and monitor all system activities and user actions</p>
+                        </div>
+                        <div class="col-auto">
+                            <div class="bg-white bg-opacity-20 rounded-pill px-4 py-2">
+                                <i class="fas fa-database me-2"></i>
+                                <span class="fw-semibold fs-6"><%= auditLogs.length %> Log Entries</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alerts -->
+                <% if (typeof error !== 'undefined' && error) { %>
+                    <div class="alert alert-danger alert-dismissible fade show animate__animated animate__shakeX" role="alert">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-exclamation-triangle me-3 fa-lg"></i>
+                            <div>
+                                <h6 class="alert-heading mb-1">Error Loading Audit Logs</h6>
+                                <p class="mb-0"><%= error %></p>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                <% } %>
+                <% if (typeof success !== 'undefined' && success) { %>
+                    <div class="alert alert-success alert-dismissible fade show animate__animated animate__bounceIn" role="alert">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-check-circle me-3 fa-lg"></i>
+                            <div>
+                                <h6 class="alert-heading mb-1">Success</h6>
+                                <p class="mb-0"><%= success %></p>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                <% } %>
+
+                <!-- Filters Card -->
+                <div class="card shadow border-0 mb-4 animate__animated animate__fadeIn">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-filter me-2 text-primary"></i>
+                            Filter Logs
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="GET" class="row g-3">
+                            <div class="col-md-3">
+                                <label class="form-label">Search</label>
+                                <input type="text" class="form-control search-box" name="search" placeholder="Search logs..." value="<%= filters.search %>">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Action</label>
+                                <select class="form-select" name="action">
+                                    <option value="">All Actions</option>
+                                    <% actions.forEach(actionItem => { %>
+                                        <option value="<%= actionItem.action %>" <%= filters.action === actionItem.action ? 'selected' : '' %>>
+                                            <%= actionItem.action %>
+                                        </option>
+                                    <% }); %>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">User</label>
+                                <select class="form-select" name="user_id">
+                                    <option value="">All Users</option>
+                                    <% recentUsers.forEach(user => { %>
+                                        <option value="<%= user.id %>" <%= filters.user_id == user.id ? 'selected' : '' %>>
+                                            <%= user.username %>
+                                        </option>
+                                    <% }); %>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Start Date</label>
+                                <input type="date" class="form-control" name="start_date" value="<%= filters.start_date %>">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">End Date</label>
+                                <input type="date" class="form-control" name="end_date" value="<%= filters.end_date %>">
+                            </div>
+                            <div class="col-md-1 d-flex align-items-end">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Audit Logs Table -->
+                <div class="card shadow border-0 animate__animated animate__fadeIn">
+                    <div class="card-header bg-white py-4 border-0">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <h5 class="card-title mb-0 text-dark fs-4">
+                                    <i class="fas fa-list-alt me-3 text-primary"></i>
+                                    System Audit Logs
+                                </h5>
+                            </div>
+                            <div class="col-auto">
+                                <div class="btn-group">
+                                    <a href="/super-admin/audit-logs/export?format=csv" class="btn btn-outline-primary">
+                                        <i class="fas fa-download me-2"></i>Export CSV
+                                    </a>
+                                    <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#clearLogsModal">
+                                        <i class="fas fa-trash me-2"></i>Clear Logs
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-body p-0">
+                        <% if (auditLogs.length > 0) { %>
+                            <div class="table-responsive">
+                                <table class="table table-hover log-table mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th width="15%">Action & User</th>
+                                            <th width="25%">Description</th>
+                                            <th width="15%">IP Address</th>
+                                            <th width="15%">User Agent</th>
+                                            <th width="20%">Timestamp</th>
+                                            <th width="10%" class="text-center">Details</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% auditLogs.forEach(log => { 
+                                            let badgeClass = 'bg-secondary';
+                                            if (log.action.includes('login')) badgeClass = 'bg-success';
+                                            else if (log.action.includes('create') || log.action.includes('add')) badgeClass = 'bg-primary';
+                                            else if (log.action.includes('update') || log.action.includes('edit')) badgeClass = 'bg-warning text-dark';
+                                            else if (log.action.includes('delete') || log.action.includes('remove')) badgeClass = 'bg-danger';
+                                            else if (log.action.includes('error') || log.action.includes('fail')) badgeClass = 'bg-dark';
+                                        %>
+                                            <tr class="log-row">
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="badge action-badge <%= badgeClass %> me-2">
+                                                            <%= log.action %>
+                                                        </span>
+                                                    </div>
+                                                    <% if (log.username) { %>
+                                                        <small class="text-muted">
+                                                            <i class="fas fa-user me-1"></i>
+                                                            <%= log.username %>
+                                                        </small>
+                                                    <% } %>
+                                                </td>
+                                                <td>
+                                                    <div class="text-dark"><%= log.description || 'No description' %></div>
+                                                </td>
+                                                <td>
+                                                    <code class="text-dark"><%= log.ip_address || 'N/A' %></code>
+                                                </td>
+                                                <td>
+                                                    <small class="text-muted">
+                                                        <%= log.user_agent ? log.user_agent.substring(0, 50) + '...' : 'N/A' %>
+                                                    </small>
+                                                </td>
+                                                <td>
+                                                    <div class="text-dark">
+                                                        <%= new Date(log.created_at).toLocaleDateString('en-US', { 
+                                                            year: 'numeric', 
+                                                            month: 'short', 
+                                                            day: 'numeric' 
+                                                        }) %>
+                                                    </div>
+                                                    <small class="text-muted">
+                                                        <%= new Date(log.created_at).toLocaleTimeString('en-US') %>
+                                                    </small>
+                                                </td>
+                                                <td class="text-center">
+                                                    <a href="/super-admin/audit-logs/<%= log.id %>" class="btn btn-outline-primary btn-sm">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        <% }); %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <% } else { %>
+                            <div class="empty-state">
+                                <i class="fas fa-clipboard-list"></i>
+                                <h3 class="text-muted mb-3">No Audit Logs Found</h3>
+                                <p class="text-muted mb-4">
+                                    <% if (filters.search || filters.action || filters.user_id || filters.start_date || filters.end_date) { %>
+                                        No logs match your current filters. Try adjusting your search criteria.
+                                    <% } else { %>
+                                        No audit logs have been recorded yet. System activities will appear here.
+                                    <% } %>
+                                </p>
+                                <% if (filters.search || filters.action || filters.user_id || filters.start_date || filters.end_date) { %>
+                                    <a href="/super-admin/audit-logs" class="btn btn-primary">
+                                        <i class="fas fa-times me-2"></i>
+                                        Clear Filters
+                                    </a>
+                                <% } %>
+                            </div>
+                        <% } %>
+                    </div>
+                    
+                    <% if (auditLogs.length > 0) { %>
+                        <div class="card-footer bg-white py-3 border-0">
+                            <div class="row align-items-center">
+                                <div class="col">
+                                    <small class="text-muted">
+                                        Showing <strong><%= Math.min(pagination.limit, auditLogs.length) %></strong> of <strong><%= pagination.total %></strong> logs
+                                        <% if (pagination.total > pagination.limit) { %>
+                                            • Page <strong><%= pagination.page %></strong> of <strong><%= pagination.totalPages %></strong>
+                                        <% } %>
+                                    </small>
+                                </div>
+                                <div class="col-auto">
+                                    <nav>
+                                        <ul class="pagination pagination-sm mb-0">
+                                            <li class="page-item <%= !pagination.hasPrev ? 'disabled' : '' %>">
+                                                <a class="page-link" href="<%= pagination.hasPrev ? `/super-admin/audit-logs?page=${pagination.page - 1}&${new URLSearchParams(filters)}` : '#' %>">
+                                                    Previous
+                                                </a>
+                                            </li>
+                                            <% for (let i = 1; i <= pagination.totalPages; i++) { %>
+                                                <li class="page-item <%= i === pagination.page ? 'active' : '' %>">
+                                                    <a class="page-link" href="/super-admin/audit-logs?page=<%= i %>&<%= new URLSearchParams(filters) %>">
+                                                        <%= i %>
+                                                    </a>
+                                                </li>
+                                            <% } %>
+                                            <li class="page-item <%= !pagination.hasNext ? 'disabled' : '' %>">
+                                                <a class="page-link" href="<%= pagination.hasNext ? `/super-admin/audit-logs?page=${pagination.page + 1}&${new URLSearchParams(filters)}` : '#' %>">
+                                                    Next
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </nav>
+                                </div>
+                            </div>
+                        </div>
+                    <% } %>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Clear Logs Modal -->
+    <div class="modal fade" id="clearLogsModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Clear Audit Logs</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to clear audit logs? This action cannot be undone.</p>
+                    <form id="clearLogsForm" method="POST" action="/super-admin/audit-logs/clear">
+                        <div class="mb-3">
+                            <label class="form-label">Clear logs older than:</label>
+                            <select class="form-select" name="older_than">
+                                <option value="30days">30 days</option>
+                                <option value="90days">90 days</option>
+                                <option value="1year">1 year</option>
+                                <option value="all">All logs (keep last 1000)</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" form="clearLogsForm" class="btn btn-danger">Clear Logs</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Auto-dismiss alerts after 5 seconds
+        setTimeout(() => {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+    </script>
+</body>
+</html>

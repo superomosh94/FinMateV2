@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= typeof title !== 'undefined' ? title : 'Notifications - FinMate' %></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .notification-item {
+            border-left: 4px solid #007bff;
+            transition: all 0.3s ease;
+        }
+        .notification-item.unread {
+            background-color: #f8f9fa;
+            border-left-color: #dc3545;
+        }
+        .notification-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .notification-type-info {
+            border-left-color: #17a2b8;
+        }
+        .notification-type-warning {
+            border-left-color: #ffc107;
+        }
+        .notification-type-error {
+            border-left-color: #dc3545;
+        }
+        .notification-type-success {
+            border-left-color: #28a745;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Include Sidebar -->
+            <%- include('../../partials/superadmin-sidebar') %>
+
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">
+                        <i class="fas fa-bell me-2"></i>Notifications
+                    </h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <div class="btn-group me-2">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="markAllAsRead()">
+                                <i class="fas fa-check-double me-1"></i>Mark All as Read
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="clearAllNotifications()">
+                                <i class="fas fa-trash me-1"></i>Clear All
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Success and Error Messages -->
+                <% if (typeof success !== 'undefined' && success) { %>
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-check-circle me-2"></i><%= success %>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                <% } %>
+                <% if (typeof error !== 'undefined' && error) { %>
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i><%= error %>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                <% } %>
+
+                <!-- Notifications Summary -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card text-white bg-primary">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h4 class="card-title">
+                                            <%= typeof pagination !== 'undefined' ? pagination.total : 0 %>
+                                        </h4>
+                                        <p class="card-text">Total Notifications</p>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <i class="fas fa-bell fa-2x"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-white bg-warning">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h4 class="card-title">
+                                            <%= typeof notifications !== 'undefined' ? notifications.filter(n => !n.is_read).length : 0 %>
+                                        </h4>
+                                        <p class="card-text">Unread</p>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <i class="fas fa-envelope fa-2x"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-white bg-info">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h4 class="card-title">
+                                            <%= typeof notifications !== 'undefined' ? notifications.filter(n => n.type === 'alert').length : 0 %>
+                                        </h4>
+                                        <p class="card-text">Alerts</p>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <i class="fas fa-exclamation-triangle fa-2x"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-white bg-success">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h4 class="card-title">
+                                            <%= typeof notifications !== 'undefined' ? notifications.filter(n => n.type === 'info').length : 0 %>
+                                        </h4>
+                                        <p class="card-text">Info</p>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <i class="fas fa-info-circle fa-2x"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notifications List -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-list me-2"></i>Recent Notifications
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <% if (typeof notifications !== 'undefined' && notifications.length > 0) { %>
+                            <div class="list-group list-group-flush">
+                                <% notifications.forEach(notification => { %>
+                                    <div class="list-group-item notification-item <%= !notification.is_read ? 'unread' : '' %> notification-type-<%= notification.type || 'info' %>">
+                                        <div class="d-flex w-100 justify-content-between align-items-start">
+                                            <div class="flex-grow-1 me-3">
+                                                <h6 class="mb-1">
+                                                    <%= notification.title %>
+                                                    <% if (!notification.is_read) { %>
+                                                        <span class="badge bg-danger ms-2">New</span>
+                                                    <% } %>
+                                                </h6>
+                                                <p class="mb-1 text-muted"><%= notification.message %></p>
+                                                <small class="text-muted">
+                                                    <i class="fas fa-user me-1"></i><%= notification.username || 'System' %>
+                                                    • <i class="fas fa-clock me-1"></i><%= new Date(notification.created_at).toLocaleString() %>
+                                                    • <span class="badge bg-<%= 
+                                                        notification.type === 'alert' ? 'warning' : 
+                                                        notification.type === 'error' ? 'danger' : 
+                                                        notification.type === 'success' ? 'success' : 'info' 
+                                                    %>">
+                                                        <%= notification.type || 'info' %>
+                                                    </span>
+                                                </small>
+                                            </div>
+                                            <div class="btn-group btn-group-sm">
+                                                <% if (!notification.is_read) { %>
+                                                    <button class="btn btn-outline-success" onclick="markAsRead(<%= notification.id %>)" title="Mark as Read">
+                                                        <i class="fas fa-check"></i>
+                                                    </button>
+                                                <% } %>
+                                                <button class="btn btn-outline-danger" onclick="deleteNotification(<%= notification.id %>)" title="Delete">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <% }) %>
+                            </div>
+                        <% } else { %>
+                            <div class="text-center py-5">
+                                <i class="fas fa-bell-slash fa-4x text-muted mb-3"></i>
+                                <h4 class="text-muted">No Notifications</h4>
+                                <p class="text-muted">You're all caught up! No new notifications.</p>
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                <% if (typeof pagination !== 'undefined' && pagination.totalPages > 1) { %>
+                    <nav aria-label="Page navigation" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            <% if (pagination.hasPrev) { %>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=<%= pagination.page - 1 %>&limit=<%= pagination.limit %>">Previous</a>
+                                </li>
+                            <% } %>
+                            
+                            <% for (let i = 1; i <= pagination.totalPages; i++) { %>
+                                <li class="page-item <%= i === pagination.page ? 'active' : '' %>">
+                                    <a class="page-link" href="?page=<%= i %>&limit=<%= pagination.limit %>"><%= i %></a>
+                                </li>
+                            <% } %>
+                            
+                            <% if (pagination.hasNext) { %>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=<%= pagination.page + 1 %>&limit=<%= pagination.limit %>">Next</a>
+                                </li>
+                            <% } %>
+                        </ul>
+                    </nav>
+                <% } %>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Notification actions
+        function markAsRead(notificationId) {
+            if (confirm('Mark this notification as read?')) {
+                // This would typically call an API endpoint
+                console.log('Marking notification as read:', notificationId);
+                // Reload the page to show changes
+                window.location.reload();
+            }
+        }
+
+        function markAllAsRead() {
+            if (confirm('Mark all notifications as read?')) {
+                // This would typically call an API endpoint
+                console.log('Marking all notifications as read');
+                // Reload the page to show changes
+                window.location.reload();
+            }
+        }
+
+        function deleteNotification(notificationId) {
+            if (confirm('Are you sure you want to delete this notification?')) {
+                // This would typically call an API endpoint
+                console.log('Deleting notification:', notificationId);
+                // Reload the page to show changes
+                window.location.reload();
+            }
+        }
+
+        function clearAllNotifications() {
+            if (confirm('Are you sure you want to clear all notifications? This action cannot be undone.')) {
+                // This would typically call an API endpoint
+                console.log('Clearing all notifications');
+                // Reload the page to show changes
+                window.location.reload();
+            }
+        }
+
+        // Auto-refresh notifications every 30 seconds
+        setInterval(() => {
+            // Optional: Implement auto-refresh if needed
+            // window.location.reload();
+        }, 30000);
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'r') {
+                e.preventDefault();
+                markAllAsRead();
+            }
+        });
+    </script>
+</body>
+</html>

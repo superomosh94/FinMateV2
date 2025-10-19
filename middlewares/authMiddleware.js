@@ -15,7 +15,6 @@ const authenticate = async (req, res, next) => {
 
     console.log('🔑 Token found, verifying...');
     const decoded = verifyToken(token);
-    // console.log('✅ Token decoded, user ID:', decoded.userId);
     
     // Get user with role information
     const [users] = await db.pool.execute(
@@ -26,8 +25,6 @@ const authenticate = async (req, res, next) => {
       [decoded.userId]
     );
 
-    // console.log('📊 Database query result - users found:', users.length);
-
     if (users.length === 0) {
       console.log('❌ User not found or inactive, clearing token');
       res.clearCookie('token');
@@ -35,17 +32,11 @@ const authenticate = async (req, res, next) => {
     }
 
     req.user = users[0];
-    // console.log('✅ User authenticated:', {
-    //   id: req.user.id,
-    //   email: req.user.email,
-    //   role_name: req.user.role_name,
-    //   is_active: req.user.is_active
-    // });
+    console.log('✅ User authenticated:', req.user.email, 'Role:', req.user.role_name);
     
     next();
   } catch (error) {
     console.error('💥 Authentication error:', error.message);
-    console.error('💥 Error stack:', error.stack);
     res.clearCookie('token');
     return res.redirect('/auth/login');
   }
@@ -53,40 +44,45 @@ const authenticate = async (req, res, next) => {
 
 const authorize = (allowedRoles = []) => {
   return (req, res, next) => {
-    // console.log('🎯 Authorization check:', {
-    //   path: req.path,
-    //   userRole: req.user?.role_name,
-    //   allowedRoles: allowedRoles
-    // });
+    // 🔥 FIX: Flatten the allowedRoles array to handle nested arrays
+    const flatRoles = Array.isArray(allowedRoles) ? allowedRoles.flat(Infinity) : [allowedRoles];
+    
+    console.log('🎯 Authorization check:', {
+      userRole: req.user?.role_name,
+      allowedRoles: flatRoles,
+      path: req.path
+    });
 
     if (!req.user) {
       console.log('❌ No user in request for authorization');
       return res.redirect('/auth/login');
     }
 
-    if (allowedRoles.length > 0 && !allowedRoles.includes(req.user.role_name)) {
+    if (flatRoles.length > 0 && !flatRoles.includes(req.user.role_name)) {
       console.log('❌ Authorization denied:', {
         userRole: req.user.role_name,
-        allowedRoles: allowedRoles
+        allowedRoles: flatRoles
       });
       return res.status(403).render('error', {
         title: 'Access Denied',
-        message: `You do not have permission to access this resource. Required role: ${allowedRoles.join(', ')}. Your role: ${req.user.role_name}`
+        message: `You do not have permission to access this resource. Required role: ${flatRoles.join(', ')}. Your role: ${req.user.role_name}`
       });
     }
 
-    // console.log('✅ Authorization granted for role:', req.user.role_name);
+    console.log('✅ Authorization granted for role:', req.user.role_name);
     next();
   };
 };
 
+// 🔥 FIX: Remove the array wrapping to prevent nesting
 const requireRole = (role) => {
-  // console.log('🔧 requireRole created for:', role);
-  return authorize([role]);
+  console.log('🔧 requireRole created for:', role);
+  // Directly pass the role instead of wrapping in array
+  return authorize(role);
 };
 
 const requireAnyRole = (roles) => {
-  // console.log('🔧 requireAnyRole created for:', roles);
+  console.log('🔧 requireAnyRole created for:', roles);
   return authorize(roles);
 };
 

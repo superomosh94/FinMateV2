@@ -486,6 +486,96 @@ CREATE TABLE `incomes` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
+
+-- Create the missing tables for super admin functionality
+CREATE TABLE IF NOT EXISTS `system_logs` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `level` ENUM('info', 'warning', 'error', 'debug') NOT NULL DEFAULT 'info',
+  `message` TEXT NOT NULL,
+  `context` JSON,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `admin_activities` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `user_id` INT NOT NULL,
+  `action` VARCHAR(255) NOT NULL,
+  `description` TEXT,
+  `ip_address` VARCHAR(45),
+  `user_agent` TEXT,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `audit_logs` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `user_id` INT,
+  `action_type` VARCHAR(100) NOT NULL,
+  `description` TEXT,
+  `table_name` VARCHAR(100),
+  `record_id` INT,
+  `old_values` JSON,
+  `new_values` JSON,
+  `ip_address` VARCHAR(45),
+  `user_agent` TEXT,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `system_settings` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(255) UNIQUE NOT NULL,
+  `value` TEXT,
+  `category` VARCHAR(100) DEFAULT 'general',
+  `type` ENUM('string', 'number', 'boolean', 'json') DEFAULT 'string',
+  `description` TEXT,
+  `is_public` BOOLEAN DEFAULT FALSE,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `sessions` (
+  `id` VARCHAR(128) PRIMARY KEY,
+  `user_id` INT NOT NULL,
+  `expires_at` TIMESTAMP NOT NULL,
+  `data` TEXT,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `payments` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `user_id` INT NOT NULL,
+  `amount` DECIMAL(10,2) NOT NULL,
+  `currency` VARCHAR(3) DEFAULT 'USD',
+  `status` ENUM('pending', 'completed', 'failed', 'refunded') DEFAULT 'pending',
+  `payment_method` VARCHAR(100),
+  `transaction_id` VARCHAR(255),
+  `description` TEXT,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Insert default system settings
+INSERT IGNORE INTO `system_settings` (`name`, `value`, `category`, `type`, `description`) VALUES
+('app_name', 'FinMate', 'general', 'string', 'Application name'),
+('app_url', 'http://localhost:3000', 'general', 'string', 'Application URL'),
+('admin_email', 'admin@finmate.com', 'general', 'string', 'Administrator email'),
+('items_per_page', '10', 'general', 'number', 'Number of items per page in lists'),
+('password_policy_min_length', '8', 'security', 'number', 'Minimum password length'),
+('session_timeout', '60', 'security', 'number', 'Session timeout in minutes'),
+('max_login_attempts', '5', 'security', 'number', 'Maximum login attempts before lockout');
+
+
 -- ==========================================
 -- SETUP COMPLETE
 -- ==========================================

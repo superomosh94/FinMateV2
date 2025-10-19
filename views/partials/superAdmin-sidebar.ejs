@@ -1,59 +1,404 @@
-<nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
-    <div class="position-sticky pt-3">
-        <h4 class="text-white text-center mb-4">
-            <i class="fas fa-chart-line me-2"></i>
-            FinMate
-        </h4>
-        <ul class="nav flex-column">
+<nav class="sidebar col-md-3 col-lg-2 d-md-block collapse" id="sidebarMenu">
+    <div class="position-sticky pt-4">
+        <!-- Logo/Brand -->
+        <div class="sidebar-brand text-center mb-5">
+            <div class="brand-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <h4 class="brand-title">FinMate</h4>
+            <small class="brand-subtitle">Super Admin</small>
+        </div>
+
+        <!-- Navigation Menu -->
+        <ul class="sidebar-nav nav flex-column" style="margin-bottom: 20px;">
+            <!-- Dashboard -->
             <li class="nav-item">
-                <a class="nav-link <%= currentPath === '/super-admin/dashboard' ? 'active' : '' %>" 
+                <a class="nav-link <%= currentPage === 'dashboard' ? 'active' : '' %>" 
                    href="/super-admin/dashboard">
-                    <i class="fas fa-tachometer-alt me-2"></i>
-                    Dashboard
+                    <i class="nav-icon fas fa-tachometer-alt"></i>
+                    <span class="nav-text">Dashboard</span>
+                    <% if (currentPage === 'dashboard') { %>
+                        <span class="nav-arrow"><i class="fas fa-chevron-right"></i></span>
+                    <% } %>
                 </a>
             </li>
+
+            <!-- User Management -->
             <li class="nav-item">
-                <a class="nav-link <%= currentPath && currentPath.includes('/super-admin/users') ? 'active' : '' %>" 
+                <a class="nav-link <%= currentPage === 'users' ? 'active' : '' %>" 
                    href="/super-admin/users">
-                    <i class="fas fa-users me-2"></i>
-                    Users
+                    <i class="nav-icon fas fa-users"></i>
+                    <span class="nav-text">Users</span>
+                    <% if (currentPage === 'users') { %>
+                        <span class="nav-arrow"><i class="fas fa-chevron-right"></i></span>
+                    <% } %>
                 </a>
             </li>
+
+            <!-- Role Management -->
             <li class="nav-item">
-                <a class="nav-link <%= currentPath && currentPath.includes('/super-admin/roles') ? 'active' : '' %>" 
+                <a class="nav-link <%= currentPage === 'roles' ? 'active' : '' %>" 
                    href="/super-admin/roles">
-                    <i class="fas fa-user-tag me-2"></i>
-                    Roles
+                    <i class="nav-icon fas fa-user-tag"></i>
+                    <span class="nav-text">Roles</span>
+                    <% if (currentPage === 'roles') { %>
+                        <span class="nav-arrow"><i class="fas fa-chevron-right"></i></span>
+                    <% } %>
                 </a>
             </li>
+
+            <!-- Permission Management -->
             <li class="nav-item">
-                <a class="nav-link <%= currentPath && currentPath.includes('/super-admin/permissions') ? 'active' : '' %>" 
+                <a class="nav-link <%= currentPage === 'permissions' ? 'active' : '' %>" 
                    href="/super-admin/permissions">
-                    <i class="fas fa-key me-2"></i>
-                    Permissions
+                    <i class="nav-icon fas fa-key"></i>
+                    <span class="nav-text">Permissions</span>
+                    <% if (currentPage === 'permissions') { %>
+                        <span class="nav-arrow"><i class="fas fa-chevron-right"></i></span>
+                    <% } %>
                 </a>
             </li>
+
+            <!-- Audit Logs -->
             <li class="nav-item">
-                <a class="nav-link <%= currentPath && currentPath.includes('/super-admin/notifications') ? 'active' : '' %>" 
+                <a class="nav-link <%= currentPage === 'audit-logs' ? 'active' : '' %>" 
+                   href="/super-admin/audit-logs">
+                    <i class="nav-icon fas fa-clipboard-list"></i>
+                    <span class="nav-text">Audit Logs</span>
+                    <% if (currentPage === 'audit-logs') { %>
+                        <span class="nav-arrow"><i class="fas fa-chevron-right"></i></span>
+                    <% } %>
+                </a>
+            </li>
+
+            <!-- Notifications -->
+            <li class="nav-item">
+                <a class="nav-link <%= currentPage === 'notifications' ? 'active' : '' %>" 
                    href="/super-admin/notifications">
-                    <i class="fas fa-bell me-2"></i>
-                    Notifications
+                    <i class="nav-icon fas fa-bell"></i>
+                    <span class="nav-text">Notifications</span>
+                    <% if (currentPage === 'notifications') { %>
+                        <span class="nav-arrow"><i class="fas fa-chevron-right"></i></span>
+                    <% } %>
                 </a>
             </li>
-            <li class="nav-item mt-3">
-                <a class="nav-link" href="/auth/profile">
-                    <i class="fas fa-user me-2"></i>
-                    Profile
-                </a>
-            </li>
+
+            <!-- System Settings -->
             <li class="nav-item">
-                <a class="nav-link" href="/auth/logout" 
+                <a class="nav-link <%= currentPage === 'system-settings' ? 'active' : '' %>" 
+                   href="/super-admin/system-settings">
+                    <i class="nav-icon fas fa-cogs"></i>
+                    <span class="nav-text">System Settings</span>
+                    <% if (currentPage === 'system-settings') { %>
+                        <span class="nav-arrow"><i class="fas fa-chevron-right"></i></span>
+                    <% } %>
+                </a>
+            </li>
+
+            <!-- Divider -->
+            <li class="nav-divider">
+                <hr>
+            </li>
+
+            <!-- Profile -->
+            <li class="nav-item">
+                <a class="nav-link <%= currentPage === 'profile' ? 'active profile-active' : '' %>" 
+                   href="/super-admin/profile">
+                    <i class="nav-icon fas fa-user"></i>
+                    <span class="nav-text">Profile</span>
+                </a>
+            </li>
+
+            <!-- Logout -->
+            <li class="nav-item">
+                <a class="nav-link logout-link" 
+                   href="/auth/logout" 
                    onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                    <i class="fas fa-sign-out-alt me-2"></i>
-                    Logout
+                    <i class="nav-icon fas fa-sign-out-alt"></i>
+                    <span class="nav-text">Logout</span>
                 </a>
                 <form id="logout-form" action="/auth/logout" method="POST" style="display: none;"></form>
             </li>
         </ul>
+
+        <!-- Current User Info -->
+        <!-- <div class="sidebar-user position-absolute bottom-0 start-0 end-0" style="margin-top: 30px;padding-top: 50px;">
+            <div class="user-info">
+                <div class="user-avatar">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+                <div class="user-details">
+                    <div class="user-name"><%= user.first_name %> <%= user.last_name %></div>
+                    <div class="user-role">Super Admin</div>
+                </div>
+            </div>
+        </div> -->
     </div>
 </nav>
+
+<style>
+/* Sidebar Base Styles */
+.sidebar {
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    min-height: 100vh;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    position: relative;
+}
+
+/* Brand Section */
+.sidebar-brand {
+    padding: 0 1rem;
+}
+
+.brand-icon {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+}
+
+.brand-icon i {
+    font-size: 1.5rem;
+    color: white;
+}
+
+.brand-title {
+    color: white;
+    font-weight: 700;
+    font-size: 1.25rem;
+    margin-bottom: 0.25rem;
+}
+
+.brand-subtitle {
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 0.875rem;
+}
+
+/* Navigation Styles */
+.sidebar-nav {
+    padding: 0 0.75rem;
+}
+
+.nav-item {
+    margin-bottom: 0.5rem;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    padding: 0.875rem 1rem;
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+    border-radius: 0.75rem;
+    border-left: 4px solid transparent;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+    transform: translateX(5px);
+    border-left-color: rgba(255, 255, 255, 0.3);
+}
+
+.nav-link.active {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+    border-left-color: #007bff;
+    font-weight: 600;
+}
+
+.nav-link.profile-active {
+    background: linear-gradient(135deg, #17a2b8, #138496);
+    border-left-color: #17a2b8;
+}
+
+/* Navigation Icons and Text */
+.nav-icon {
+    width: 20px;
+    text-align: center;
+    margin-right: 0.75rem;
+    font-size: 1.1rem;
+}
+
+.nav-text {
+    flex: 1;
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.nav-arrow {
+    opacity: 0.7;
+    transition: transform 0.3s ease;
+}
+
+.nav-link.active .nav-arrow {
+    transform: translateX(3px);
+}
+
+/* Divider */
+.nav-divider {
+    margin: 1.5rem 0;
+}
+
+.nav-divider hr {
+    border-color: rgba(255, 255, 255, 0.2);
+    margin: 0;
+}
+
+/* Logout Link */
+.logout-link:hover {
+    background-color: rgba(220, 53, 69, 0.2);
+    border-left-color: #dc3545;
+}
+
+/* User Info Section */
+.sidebar-user {
+    padding: 1.25rem 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #28a745, #20c997);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.user-avatar i {
+    color: white;
+    font-size: 0.9rem;
+}
+
+.user-details {
+    margin-left: 0.75rem;
+    flex: 1;
+}
+
+.user-name {
+    color: white;
+    font-weight: 600;
+    font-size: 0.9rem;
+    line-height: 1.2;
+}
+
+.user-role {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.8rem;
+    line-height: 1.2;
+}
+
+/* Custom Scrollbar */
+.sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+/* Responsive Design */
+@media (max-width: 767.98px) {
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1040;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+    
+    .sidebar.show {
+        transform: translateX(0);
+    }
+    
+    .sidebar-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1039;
+    }
+}
+
+/* Animation for active state */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.nav-link {
+    animation: slideIn 0.3s ease-out;
+}
+
+.nav-link:nth-child(1) { animation-delay: 0.1s; }
+.nav-link:nth-child(2) { animation-delay: 0.15s; }
+.nav-link:nth-child(3) { animation-delay: 0.2s; }
+.nav-link:nth-child(4) { animation-delay: 0.25s; }
+.nav-link:nth-child(5) { animation-delay: 0.3s; }
+.nav-link:nth-child(6) { animation-delay: 0.35s; }
+.nav-link:nth-child(7) { animation-delay: 0.4s; }
+.nav-link:nth-child(8) { animation-delay: 0.45s; }
+.nav-link:nth-child(9) { animation-delay: 0.5s; }
+</style>
+
+<!-- Optional: Add this script for mobile sidebar toggle -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Mobile sidebar toggle
+    const sidebar = document.getElementById('sidebarMenu');
+    const toggleButton = document.querySelector('[data-bs-toggle="collapse"]');
+    
+    if (toggleButton) {
+        toggleButton.addEventListener('click', function() {
+            sidebar.classList.toggle('show');
+        });
+    }
+    
+    // Close sidebar when clicking on a link (mobile)
+    const navLinks = document.querySelectorAll('.sidebar-nav .nav-link');
+    navLinks.forEach(link => {
+        link.addEventListener('click', function() {
+            if (window.innerWidth < 768) {
+                sidebar.classList.remove('show');
+            }
+        });
+    });
+});
+</script>

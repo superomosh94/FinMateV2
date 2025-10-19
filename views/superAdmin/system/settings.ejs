@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .settings-category {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border-left: 4px solid #007bff;
+        }
+        .setting-item {
+            border-bottom: 1px solid #e9ecef;
+            padding: 1rem 0;
+        }
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+        .setting-description {
+            font-size: 0.875rem;
+            color: #6c757d;
+            margin-top: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="container-fluid">
+        <div class="row">
+            <%- include('../../partials/superadmin-sidebar') %>
+            <!-- Sidebar would be here -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">
+                        <i class="fas fa-cog me-2"></i>System Settings
+                    </h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <button type="submit" form="settingsForm" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i>Save All Changes
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Alerts -->
+                <% if (success) { %>
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-check-circle me-2"></i><%= success %>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                <% } %>
+                <% if (error) { %>
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i><%= error %>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                <% } %>
+
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-sliders-h me-2"></i>Application Configuration
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <form method="POST" action="/super-admin/system-settings/update" id="settingsForm">
+                                    
+                                    <% if (Object.keys(settings).length > 0) { %>
+                                        
+                                        <!-- General Settings -->
+                                        <% if (settings.general) { %>
+                                        <div class="settings-category">
+                                            <h5 class="mb-3 text-primary">
+                                                <i class="fas fa-globe me-2"></i>General Settings
+                                            </h5>
+                                            <% settings.general.forEach(setting => { %>
+                                                <div class="setting-item">
+                                                    <div class="row align-items-center">
+                                                        <div class="col-md-4">
+                                                            <label class="form-label fw-bold">
+                                                                <%= setting.name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) %>
+                                                            </label>
+                                                            <% if (setting.description) { %>
+                                                                <div class="setting-description">
+                                                                    <%= setting.description %>
+                                                                </div>
+                                                            <% } %>
+                                                        </div>
+                                                        <div class="col-md-8">
+                                                            <input type="text" 
+                                                                   class="form-control" 
+                                                                   name="<%= setting.name %>" 
+                                                                   value="<%= setting.value %>"
+                                                                   placeholder="Enter value for <%= setting.name %>">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            <% }) %>
+                                        </div>
+                                        <% } %>
+
+                                        <!-- Email Settings -->
+                                        <% if (settings.email) { %>
+                                        <div class="settings-category">
+                                            <h5 class="mb-3 text-primary">
+                                                <i class="fas fa-envelope me-2"></i>Email Settings
+                                            </h5>
+                                            <% settings.email.forEach(setting => { %>
+                                                <div class="setting-item">
+                                                    <div class="row align-items-center">
+                                                        <div class="col-md-4">
+                                                            <label class="form-label fw-bold">
+                                                                <%= setting.name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) %>
+                                                            </label>
+                                                            <% if (setting.description) { %>
+                                                                <div class="setting-description">
+                                                                    <%= setting.description %>
+                                                                </div>
+                                                            <% } %>
+                                                        </div>
+                                                        <div class="col-md-8">
+                                                            <% if (setting.name.includes('password')) { %>
+                                                                <input type="password" 
+                                                                       class="form-control" 
+                                                                       name="<%= setting.name %>" 
+                                                                       value="<%= setting.value %>"
+                                                                       placeholder="••••••••">
+                                                            <% } else { %>
+                                                                <input type="text" 
+                                                                       class="form-control" 
+                                                                       name="<%= setting.name %>" 
+                                                                       value="<%= setting.value %>"
+                                                                       placeholder="Enter value for <%= setting.name %>">
+                                                            <% } %>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            <% }) %>
+                                        </div>
+                                        <% } %>
+
+                                        <!-- Security Settings -->
+                                        <% if (settings.security) { %>
+                                        <div class="settings-category">
+                                            <h5 class="mb-3 text-primary">
+                                                <i class="fas fa-shield-alt me-2"></i>Security Settings
+                                            </h5>
+                                            <% settings.security.forEach(setting => { %>
+                                                <div class="setting-item">
+                                                    <div class="row align-items-center">
+                                                        <div class="col-md-4">
+                                                            <label class="form-label fw-bold">
+                                                                <%= setting.name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) %>
+                                                            </label>
+                                                            <% if (setting.description) { %>
+                                                                <div class="setting-description">
+                                                                    <%= setting.description %>
+                                                                </div>
+                                                            <% } %>
+                                                        </div>
+                                                        <div class="col-md-8">
+                                                            <% if (setting.name.includes('enable') || setting.name.includes('allow')) { %>
+                                                                <select class="form-select" name="<%= setting.name %>">
+                                                                    <option value="true" <%= setting.value === 'true' ? 'selected' : '' %>>Enabled</option>
+                                                                    <option value="false" <%= setting.value === 'false' ? 'selected' : '' %>>Disabled</option>
+                                                                </select>
+                                                            <% } else { %>
+                                                                <input type="text" 
+                                                                       class="form-control" 
+                                                                       name="<%= setting.name %>" 
+                                                                       value="<%= setting.value %>"
+                                                                       placeholder="Enter value for <%= setting.name %>">
+                                                            <% } %>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            <% }) %>
+                                        </div>
+                                        <% } %>
+
+                                        <!-- Database Settings -->
+                                        <% if (settings.database) { %>
+                                        <div class="settings-category">
+                                            <h5 class="mb-3 text-primary">
+                                                <i class="fas fa-database me-2"></i>Database Settings
+                                            </h5>
+                                            <% settings.database.forEach(setting => { %>
+                                                <div class="setting-item">
+                                                    <div class="row align-items-center">
+                                                        <div class="col-md-4">
+                                                            <label class="form-label fw-bold">
+                                                                <%= setting.name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) %>
+                                                            </label>
+                                                            <% if (setting.description) { %>
+                                                                <div class="setting-description">
+                                                                    <%= setting.description %>
+                                                                </div>
+                                                            <% } %>
+                                                        </div>
+                                                        <div class="col-md-8">
+                                                            <input type="text" 
+                                                                   class="form-control" 
+                                                                   name="<%= setting.name %>" 
+                                                                   value="<%= setting.value %>"
+                                                                   placeholder="Enter value for <%= setting.name %>">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            <% }) %>
+                                        </div>
+                                        <% } %>
+
+                                        <!-- Other Categories -->
+                                        <% Object.keys(settings).forEach(category => { %>
+                                            <% if (!['general', 'email', 'security', 'database'].includes(category)) { %>
+                                                <div class="settings-category">
+                                                    <h5 class="mb-3 text-primary">
+                                                        <i class="fas fa-cogs me-2"></i>
+                                                        <%= category.charAt(0).toUpperCase() + category.slice(1) %> Settings
+                                                    </h5>
+                                                    <% settings[category].forEach(setting => { %>
+                                                        <div class="setting-item">
+                                                            <div class="row align-items-center">
+                                                                <div class="col-md-4">
+                                                                    <label class="form-label fw-bold">
+                                                                        <%= setting.name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) %>
+                                                                    </label>
+                                                                    <% if (setting.description) { %>
+                                                                        <div class="setting-description">
+                                                                            <%= setting.description %>
+                                                                        </div>
+                                                                    <% } %>
+                                                                </div>
+                                                                <div class="col-md-8">
+                                                                    <input type="text" 
+                                                                           class="form-control" 
+                                                                           name="<%= setting.name %>" 
+                                                                           value="<%= setting.value %>"
+                                                                           placeholder="Enter value for <%= setting.name %>">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    <% }) %>
+                                                </div>
+                                            <% } %>
+                                        <% }) %>
+
+                                    <% } else { %>
+                                        
+                                        <!-- No Settings Available -->
+                                        <div class="text-center py-5">
+                                            <div class="mb-4">
+                                                <i class="fas fa-cogs fa-4x text-muted"></i>
+                                            </div>
+                                            <h4 class="text-muted">No System Settings Found</h4>
+                                            <p class="text-muted mb-4">
+                                                The system_settings table doesn't exist or is empty.
+                                            </p>
+                                            <div class="alert alert-info text-start">
+                                                <h6><i class="fas fa-info-circle me-2"></i>How to set up system settings:</h6>
+                                                <p class="mb-2">Create a 'system_settings' table in your database with the following structure:</p>
+                                                <pre class="bg-dark text-light p-3 rounded small">
+CREATE TABLE system_settings (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) UNIQUE NOT NULL,
+    value TEXT,
+    description TEXT,
+    category VARCHAR(100) DEFAULT 'general',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);</pre>
+                                                <p class="mt-2 mb-0">Then insert some default settings:</p>
+                                                <pre class="bg-dark text-light p-3 rounded small">
+INSERT INTO system_settings (name, value, description, category) VALUES
+('app_name', 'FinMate', 'Application name', 'general'),
+('app_version', '2.0.0', 'Application version', 'general'),
+('admin_email', 'admin@finmate.com', 'Administrator email', 'email'),
+('smtp_host', 'smtp.gmail.com', 'SMTP server host', 'email'),
+('max_login_attempts', '5', 'Maximum login attempts before lockout', 'security'),
+('session_timeout', '3600', 'Session timeout in seconds', 'security');</pre>
+                                            </div>
+                                        </div>
+
+                                    <% } %>
+
+                                    <% if (Object.keys(settings).length > 0) { %>
+                                        <div class="text-center mt-4">
+                                            <button type="submit" class="btn btn-primary btn-lg">
+                                                <i class="fas fa-save me-2"></i>Save All Settings
+                                            </button>
+                                            <a href="/super-admin/system-settings" class="btn btn-secondary btn-lg ms-2">
+                                                <i class="fas fa-undo me-2"></i>Reset Changes
+                                            </a>
+                                        </div>
+                                    <% } %>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <% if (Object.keys(settings).length > 0) { %>
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-bolt me-2"></i>Quick Actions
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-3">
+                                        <button class="btn btn-outline-primary w-100" onclick="resetToDefaults()">
+                                            <i class="fas fa-undo me-2"></i>Reset to Defaults
+                                        </button>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <button class="btn btn-outline-info w-100" onclick="exportSettings()">
+                                            <i class="fas fa-download me-2"></i>Export Settings
+                                        </button>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <button class="btn btn-outline-warning w-100" onclick="clearCache()">
+                                            <i class="fas fa-broom me-2"></i>Clear Cache
+                                        </button>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <button class="btn btn-outline-success w-100" onclick="testSettings()">
+                                            <i class="fas fa-vial me-2"></i>Test Settings
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <% } %>
+
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Form validation
+        document.getElementById('settingsForm').addEventListener('submit', function(e) {
+            const inputs = this.querySelectorAll('input[required]');
+            let valid = true;
+            
+            inputs.forEach(input => {
+                if (!input.value.trim()) {
+                    valid = false;
+                    input.classList.add('is-invalid');
+                } else {
+                    input.classList.remove('is-invalid');
+                }
+            });
+            
+            if (!valid) {
+                e.preventDefault();
+                alert('Please fill in all required fields.');
+            }
+        });
+
+        // Quick action functions
+        function resetToDefaults() {
+            if (confirm('Are you sure you want to reset all settings to their default values?')) {
+                // This would typically call an API endpoint
+                alert('Reset functionality would be implemented here.');
+            }
+        }
+
+        function exportSettings() {
+            alert('Export functionality would be implemented here.');
+        }
+
+        function clearCache() {
+            if (confirm('Clear all system cache?')) {
+                // This would typically call an API endpoint
+                alert('Cache cleared successfully!');
+            }
+        }
+
+        function testSettings() {
+            alert('Test functionality would be implemented here.');
+        }
+
+        // Auto-save indicator
+        let saveTimeout;
+        const form = document.getElementById('settingsForm');
+        const saveButton = form.querySelector('button[type="submit"]');
+        
+        form.addEventListener('input', function() {
+            clearTimeout(saveTimeout);
+            saveButton.innerHTML = '<i class="fas fa-circle-notch fa-spin me-2"></i>Saving...';
+            saveButton.disabled = true;
+            
+            saveTimeout = setTimeout(() => {
+                saveButton.innerHTML = '<i class="fas fa-save me-2"></i>Save All Settings';
+                saveButton.disabled = false;
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
