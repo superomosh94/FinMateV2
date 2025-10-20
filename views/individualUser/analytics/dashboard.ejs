@@ -6,7 +6,6 @@
     <title>Financial Analytics - BudgetMaster</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -142,234 +141,19 @@
             font-weight: 600;
         }
 
-        /* Chart Styles */
-        .chart-container {
-            position: relative;
-            height: 400px;
-            width: 100%;
-            min-height: 400px;
-        }
-        
-        .filter-controls {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-        
-        .filter-group {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-        
-        .date-range-inputs {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-        
-        .filter-btn {
-            background: var(--primary-gradient);
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .filter-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-        
-        .filter-select, .date-input {
-            padding: 8px 12px;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-            background-color: white;
-        }
-
-        .loading-spinner {
-            display: none;
-            text-align: center;
-            padding: 2rem;
-        }
-
-        /* CSS Bar Chart */
-        .bar-chart {
-            margin: 1.5rem 0;
-        }
-
-        .bar-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 1rem;
-            padding: 0.5rem 0;
-        }
-
-        .bar-label {
-            width: 120px;
-            font-weight: 500;
-            color: #343a40;
-            font-size: 0.9rem;
-        }
-
-        .bar-container {
-            flex: 1;
-            background: #f8f9fa;
-            border-radius: 10px;
-            overflow: hidden;
-            height: 35px;
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
-        }
-
-        .bar-fill {
-            height: 100%;
-            background: var(--primary-gradient);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            padding: 0 15px;
-            color: white;
-            font-size: 0.8rem;
-            font-weight: 600;
-            min-width: 60px;
-            transition: width 0.8s ease;
-        }
-
-        /* Category Grid */
-        .category-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
-            margin-top: 1rem;
-        }
-
-        .category-item {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 12px;
-            border-left: 4px solid #667eea;
-            box-shadow: 0 3px 15px rgba(0,0,0,0.08);
-            transition: all 0.3s ease;
-            border: 1px solid rgba(0,0,0,0.05);
-        }
-
-        .category-item:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 25px rgba(0,0,0,0.12);
-        }
-
-        .percentage-display {
-            font-size: 1.5rem;
-            font-weight: 700;
-            background: var(--primary-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        /* Comparison Bars */
-        .comparison-bar {
-            display: flex;
-            height: 45px;
-            border-radius: 10px;
-            overflow: hidden;
-            margin: 1rem 0;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .income-bar {
-            background: var(--success-gradient);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-
-        .expense-bar {
-            background: var(--danger-gradient);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-
-        /* Budget Progress */
-        .budget-status {
-            display: flex;
-            align-items: center;
-            margin: 1rem 0;
-        }
-
-        .status-dot {
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            margin-right: 0.75rem;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-
-        .status-good { background: var(--success-gradient); }
-        .status-warning { background: var(--warning-gradient); }
-        .status-danger { background: var(--danger-gradient); }
-
-        .budget-bar {
-            background: linear-gradient(90deg, #e9ecef, #f8f9fa);
-            border-radius: 8px;
-            overflow: hidden;
-            height: 25px;
-            margin: 0.75rem 0;
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
-        }
-
-        .budget-fill {
-            height: 100%;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            padding: 0 12px;
-            color: white;
-            font-size: 0.75rem;
-            font-weight: 600;
-            min-width: 50px;
-        }
-
-        .bg-success { background: var(--success-gradient); }
-        .bg-warning { background: var(--warning-gradient); }
-        .bg-danger { background: var(--danger-gradient); }
-
-        /* Empty States */
-        .empty-state {
-            text-align: center;
-            padding: 3rem 2rem;
-            color: #6c757d;
-        }
-
-        .empty-state i {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-            opacity: 0.3;
-        }
-
-        /* Data Tables */
-        .data-table {
+        /* Expandable Table Styles */
+        .expandable-table {
             background: white;
             border-radius: 10px;
             overflow: hidden;
             box-shadow: 0 3px 15px rgba(0,0,0,0.08);
         }
 
-        .data-table th {
+        .expandable-table .table {
+            margin-bottom: 0;
+        }
+
+        .expandable-table th {
             background: var(--primary-gradient);
             color: white;
             border: none;
@@ -377,28 +161,115 @@
             padding: 1rem;
         }
 
-        .data-table td {
+        .expandable-table td {
             padding: 0.75rem 1rem;
             border-color: #f8f9fa;
+            vertical-align: middle;
         }
 
-        .data-table tbody tr:hover {
+        .expandable-table tbody tr {
+            transition: all 0.3s ease;
+        }
+
+        .expandable-table tbody tr:hover {
             background-color: #f8f9fa;
         }
 
-        /* Debug Panel */
-        .debug-panel {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            border-left: 4px solid #17a2b8;
+        .expandable-table tbody tr.expandable-row {
+            cursor: pointer;
         }
 
-        .debug-info {
-            font-family: 'Courier New', monospace;
-            font-size: 0.8rem;
-            color: #495057;
+        .expandable-table tbody tr.expandable-row:hover {
+            background-color: #e9ecef;
+        }
+
+        .expandable-content {
+            background: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .expandable-content .table {
+            margin-bottom: 0;
+            background: transparent;
+        }
+
+        .expandable-content td {
+            border-top: none;
+            padding: 0.5rem 1rem;
+        }
+
+        .badge-transactions {
+            background: var(--info-gradient);
+            color: white;
+        }
+
+        .badge-income {
+            background: var(--success-gradient);
+            color: white;
+        }
+
+        .badge-expense {
+            background: var(--danger-gradient);
+            color: white;
+        }
+
+        .progress {
+            height: 8px;
+            margin: 0.5rem 0;
+        }
+
+        .progress-bar {
+            border-radius: 4px;
+        }
+
+        .amount-positive {
+            color: #1cc88a;
+            font-weight: 600;
+        }
+
+        .amount-negative {
+            color: #e74a3b;
+            font-weight: 600;
+        }
+
+        .amount-neutral {
+            color: #6c757d;
+            font-weight: 600;
+        }
+
+        /* Summary Cards */
+        .summary-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            border-left: 4px solid;
+        }
+
+        .summary-card.income {
+            border-left-color: #1cc88a;
+        }
+
+        .summary-card.expense {
+            border-left-color: #e74a3b;
+        }
+
+        .summary-card.savings {
+            border-left-color: #667eea;
+        }
+
+        .summary-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .summary-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         /* Mobile Responsiveness */
@@ -442,26 +313,12 @@
                 grid-template-columns: 1fr;
             }
             
-            .category-grid {
-                grid-template-columns: 1fr;
-            }
-            
             .analytics-header {
                 padding: 1.5rem 1rem;
             }
             
-            .filter-controls {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            
-            .date-range-inputs {
-                flex-direction: column;
-                width: 100%;
-            }
-            
-            .date-input {
-                width: 100%;
+            .table-responsive {
+                font-size: 0.875rem;
             }
         }
     </style>
@@ -470,7 +327,7 @@
     <div class="container-fluid">
         <div class="row">
             <!-- Sidebar -->
-            <%- include('../../partials/sidebar', { user: user, currentPage: 'analytics', notificationCount: notificationCount }) %>
+          <%- include('../../partials/sidebar', { activePage: 'analytics' }) %>
 
             <!-- Main content -->
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
@@ -482,24 +339,6 @@
                     <h5 class="mb-0">Analytics</h5>
                 </div>
 
-                <!-- Debug Panel -->
-                <div class="debug-panel">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <small class="text-muted">Chart Debug Information</small>
-                        <div>
-                            <button onclick="debugChartStatus()" class="btn btn-info btn-sm me-2">
-                                <i class="fas fa-search me-1"></i> Check Status
-                            </button>
-                            <button onclick="recreateChart()" class="btn btn-success btn-sm">
-                                <i class="fas fa-redo me-1"></i> Recreate Chart
-                            </button>
-                        </div>
-                    </div>
-                    <div class="debug-info mt-2" id="debugInfo">
-                        Initializing...
-                    </div>
-                </div>
-
                 <!-- Overlay for mobile -->
                 <div class="sidebar-overlay d-md-none" id="sidebarOverlay"></div>
 
@@ -507,13 +346,13 @@
                 <div class="analytics-header">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h1 class="h3 mb-2"><i class="fas fa-chart-line me-2"></i>Financial Analytics</h1>
+                            <h1 class="h3 mb-2"><i class="fas fa-chart-bar me-2"></i>Financial Analytics</h1>
                             <p class="mb-0 opacity-85">Comprehensive insights into your financial patterns and trends</p>
                         </div>
                         <div class="btn-toolbar">
                             <span class="me-2 badge bg-light text-dark">
                                 <i class="fas fa-user me-1"></i>
-                                <%= user.email %>
+                                user@example.com
                             </span>
                         </div>
                     </div>
@@ -523,281 +362,615 @@
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-icon">💸</div>
-                        <div class="stat-value">Ksh <%= (financialData.expenseTrends.reduce((sum, item) => sum + item.amount, 0) || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></div>
+                        <div class="stat-value">Ksh 1,692.75</div>
                         <div class="stat-label">Total Expenses</div>
                     </div>
                     
                     <div class="stat-card">
                         <div class="stat-icon">💰</div>
-                        <div class="stat-value">Ksh <%= (financialData.incomeVsExpense.reduce((sum, item) => sum + (item.income - item.expenses), 0) || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></div>
+                        <div class="stat-value">Ksh 32,393.25</div>
                         <div class="stat-label">Net Savings</div>
                     </div>
                     
                     <div class="stat-card">
                         <div class="stat-icon">📊</div>
-                        <div class="stat-value"><%= financialData.categoryBreakdown.length || 0 %></div>
+                        <div class="stat-value">4</div>
                         <div class="stat-label">Active Categories</div>
                     </div>
                     
                     <div class="stat-card">
                         <div class="stat-icon">🎯</div>
-                        <div class="stat-value"><%= financialData.budgetProgress.filter(b => b.percentage > 90).length || 0 %></div>
-                        <div class="stat-label">Budgets Near Limit</div>
+                        <div class="stat-value">2</div>
+                        <div class="stat-label">Active Budgets</div>
                     </div>
                 </div>
 
-                <!-- Financial Trends Line Graph -->
-                <div class="visualization-card">
-                    <div class="card-header">
-                        <i class="fas fa-chart-line"></i>
-                        <h4>Financial Trends</h4>
-                    </div>
-                    
-                    <!-- Filter Controls -->
-                    <div class="filter-controls">
-                        <div class="filter-group">
-                            <label for="timeFilter">View by:</label>
-                            <select id="timeFilter" class="filter-select">
-                                <option value="7d">Last 7 Days</option>
-                                <option value="30d" selected>Last 30 Days</option>
-                                <option value="3m">Last 3 Months</option>
-                                <option value="6m">Last 6 Months</option>
-                                <option value="1y">Last Year</option>
-                                <option value="custom">Custom Range</option>
-                            </select>
+                <!-- Financial Summary -->
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="summary-card income">
+                            <div class="summary-value amount-positive">Ksh 34,086.00</div>
+                            <div class="summary-label">Total Income</div>
                         </div>
-                        
-                        <div class="filter-group date-range-inputs" id="customDateRange" style="display: none;">
-                            <label for="startDate">From:</label>
-                            <input type="date" id="startDate" class="date-input">
-                            <label for="endDate">To:</label>
-                            <input type="date" id="endDate" class="date-input">
-                        </div>
-                        
-                        <button id="applyFilter" class="filter-btn">
-                            <i class="fas fa-filter me-1"></i> Apply Filter
-                        </button>
-                        
-                        <button onclick="testChartWithSampleData()" class="filter-btn" style="background: #17a2b8;">
-                            <i class="fas fa-vial me-1"></i> Test with Sample Data
-                        </button>
                     </div>
-                    
-                    <!-- Loading Spinner -->
-                    <div class="loading-spinner" id="chartLoading">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
+                    <div class="col-md-4">
+                        <div class="summary-card expense">
+                            <div class="summary-value amount-negative">Ksh 1,692.75</div>
+                            <div class="summary-label">Total Expenses</div>
                         </div>
-                        <p class="mt-2 text-muted">Loading chart data...</p>
                     </div>
-                    
-                    <!-- Chart Container -->
-                    <div class="chart-container">
-                        <canvas id="trendsChart"></canvas>
+                    <div class="col-md-4">
+                        <div class="summary-card savings">
+                            <div class="summary-value amount-positive">Ksh 32,393.25</div>
+                            <div class="summary-label">Net Savings</div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Expense Trends -->
+                <!-- Expense Trends Table -->
                 <div class="visualization-card">
                     <div class="card-header">
-                        <i class="fas fa-chart-bar"></i>
-                        <h4>Expense Trends</h4>
+                        <i class="fas fa-receipt"></i>
+                        <h4>Daily Expense Trends</h4>
                     </div>
-                    <% if (financialData.expenseTrends && financialData.expenseTrends.length > 0) { 
-                        const maxAmount = Math.max(...financialData.expenseTrends.map(t => t.amount));
-                    %>
-                        <div class="bar-chart">
-                            <% financialData.expenseTrends.forEach(trend => { 
-                                const percentage = (trend.amount / maxAmount) * 100;
-                                const date = new Date(trend.date);
-                                const label = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                            %>
-                                <div class="bar-item">
-                                    <div class="bar-label"><%= label %></div>
-                                    <div class="bar-container">
-                                        <div class="bar-fill" style="width: <%= percentage %>%;">
-                                            Ksh <%= trend.amount.toFixed(2) %>
-                                        </div>
-                                    </div>
-                                </div>
-                            <% }); %>
+                    <div class="expandable-table">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Total Amount</th>
+                                        <th>Transaction Count</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="expandable-row" data-bs-toggle="collapse" data-bs-target="#day1">
+                                        <td>
+                                            <i class="fas fa-calendar-day me-2 text-primary"></i>
+                                            September 30, 2025
+                                        </td>
+                                        <td class="amount-negative">Ksh 15.75</td>
+                                        <td>
+                                            <span class="badge badge-transactions">1 transaction</span>
+                                        </td>
+                                        <td>
+                                            <i class="fas fa-chevron-down"></i>
+                                        </td>
+                                    </tr>
+                                    <tr class="expandable-content collapse" id="day1">
+                                        <td colspan="4">
+                                            <div class="p-3">
+                                                <h6 class="mb-3">Transaction Details</h6>
+                                                <table class="table table-sm">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Description</th>
+                                                            <th>Category</th>
+                                                            <th>Amount</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td>Sample transaction</td>
+                                                            <td>Food</td>
+                                                            <td class="amount-negative">Ksh 15.75</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    
+                                    <tr class="expandable-row" data-bs-toggle="collapse" data-bs-target="#day2">
+                                        <td>
+                                            <i class="fas fa-calendar-day me-2 text-primary"></i>
+                                            October 1, 2025
+                                        </td>
+                                        <td class="amount-negative">Ksh 45.00</td>
+                                        <td>
+                                            <span class="badge badge-transactions">1 transaction</span>
+                                        </td>
+                                        <td>
+                                            <i class="fas fa-chevron-down"></i>
+                                        </td>
+                                    </tr>
+                                    <tr class="expandable-content collapse" id="day2">
+                                        <td colspan="4">
+                                            <div class="p-3">
+                                                <h6 class="mb-3">Transaction Details</h6>
+                                                <table class="table table-sm">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Description</th>
+                                                            <th>Category</th>
+                                                            <th>Amount</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td>Sample transaction</td>
+                                                            <td>Food</td>
+                                                            <td class="amount-negative">Ksh 45.00</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    
+                                    <tr class="expandable-row" data-bs-toggle="collapse" data-bs-target="#day3">
+                                        <td>
+                                            <i class="fas fa-calendar-day me-2 text-primary"></i>
+                                            October 2, 2025
+                                        </td>
+                                        <td class="amount-negative">Ksh 75.00</td>
+                                        <td>
+                                            <span class="badge badge-transactions">1 transaction</span>
+                                        </td>
+                                        <td>
+                                            <i class="fas fa-chevron-down"></i>
+                                        </td>
+                                    </tr>
+                                    <tr class="expandable-content collapse" id="day3">
+                                        <td colspan="4">
+                                            <div class="p-3">
+                                                <h6 class="mb-3">Transaction Details</h6>
+                                                <table class="table table-sm">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Description</th>
+                                                            <th>Category</th>
+                                                            <th>Amount</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td>Sample transaction</td>
+                                                            <td>Entertainment</td>
+                                                            <td class="amount-negative">Ksh 75.00</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    
+                                    <tr class="expandable-row" data-bs-toggle="collapse" data-bs-target="#day4">
+                                        <td>
+                                            <i class="fas fa-calendar-day me-2 text-primary"></i>
+                                            October 11, 2025
+                                        </td>
+                                        <td class="amount-negative">Ksh 1,500.00</td>
+                                        <td>
+                                            <span class="badge badge-transactions">1 transaction</span>
+                                        </td>
+                                        <td>
+                                            <i class="fas fa-chevron-down"></i>
+                                        </td>
+                                    </tr>
+                                    <tr class="expandable-content collapse" id="day4">
+                                        <td colspan="4">
+                                            <div class="p-3">
+                                                <h6 class="mb-3">Transaction Details</h6>
+                                                <table class="table table-sm">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Description</th>
+                                                            <th>Category</th>
+                                                            <th>Amount</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td>Sample transaction</td>
+                                                            <td>Food</td>
+                                                            <td class="amount-negative">Ksh 1,500.00</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    
+                                    <tr class="expandable-row" data-bs-toggle="collapse" data-bs-target="#day5">
+                                        <td>
+                                            <i class="fas fa-calendar-day me-2 text-primary"></i>
+                                            October 12, 2025
+                                        </td>
+                                        <td class="amount-negative">Ksh 57.00</td>
+                                        <td>
+                                            <span class="badge badge-transactions">2 transactions</span>
+                                        </td>
+                                        <td>
+                                            <i class="fas fa-chevron-down"></i>
+                                        </td>
+                                    </tr>
+                                    <tr class="expandable-content collapse" id="day5">
+                                        <td colspan="4">
+                                            <div class="p-3">
+                                                <h6 class="mb-3">Transaction Details</h6>
+                                                <table class="table table-sm">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Description</th>
+                                                            <th>Category</th>
+                                                            <th>Amount</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td>Sample transaction 1</td>
+                                                            <td>Transportation</td>
+                                                            <td class="amount-negative">Ksh 45.00</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>Sample transaction 2</td>
+                                                            <td>Food & Dining</td>
+                                                            <td class="amount-negative">Ksh 12.00</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
-                    <% } else { %>
-                        <div class="empty-state">
-                            <i class="fas fa-chart-bar"></i>
-                            <h5>No Expense Data</h5>
-                            <p class="text-muted">No expenses recorded for the selected period.</p>
-                        </div>
-                    <% } %>
+                    </div>
                 </div>
 
-                <!-- Category Breakdown -->
+                <!-- Category Breakdown Table -->
                 <div class="visualization-card">
                     <div class="card-header">
-                        <i class="fas fa-chart-pie"></i>
+                        <i class="fas fa-tags"></i>
                         <h4>Spending by Category</h4>
                     </div>
-                    <% if (financialData.categoryBreakdown && financialData.categoryBreakdown.length > 0) { 
-                        const totalAmount = financialData.categoryBreakdown.reduce((sum, cat) => sum + cat.amount, 0);
-                    %>
-                        <div class="category-grid">
-                            <% financialData.categoryBreakdown.forEach(category => { 
-                                const percentage = totalAmount > 0 ? (category.amount / totalAmount) * 100 : 0;
-                            %>
-                                <div class="category-item">
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <strong class="text-dark"><%= category.category %></strong>
-                                        <div class="percentage-display"><%= percentage.toFixed(1) %>%</div>
-                                    </div>
-                                    <div class="text-muted mb-3">Ksh <%= category.amount.toFixed(2) %></div>
-                                    <div class="bar-container">
-                                        <div class="bar-fill" style="width: <%= percentage %>%;">
-                                            <%= percentage.toFixed(1) %>%
-                                        </div>
-                                    </div>
-                                </div>
-                            <% }); %>
-                        </div>
-                    <% } else { %>
-                        <div class="empty-state">
-                            <i class="fas fa-chart-pie"></i>
-                            <h5>No Category Data</h5>
-                            <p class="text-muted">No category spending data available.</p>
-                        </div>
-                    <% } %>
-                </div>
-
-                <!-- Income vs Expenses & Budget Progress -->
-                <div class="row">
-                    <div class="col-lg-6">
-                        <div class="visualization-card h-100">
-                            <div class="card-header">
-                                <i class="fas fa-balance-scale"></i>
-                                <h4>Income vs Expenses</h4>
-                            </div>
-                            <% if (financialData.incomeVsExpense && financialData.incomeVsExpense.length > 0) { 
-                                financialData.incomeVsExpense.forEach(month => {
-                                    const total = month.income + month.expenses;
-                                    const incomePercent = total > 0 ? (month.income / total) * 100 : 0;
-                                    const expensePercent = total > 0 ? (month.expenses / total) * 100 : 0;
-                            %>
-                                <div class="mb-4">
-                                    <h6 class="text-dark mb-3"><%= month.month %></h6>
-                                    <div class="comparison-bar">
-                                        <div class="income-bar" style="width: <%= incomePercent %>%;">
-                                            Ksh <%= month.income.toFixed(2) %>
-                                        </div>
-                                        <div class="expense-bar" style="width: <%= expensePercent %>%;">
-                                            Ksh <%= month.expenses.toFixed(2) %>
-                                        </div>
-                                    </div>
-                                    <div class="d-flex justify-content-between text-muted small mt-2">
-                                        <span><i class="fas fa-arrow-up text-success me-1"></i>Income</span>
-                                        <span><i class="fas fa-arrow-down text-danger me-1"></i>Expenses</span>
-                                    </div>
-                                </div>
-                            <% }); 
-                            } else { %>
-                                <div class="empty-state">
-                                    <i class="fas fa-balance-scale"></i>
-                                    <h5>No Comparison Data</h5>
-                                    <p class="text-muted">No income or expense data for comparison.</p>
-                                </div>
-                            <% } %>
-                        </div>
-                    </div>
-
-                    <div class="col-lg-6">
-                        <div class="visualization-card h-100">
-                            <div class="card-header">
-                                <i class="fas fa-bullseye"></i>
-                                <h4>Budget Progress</h4>
-                            </div>
-                            <% if (financialData.budgetProgress && financialData.budgetProgress.length > 0) { %>
-                                <div class="category-grid">
-                                    <% financialData.budgetProgress.forEach(budget => { %>
-                                        <div class="category-item">
-                                            <div class="budget-status">
-                                                <div class="status-dot <%= budget.percentage > 90 ? 'status-danger' : budget.percentage > 75 ? 'status-warning' : 'status-good' %>"></div>
-                                                <strong class="text-dark"><%= budget.category %></strong>
-                                            </div>
-                                            <div class="d-flex justify-content-between text-muted small mb-2">
-                                                <span>Spent:</span>
-                                                <span>Ksh <%= budget.spent.toFixed(2) %> / Ksh <%= budget.budget.toFixed(2) %></span>
-                                            </div>
-                                            <div class="budget-bar">
-                                                <div class="budget-fill <%= budget.percentage > 90 ? 'bg-danger' : budget.percentage > 75 ? 'bg-warning' : 'bg-success' %>" 
-                                                     style="width: <%= Math.min(budget.percentage, 100) %>%;">
-                                                    <%= budget.percentage.toFixed(1) %>%
+                    <div class="expandable-table">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Category</th>
+                                        <th>Total Amount</th>
+                                        <th>Transaction Count</th>
+                                        <th>Percentage</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="expandable-row" data-bs-toggle="collapse" data-bs-target="#cat1">
+                                        <td>
+                                            <i class="fas fa-utensils me-2 text-success"></i>
+                                            Food
+                                        </td>
+                                        <td class="amount-negative">Ksh 1,500.00</td>
+                                        <td>
+                                            <span class="badge badge-transactions">1 transaction</span>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="progress flex-grow-1 me-2">
+                                                    <div class="progress-bar bg-success" style="width: 88.6%"></div>
                                                 </div>
+                                                <span>88.6%</span>
                                             </div>
-                                            <div class="text-muted small mt-2">
-                                                <i class="fas fa-coins me-1"></i>Remaining: Ksh <%= budget.remaining.toFixed(2) %>
+                                        </td>
+                                        <td>
+                                            <i class="fas fa-chevron-down"></i>
+                                        </td>
+                                    </tr>
+                                    <tr class="expandable-content collapse" id="cat1">
+                                        <td colspan="5">
+                                            <div class="p-3">
+                                                <h6 class="mb-3">Transaction Details - Food</h6>
+                                                <table class="table table-sm">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Date</th>
+                                                            <th>Description</th>
+                                                            <th>Amount</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td>Oct 11, 2025</td>
+                                                            <td>Sample transaction</td>
+                                                            <td class="amount-negative">Ksh 1,500.00</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
                                             </div>
-                                        </div>
-                                    <% }); %>
-                                </div>
-                            <% } else { %>
-                                <div class="empty-state">
-                                    <i class="fas fa-bullseye"></i>
-                                    <h5>No Budget Data</h5>
-                                    <p class="text-muted">No active budgets to display.</p>
-                                </div>
-                            <% } %>
+                                        </td>
+                                    </tr>
+                                    
+                                    <tr class="expandable-row" data-bs-toggle="collapse" data-bs-target="#cat2">
+                                        <td>
+                                            <i class="fas fa-film me-2 text-warning"></i>
+                                            Entertainment
+                                        </td>
+                                        <td class="amount-negative">Ksh 75.00</td>
+                                        <td>
+                                            <span class="badge badge-transactions">1 transaction</span>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="progress flex-grow-1 me-2">
+                                                    <div class="progress-bar bg-warning" style="width: 4.4%"></div>
+                                                </div>
+                                                <span>4.4%</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <i class="fas fa-chevron-down"></i>
+                                        </td>
+                                    </tr>
+                                    <tr class="expandable-content collapse" id="cat2">
+                                        <td colspan="5">
+                                            <div class="p-3">
+                                                <h6 class="mb-3">Transaction Details - Entertainment</h6>
+                                                <table class="table table-sm">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Date</th>
+                                                            <th>Description</th>
+                                                            <th>Amount</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td>Oct 2, 2025</td>
+                                                            <td>Sample transaction</td>
+                                                            <td class="amount-negative">Ksh 75.00</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    
+                                    <tr class="expandable-row" data-bs-toggle="collapse" data-bs-target="#cat3">
+                                        <td>
+                                            <i class="fas fa-bus me-2 text-info"></i>
+                                            Transportation
+                                        </td>
+                                        <td class="amount-negative">Ksh 68.00</td>
+                                        <td>
+                                            <span class="badge badge-transactions">2 transactions</span>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="progress flex-grow-1 me-2">
+                                                    <div class="progress-bar bg-info" style="width: 4.0%"></div>
+                                                </div>
+                                                <span>4.0%</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <i class="fas fa-chevron-down"></i>
+                                        </td>
+                                    </tr>
+                                    <tr class="expandable-content collapse" id="cat3">
+                                        <td colspan="5">
+                                            <div class="p-3">
+                                                <h6 class="mb-3">Transaction Details - Transportation</h6>
+                                                <table class="table table-sm">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Date</th>
+                                                            <th>Description</th>
+                                                            <th>Amount</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td>Oct 12, 2025</td>
+                                                            <td>Sample transaction 1</td>
+                                                            <td class="amount-negative">Ksh 45.00</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>Other date</td>
+                                                            <td>Sample transaction 2</td>
+                                                            <td class="amount-negative">Ksh 23.00</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    
+                                    <tr class="expandable-row" data-bs-toggle="collapse" data-bs-target="#cat4">
+                                        <td>
+                                            <i class="fas fa-utensils me-2 text-primary"></i>
+                                            Food & Dining
+                                        </td>
+                                        <td class="amount-negative">Ksh 49.75</td>
+                                        <td>
+                                            <span class="badge badge-transactions">2 transactions</span>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="progress flex-grow-1 me-2">
+                                                    <div class="progress-bar bg-primary" style="width: 2.9%"></div>
+                                                </div>
+                                                <span>2.9%</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <i class="fas fa-chevron-down"></i>
+                                        </td>
+                                    </tr>
+                                    <tr class="expandable-content collapse" id="cat4">
+                                        <td colspan="5">
+                                            <div class="p-3">
+                                                <h6 class="mb-3">Transaction Details - Food & Dining</h6>
+                                                <table class="table table-sm">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Date</th>
+                                                            <th>Description</th>
+                                                            <th>Amount</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td>Oct 12, 2025</td>
+                                                            <td>Sample transaction</td>
+                                                            <td class="amount-negative">Ksh 12.00</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>Other date</td>
+                                                            <td>Sample transaction</td>
+                                                            <td class="amount-negative">Ksh 37.75</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
 
-                <!-- Data Tables -->
+                <!-- Budget Progress Table -->
                 <div class="visualization-card">
                     <div class="card-header">
-                        <i class="fas fa-table"></i>
-                        <h4>Detailed Data</h4>
+                        <i class="fas fa-bullseye"></i>
+                        <h4>Budget Progress</h4>
                     </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h6 class="text-dark mb-3">Recent Expenses</h6>
-                            <div class="data-table">
-                                <table class="table table-hover mb-0">
-                                    <thead>
-                                        <tr>
-                                            <th>Date</th>
-                                            <th>Amount</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <% financialData.expenseTrends.slice(0, 5).forEach(expense => { 
-                                            const date = new Date(expense.date);
-                                        %>
-                                            <tr>
-                                                <td><%= date.toLocaleDateString() %></td>
-                                                <td class="fw-bold">Ksh <%= expense.amount.toFixed(2) %></td>
-                                            </tr>
-                                        <% }); %>
-                                    </tbody>
-                                </table>
-                            </div>
+                    <div class="expandable-table">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Category</th>
+                                        <th>Budget Amount</th>
+                                        <th>Spent Amount</th>
+                                        <th>Remaining</th>
+                                        <th>Progress</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <i class="fas fa-utensils me-2 text-primary"></i>
+                                            Food & Dining
+                                        </td>
+                                        <td class="amount-neutral">Ksh 350.00</td>
+                                        <td class="amount-negative">Ksh 49.75</td>
+                                        <td class="amount-positive">Ksh 300.25</td>
+                                        <td>
+                                            <div class="progress">
+                                                <div class="progress-bar bg-success" style="width: 14.2%">14.2%</div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-success">On Track</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <i class="fas fa-bus me-2 text-info"></i>
+                                            Transportation
+                                        </td>
+                                        <td class="amount-neutral">Ksh 350.00</td>
+                                        <td class="amount-negative">Ksh 23.00</td>
+                                        <td class="amount-positive">Ksh 327.00</td>
+                                        <td>
+                                            <div class="progress">
+                                                <div class="progress-bar bg-success" style="width: 6.6%">6.6%</div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-success">On Track</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <i class="fas fa-shopping-bag me-2 text-warning"></i>
+                                            Shopping
+                                        </td>
+                                        <td class="amount-neutral">Ksh 150.00</td>
+                                        <td class="amount-negative">Ksh 0.00</td>
+                                        <td class="amount-positive">Ksh 150.00</td>
+                                        <td>
+                                            <div class="progress">
+                                                <div class="progress-bar bg-success" style="width: 0%">0%</div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-success">On Track</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <i class="fas fa-heartbeat me-2 text-danger"></i>
+                                            Healthcare
+                                        </td>
+                                        <td class="amount-neutral">Ksh 100.00</td>
+                                        <td class="amount-negative">Ksh 0.00</td>
+                                        <td class="amount-positive">Ksh 100.00</td>
+                                        <td>
+                                            <div class="progress">
+                                                <div class="progress-bar bg-success" style="width: 0%">0%</div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-success">On Track</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
-                        <div class="col-md-6">
-                            <h6 class="text-dark mb-3">Category Summary</h6>
-                            <div class="data-table">
-                                <table class="table table-hover mb-0">
-                                    <thead>
-                                        <tr>
-                                            <th>Category</th>
-                                            <th>Total</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <% financialData.categoryBreakdown.forEach(category => { %>
-                                            <tr>
-                                                <td><%= category.category %></td>
-                                                <td class="fw-bold">Ksh <%= category.amount.toFixed(2) %></td>
-                                            </tr>
-                                        <% }); %>
-                                    </tbody>
-                                </table>
-                            </div>
+                    </div>
+                </div>
+
+                <!-- Monthly Summary -->
+                <div class="visualization-card">
+                    <div class="card-header">
+                        <i class="fas fa-calendar-alt"></i>
+                        <h4>Monthly Financial Summary - October 2025</h4>
+                    </div>
+                    <div class="expandable-table">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Metric</th>
+                                        <th>Amount</th>
+                                        <th>Details</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <i class="fas fa-arrow-up text-success me-2"></i>
+                                            Total Income
+                                        </td>
+                                        <td class="amount-positive">Ksh 34,086.00</td>
+                                        <td>Primary income source</td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <i class="fas fa-arrow-down text-danger me-2"></i>
+                                            Total Expenses
+                                        </td>
+                                        <td class="amount-negative">Ksh 1,692.75</td>
+                                        <td>6 transactions across 4 categories</td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <i class="fas fa-piggy-bank text-primary me-2"></i>
+                                            Net Savings
+                                        </td>
+                                        <td class="amount-positive">Ksh 32,393.25</td>
+                                        <td>Savings rate: 95.0%</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -807,30 +980,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Global variables
-        let trendsChart = null;
-        const sampleChartData = {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-            income: [50000, 52000, 48000, 55000, 53000, 58000],
-            expenses: [35000, 38000, 42000, 37000, 39000, 41000],
-            savings: [15000, 14000, 6000, 18000, 14000, 17000]
-        };
-
-        // Debug function
-        function debugChartStatus() {
-            const canvas = document.getElementById('trendsChart');
-            const debugInfo = document.getElementById('debugInfo');
-            
-            let status = `📊 CHART STATUS:\n`;
-            status += `Canvas: ${canvas ? '✅ Found' : '❌ Not found'}\n`;
-            status += `Dimensions: ${canvas ? `${canvas.offsetWidth}x${canvas.offsetHeight}` : 'N/A'}\n`;
-            status += `Chart instance: ${trendsChart ? '✅ Created' : '❌ Not created'}\n`;
-            status += `Chart.js: ${typeof Chart !== 'undefined' ? '✅ Loaded' : '❌ Not loaded'}`;
-            
-            debugInfo.innerHTML = status.replace(/\n/g, '<br>');
-            console.log('🔍 ' + status.replace(/\n/g, ' | '));
-        }
-
         // Mobile menu functionality
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🚀 Initializing Financial Analytics Dashboard');
@@ -857,254 +1006,17 @@
                 });
             });
 
-            // Initialize dashboard
-            setTimeout(initializeDashboard, 100);
-        });
-
-        // Main initialization function
-        function initializeDashboard() {
-            console.log('📈 Initializing dashboard components...');
-            
-            initializeTrendsChart();
-            setupFilterControls();
-            loadChartData();
-            debugChartStatus();
-        }
-
-        // Chart initialization
-        function initializeTrendsChart() {
-            console.log('🎯 Creating trends chart...');
-            const canvas = document.getElementById('trendsChart');
-            
-            if (!canvas) {
-                console.error('❌ Chart canvas not found');
-                return;
-            }
-
-            // Clear existing chart
-            if (trendsChart) trendsChart.destroy();
-
-            try {
-                trendsChart = new Chart(canvas, {
-                    type: 'line',
-                    data: {
-                        labels: [],
-                        datasets: [
-                            {
-                                label: 'Income',
-                                data: [],
-                                borderColor: '#1cc88a',
-                                backgroundColor: 'rgba(28, 200, 138, 0.1)',
-                                borderWidth: 3,
-                                tension: 0.3,
-                                fill: true,
-                                pointBackgroundColor: '#1cc88a',
-                                pointBorderColor: '#fff',
-                                pointBorderWidth: 2,
-                                pointRadius: 4,
-                                pointHoverRadius: 6
-                            },
-                            {
-                                label: 'Expenses',
-                                data: [],
-                                borderColor: '#e74a3b',
-                                backgroundColor: 'rgba(231, 74, 59, 0.1)',
-                                borderWidth: 3,
-                                tension: 0.3,
-                                fill: true,
-                                pointBackgroundColor: '#e74a3b',
-                                pointBorderColor: '#fff',
-                                pointBorderWidth: 2,
-                                pointRadius: 4,
-                                pointHoverRadius: 6
-                            },
-                            {
-                                label: 'Savings',
-                                data: [],
-                                borderColor: '#667eea',
-                                backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                                borderWidth: 3,
-                                tension: 0.3,
-                                fill: true,
-                                pointBackgroundColor: '#667eea',
-                                pointBorderColor: '#fff',
-                                pointBorderWidth: 2,
-                                pointRadius: 4,
-                                pointHoverRadius: 6
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'top',
-                                labels: {
-                                    padding: 20,
-                                    usePointStyle: true,
-                                    font: { size: 12, weight: 'bold' }
-                                }
-                            },
-                            tooltip: {
-                                mode: 'index',
-                                intersect: false,
-                                callbacks: {
-                                    label: (context) => `${context.dataset.label}: Ksh ${context.parsed.y.toLocaleString()}`
-                                }
-                            }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: {
-                                    callback: (value) => 'Ksh ' + value.toLocaleString()
-                                }
-                            }
-                        }
+            // Enhance expandable rows
+            document.querySelectorAll('.expandable-row').forEach(row => {
+                row.addEventListener('click', function() {
+                    const icon = this.querySelector('.fa-chevron-down');
+                    if (icon) {
+                        icon.classList.toggle('fa-chevron-down');
+                        icon.classList.toggle('fa-chevron-up');
                     }
                 });
-                
-                console.log('✅ Chart created successfully');
-            } catch (error) {
-                console.error('❌ Chart creation failed:', error);
-            }
-        }
-
-        // Filter controls setup
-        function setupFilterControls() {
-            const timeFilter = document.getElementById('timeFilter');
-            const customDateRange = document.getElementById('customDateRange');
-            const applyFilterBtn = document.getElementById('applyFilter');
-            
-            if (!timeFilter || !applyFilterBtn) return;
-
-            timeFilter.addEventListener('change', function() {
-                customDateRange.style.display = this.value === 'custom' ? 'flex' : 'none';
             });
-
-            applyFilterBtn.addEventListener('click', loadChartData);
-            
-            // Set default dates
-            const today = new Date();
-            const oneMonthAgo = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
-            
-            const startDate = document.getElementById('startDate');
-            const endDate = document.getElementById('endDate');
-            if (startDate) startDate.valueAsDate = oneMonthAgo;
-            if (endDate) endDate.valueAsDate = today;
-        }
-
-        // Load chart data
-        async function loadChartData() {
-            console.log('📥 Loading chart data...');
-            showLoading(true);
-            
-            try {
-                const timeFilter = document.getElementById('timeFilter').value;
-                let startDate, endDate = new Date();
-                
-                // Calculate date range
-                switch(timeFilter) {
-                    case '7d': startDate = new Date(endDate.getTime() - 7 * 24 * 60 * 60 * 1000); break;
-                    case '30d': startDate = new Date(endDate.getTime() - 30 * 24 * 60 * 60 * 1000); break;
-                    case '3m': startDate = new Date(endDate.getFullYear(), endDate.getMonth() - 3, endDate.getDate()); break;
-                    case '6m': startDate = new Date(endDate.getFullYear(), endDate.getMonth() - 6, endDate.getDate()); break;
-                    case '1y': startDate = new Date(endDate.getFullYear() - 1, endDate.getMonth(), endDate.getDate()); break;
-                    case 'custom': 
-                        startDate = new Date(document.getElementById('startDate').value);
-                        endDate = new Date(document.getElementById('endDate').value);
-                        break;
-                    default: startDate = new Date(endDate.getTime() - 30 * 24 * 60 * 60 * 1000);
-                }
-
-                // Try to fetch data from API
-                const response = await fetch('/user/api/analytics/trends', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        startDate: startDate.toISOString().split('T')[0],
-                        endDate: endDate.toISOString().split('T')[0]
-                    })
-                });
-
-                if (response.ok) {
-                    const chartData = await response.json();
-                    updateChartWithData(chartData);
-                    showNotification(`Data loaded for ${timeFilter} period`, 'success');
-                } else {
-                    throw new Error('API request failed');
-                }
-            } catch (error) {
-                console.log('🔄 Using sample data as fallback');
-                updateChartWithData(sampleChartData);
-                showNotification('Using sample data for demonstration', 'info');
-            } finally {
-                showLoading(false);
-            }
-        }
-
-        // Update chart with data
-        function updateChartWithData(chartData) {
-            if (!trendsChart) {
-                console.error('❌ Chart not initialized');
-                return;
-            }
-
-            const labels = Array.isArray(chartData.labels) ? chartData.labels : sampleChartData.labels;
-            const incomeData = Array.isArray(chartData.income) ? chartData.income : sampleChartData.income;
-            const expenseData = Array.isArray(chartData.expenses) ? chartData.expenses : sampleChartData.expenses;
-            const savingsData = Array.isArray(chartData.savings) ? chartData.savings : sampleChartData.savings;
-
-            trendsChart.data.labels = labels;
-            trendsChart.data.datasets[0].data = incomeData;
-            trendsChart.data.datasets[1].data = expenseData;
-            trendsChart.data.datasets[2].data = savingsData;
-            
-            trendsChart.update('active');
-            console.log('✅ Chart updated with data');
-        }
-
-        // Utility functions
-        function showLoading(show) {
-            const spinner = document.getElementById('chartLoading');
-            if (spinner) spinner.style.display = show ? 'block' : 'none';
-        }
-
-        function showNotification(message, type = 'info') {
-            const toast = document.createElement('div');
-            toast.className = 'position-fixed bottom-0 end-0 p-3';
-            toast.style.zIndex = '11';
-            toast.innerHTML = `
-                <div class="toast show">
-                    <div class="toast-header ${type === 'error' ? 'bg-danger' : type === 'success' ? 'bg-success' : 'bg-primary'} text-white">
-                        <i class="fas fa-${type === 'error' ? 'exclamation-triangle' : type === 'success' ? 'check-circle' : 'info-circle'} me-2"></i>
-                        <strong class="me-auto">${type.charAt(0).toUpperCase() + type.slice(1)}</strong>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
-                    </div>
-                    <div class="toast-body">${message}</div>
-                </div>
-            `;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 5000);
-        }
-
-        // Debug functions
-        function testChartWithSampleData() {
-            console.log('🧪 Testing with sample data');
-            updateChartWithData(sampleChartData);
-            showNotification('Sample data loaded successfully!', 'success');
-        }
-
-        function recreateChart() {
-            console.log('🔄 Recreating chart...');
-            if (trendsChart) trendsChart.destroy();
-            trendsChart = null;
-            setTimeout(() => {
-                initializeTrendsChart();
-                setTimeout(() => updateChartWithData(sampleChartData), 100);
-            }, 50);
-        }
+        });
     </script>
 </body>
 </html>
