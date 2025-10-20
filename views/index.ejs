@@ -13,12 +13,25 @@
         :root {
             --primary: #6366f1;
             --primary-dark: #4f46e5;
+            --primary-light: #e0e7ff;
             --secondary: #10b981;
+            --secondary-light: #d1fae5;
             --accent: #f59e0b;
+            --accent-light: #fef3c7;
             --dark: #1f2937;
+            --dark-light: #374151;
             --light: #f8fafc;
+            --gray: #6b7280;
+            --gray-light: #e5e7eb;
             --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --gradient-primary: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            --gradient-light: linear-gradient(135deg, #818cf8 0%, #6366f1 100%);
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --radius: 8px;
+            --radius-lg: 12px;
+            --radius-xl: 16px;
         }
 
         * {
@@ -32,25 +45,44 @@
             line-height: 1.6;
             color: var(--dark);
             overflow-x: hidden;
+            font-size: 16px;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--gray);
         }
 
         /* Navigation */
         .navbar {
             backdrop-filter: blur(10px);
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(255, 255, 255, 0.98);
             transition: all 0.3s ease;
             padding: 1rem 0;
+            box-shadow: var(--shadow-sm);
         }
 
         .navbar.scrolled {
             background: rgba(255, 255, 255, 0.98);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            box-shadow: var(--shadow);
         }
 
         .navbar-brand {
             font-weight: 700;
             font-size: 1.5rem;
             color: var(--primary) !important;
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-brand i {
+            font-size: 1.75rem;
         }
 
         .nav-link {
@@ -58,15 +90,30 @@
             color: var(--dark) !important;
             transition: all 0.3s ease;
             margin: 0 0.5rem;
+            position: relative;
         }
 
         .nav-link:hover {
             color: var(--primary) !important;
-            transform: translateY(-1px);
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: var(--primary);
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
         }
 
         .btn-primary-custom {
-            background: var(--gradient-primary);
+            background: var(--gradient-light);
             border: none;
             padding: 0.75rem 2rem;
             border-radius: 50px;
@@ -84,7 +131,7 @@
         .hero-section {
             background: var(--gradient);
             color: white;
-            padding: 120px 0 100px;
+            padding: 160px 0 100px;
             position: relative;
             overflow: hidden;
         }
@@ -115,11 +162,12 @@
             font-weight: 500;
             margin-bottom: 2rem;
             display: inline-block;
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
         .hero-title {
             font-size: 3.5rem;
-            font-weight: 700;
+            font-weight: 800;
             line-height: 1.1;
             margin-bottom: 1.5rem;
         }
@@ -131,80 +179,38 @@
             max-width: 600px;
             margin-left: auto;
             margin-right: auto;
+            line-height: 1.6;
         }
 
-        /* Features Section */
-        .features-section {
-            padding: 100px 0;
-            background: var(--light);
-        }
-
-        .section-title {
-            font-size: 2.5rem;
-            font-weight: 700;
-            text-align: center;
-            margin-bottom: 1rem;
-            color: var(--dark);
-        }
-
-        .section-subtitle {
-            text-align: center;
-            color: #6b7280;
-            font-size: 1.1rem;
-            max-width: 600px;
-            margin: 0 auto 4rem;
-        }
-
-        .feature-card {
+        .btn-light-custom {
             background: white;
-            padding: 3rem 2rem;
-            border-radius: 20px;
-            text-align: center;
-            transition: all 0.3s ease;
-            border: 1px solid #e5e7eb;
-            height: 100%;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .feature-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: var(--gradient-primary);
-        }
-
-        .feature-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-        }
-
-        .feature-icon {
-            width: 80px;
-            height: 80px;
-            background: var(--gradient-primary);
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 2rem;
-            color: white;
-            font-size: 2rem;
-        }
-
-        .feature-title {
-            font-size: 1.5rem;
+            color: var(--primary);
+            border: none;
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
             font-weight: 600;
-            margin-bottom: 1rem;
-            color: var(--dark);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
         }
 
-        .feature-description {
-            color: #6b7280;
-            line-height: 1.7;
+        .btn-light-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 255, 255, 0.3);
+            color: var(--primary);
+        }
+
+        .btn-outline-light {
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline-light:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: white;
+            transform: translateY(-2px);
         }
 
         /* Stats Section */
@@ -220,16 +226,340 @@
 
         .stat-number {
             font-size: 3rem;
-            font-weight: 700;
-            background: var(--gradient-primary);
+            font-weight: 800;
+            background: var(--gradient-light);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             margin-bottom: 0.5rem;
+            line-height: 1;
         }
 
         .stat-label {
-            color: #6b7280;
+            color: var(--gray);
             font-weight: 500;
+            font-size: 1.1rem;
+        }
+
+        /* Features Section */
+        .features-section {
+            padding: 100px 0;
+            background: var(--light);
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: var(--gray);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto 4rem;
+            line-height: 1.6;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 3rem 2rem;
+            border-radius: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid var(--gray-light);
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-light);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--gradient-light);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 2rem;
+            color: white;
+            font-size: 2rem;
+        }
+
+        .feature-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+
+        .feature-description {
+            color: var(--gray);
+            line-height: 1.7;
+        }
+
+        /* Benefits Section */
+        .benefits-section {
+            padding: 100px 0;
+            background: white;
+        }
+
+        .benefit-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 2.5rem;
+        }
+
+        .benefit-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--primary-light);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1.5rem;
+            flex-shrink: 0;
+            color: var(--primary);
+            font-size: 1.5rem;
+        }
+
+        .benefit-content h4 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+        }
+
+        .benefit-content p {
+            color: var(--gray);
+            margin-bottom: 0;
+        }
+
+        /* Testimonials Section */
+        .testimonials-section {
+            padding: 100px 0;
+            background: var(--light);
+        }
+
+        .testimonial-card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+            height: 100%;
+            position: relative;
+        }
+
+        .testimonial-card::before {
+            content: '"';
+            position: absolute;
+            top: 1rem;
+            right: 2rem;
+            font-size: 5rem;
+            color: var(--primary-light);
+            font-family: Georgia, serif;
+            line-height: 1;
+        }
+
+        .testimonial-text {
+            font-style: italic;
+            color: var(--dark-light);
+            margin-bottom: 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+        }
+
+        .author-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--gradient-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            margin-right: 1rem;
+        }
+
+        .author-info h5 {
+            margin-bottom: 0.25rem;
+            font-size: 1rem;
+        }
+
+        .author-info p {
+            margin-bottom: 0;
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+
+        /* How It Works Section */
+        .how-it-works-section {
+            padding: 100px 0;
+            background: white;
+        }
+
+        .step-card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: var(--radius-lg);
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid var(--gray-light);
+            height: 100%;
+            position: relative;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .step-number {
+            width: 60px;
+            height: 60px;
+            background: var(--gradient-light);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .step-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+
+        .step-description {
+            color: var(--gray);
+            line-height: 1.7;
+        }
+
+        /* Pricing Section */
+        .pricing-section {
+            padding: 100px 0;
+            background: var(--light);
+        }
+
+        .pricing-card {
+            background: white;
+            padding: 3rem 2rem;
+            border-radius: var(--radius-lg);
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid var(--gray-light);
+            height: 100%;
+            position: relative;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .pricing-card.featured {
+            border: 2px solid var(--primary);
+            transform: scale(1.05);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .pricing-card.featured::before {
+            content: 'Most Popular';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--gradient-light);
+            color: white;
+            padding: 0.25rem 1.5rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .pricing-header {
+            margin-bottom: 2rem;
+        }
+
+        .pricing-name {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+        }
+
+        .pricing-price {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .pricing-period {
+            color: var(--gray);
+            font-size: 1rem;
+        }
+
+        .pricing-features {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 2rem;
+        }
+
+        .pricing-features li {
+            margin-bottom: 0.75rem;
+            color: var(--gray);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pricing-features li i {
+            color: var(--secondary);
+            margin-right: 0.5rem;
+        }
+
+        /* FAQ Section */
+        .faq-section {
+            padding: 100px 0;
+            background: white;
+        }
+
+        .accordion-button {
+            font-weight: 600;
+            padding: 1.25rem 1.5rem;
+        }
+
+        .accordion-button:not(.collapsed) {
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .accordion-button:focus {
+            box-shadow: 0 0 0 0.25rem rgba(99, 102, 241, 0.25);
         }
 
         /* CTA Section */
@@ -260,7 +590,7 @@
 
         .cta-title {
             font-size: 2.5rem;
-            font-weight: 700;
+            font-weight: 800;
             margin-bottom: 1rem;
         }
 
@@ -271,22 +601,7 @@
             max-width: 600px;
             margin-left: auto;
             margin-right: auto;
-        }
-
-        .btn-light-custom {
-            background: white;
-            color: var(--primary);
-            border: none;
-            padding: 1rem 2.5rem;
-            border-radius: 50px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
-        }
-
-        .btn-light-custom:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(255, 255, 255, 0.3);
+            line-height: 1.6;
         }
 
         /* Footer */
@@ -301,6 +616,13 @@
             font-weight: 700;
             margin-bottom: 1rem;
             color: white;
+            display: flex;
+            align-items: center;
+        }
+
+        .footer-brand i {
+            font-size: 1.75rem;
+            margin-right: 0.5rem;
         }
 
         .footer-links {
@@ -309,7 +631,7 @@
         }
 
         .footer-links li {
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.75rem;
         }
 
         .footer-links a {
@@ -325,7 +647,7 @@
         .social-links {
             display: flex;
             gap: 1rem;
-            margin-top: 1rem;
+            margin-top: 1.5rem;
         }
 
         .social-links a {
@@ -352,6 +674,7 @@
             margin-top: 3rem;
             text-align: center;
             color: #9ca3af;
+            font-size: 0.9rem;
         }
 
         /* Animations */
@@ -377,6 +700,24 @@
             .feature-card {
                 margin-bottom: 2rem;
             }
+            
+            .benefit-item {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .benefit-icon {
+                margin-right: 0;
+                margin-bottom: 1rem;
+            }
+            
+            .hero-section {
+                padding: 140px 0 80px;
+            }
+            
+            .pricing-card.featured {
+                transform: scale(1);
+            }
         }
     </style>
 </head>
@@ -400,10 +741,13 @@
                         <a class="nav-link" href="#benefits">Benefits</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/auth/login">Login</a>
+                        <a class="nav-link" href="#pricing">Pricing</a>
                     </li>
                     <li class="nav-item">
-                        <a class="btn btn-primary-custom ms-2" href="/auth/register">
+                        <a class="nav-link" href="/auth/login">Login</a>
+                    </li>
+                    <li class="nav-item ms-2">
+                        <a class="btn btn-primary-custom" href="/auth/register">
                             Get Started Free
                         </a>
                     </li>
@@ -421,19 +765,18 @@
                         <i class="fas fa-rocket me-2"></i>Trusted by 10,000+ Users Worldwide
                     </span>
                     <h1 class="hero-title">
-                        Smart Finance Management 
-                        <span class="d-block">Made Simple</span>
+                        Stop Worrying About Money, 
+                        <span class="d-block">Start Living Your Dreams</span>
                     </h1>
-                    <p class="hero-subtitle">
-                        Take control of your financial future with AI-powered insights, automated budgeting, 
-                        and real-time expense tracking. Join the revolution in personal finance management.
+                    <p class="hero-subtitle" style="color: black;">
+                        Imagine waking up knowing exactly where your money is going, feeling confident about your financial future, and having a plan to achieve your biggest dreams. FinMate makes this possible.
                     </p>
                     <div class="d-flex flex-column flex-sm-row justify-content-center gap-3">
                         <a href="/auth/register" class="btn btn-light-custom btn-lg">
                             <i class="fas fa-play-circle me-2"></i>Start Free Trial
                         </a>
                         <a href="#features" class="btn btn-outline-light btn-lg">
-                            <i class="fas fa-chart-line me-2"></i>Explore Features
+                            <i class="fas fa-chart-line me-2"></i>See How It Works
                         </a>
                     </div>
                 </div>
@@ -468,7 +811,7 @@
     <!-- Features Section -->
     <section id="features" class="features-section">
         <div class="container">
-            <h2 class="section-title">Powerful Features</h2>
+            <h2 class="section-title">Powerful Features That Give You Peace of Mind</h2>
             <p class="section-subtitle">
                 Everything you need to take control of your finances and achieve your financial goals
             </p>
@@ -555,12 +898,303 @@
         </div>
     </section>
 
+    <!-- Benefits Section -->
+    <section id="benefits" class="benefits-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h2 class="section-title text-start">Transform Your Relationship With Money</h2>
+                    <p class="section-subtitle text-start mb-4">
+                        FinMate isn't just about tracking numbers—it's about creating the financial freedom to live life on your terms.
+                    </p>
+                    
+                    <div class="benefit-item">
+                        <div class="benefit-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="benefit-content">
+                            <h4>Save Time & Reduce Stress</h4>
+                            <p>Automate your financial tracking and reduce the time spent managing your finances by up to 80%.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="benefit-item">
+                        <div class="benefit-icon">
+                            <i class="fas fa-piggy-bank"></i>
+                        </div>
+                        <div class="benefit-content">
+                            <h4>Save More Money</h4>
+                            <p>Our users save an average of 20% more each month by identifying unnecessary expenses and optimizing budgets.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="benefit-item">
+                        <div class="benefit-icon">
+                            <i class="fas fa-lock"></i>
+                        </div>
+                        <div class="benefit-content">
+                            <h4>Bank-Level Security</h4>
+                            <p>Your financial data is encrypted end-to-end and we never store your banking credentials.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="benefit-item">
+                        <div class="benefit-icon">
+                            <i class="fas fa-headset"></i>
+                        </div>
+                        <div class="benefit-content">
+                            <h4>Expert Support</h4>
+                            <p>Get personalized guidance from our financial experts to help you achieve your specific goals.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="text-center">
+                        <div class="feature-icon floating mx-auto" style="width: 150px; height: 150px; font-size: 4rem;">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="how-it-works-section">
+        <div class="container">
+            <h2 class="section-title">How FinMate Works</h2>
+            <p class="section-subtitle">
+                Getting started is simple, and you'll see results from day one
+            </p>
+            
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6">
+                    <div class="step-card">
+                        <div class="step-number">1</div>
+                        <h4 class="step-title">Connect Your Accounts</h4>
+                        <p class="step-description">
+                            Securely link your bank accounts, credit cards, and investment accounts in minutes.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 col-md-6">
+                    <div class="step-card">
+                        <div class="step-number">2</div>
+                        <h4 class="step-title">Set Your Goals</h4>
+                        <p class="step-description">
+                            Define what matters most to you—whether it's saving for a home, paying off debt, or building wealth.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 col-md-6">
+                    <div class="step-card">
+                        <div class="step-number">3</div>
+                        <h4 class="step-title">Watch Your Progress</h4>
+                        <p class="step-description">
+                            Get personalized insights and watch your financial health improve with each passing day.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section id="testimonials" class="testimonials-section">
+        <div class="container">
+            <h2 class="section-title">Real Stories, Real Results</h2>
+            <p class="section-subtitle">
+                Hear from people who have transformed their financial lives with FinMate
+            </p>
+            
+            <div class="row">
+                <div class="col-lg-4 col-md-6">
+                    <div class="testimonial-card">
+                        <p class="testimonial-text">
+                            FinMate completely changed how I manage my finances. I've saved over $3,000 in just six months by following their budget recommendations.
+                        </p>
+                        <div class="testimonial-author">
+                            <div class="author-avatar">JS</div>
+                            <div class="author-info">
+                                <h5>Jessica Smith</h5>
+                                <p>Marketing Manager</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 col-md-6">
+                    <div class="testimonial-card">
+                        <p class="testimonial-text">
+                            The AI insights helped me identify spending patterns I never noticed. I'm now on track to pay off my student loans two years early!
+                        </p>
+                        <div class="testimonial-author">
+                            <div class="author-avatar">MR</div>
+                            <div class="author-info">
+                                <h5>Michael Rodriguez</h5>
+                                <p>Software Engineer</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 col-md-6">
+                    <div class="testimonial-card">
+                        <p class="testimonial-text">
+                            As a freelancer with irregular income, FinMate's forecasting tools have been a game-changer for my financial planning and stability.
+                        </p>
+                        <div class="testimonial-author">
+                            <div class="author-avatar">SC</div>
+                            <div class="author-info">
+                                <h5>Sarah Chen</h5>
+                                <p>Freelance Designer</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="pricing-section">
+        <div class="container">
+            <h2 class="section-title">Simple, Transparent Pricing</h2>
+            <p class="section-subtitle">
+                Choose the plan that works best for you. All plans include a 14-day free trial.
+            </p>
+            
+            <div class="row g-4">
+                <div class="col-lg-4">
+                    <div class="pricing-card">
+                        <div class="pricing-header">
+                            <h4 class="pricing-name">Basic</h4>
+                            <div class="pricing-price">$0</div>
+                            <div class="pricing-period">Forever Free</div>
+                        </div>
+                        <ul class="pricing-features">
+                            <li><i class="fas fa-check"></i> Expense Tracking</li>
+                            <li><i class="fas fa-check"></i> Basic Budgeting</li>
+                            <li><i class="fas fa-check"></i> Bill Reminders</li>
+                            <li><i class="fas fa-times"></i> AI Optimization</li>
+                            <li><i class="fas fa-times"></i> Investment Tracking</li>
+                        </ul>
+                        <a href="/auth/register" class="btn btn-outline-primary w-100">Get Started</a>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4">
+                    <div class="pricing-card featured">
+                        <div class="pricing-header">
+                            <h4 class="pricing-name">Pro</h4>
+                            <div class="pricing-price">$9</div>
+                            <div class="pricing-period">per month</div>
+                        </div>
+                        <ul class="pricing-features">
+                            <li><i class="fas fa-check"></i> Everything in Basic</li>
+                            <li><i class="fas fa-check"></i> AI Budget Optimization</li>
+                            <li><i class="fas fa-check"></i> Goal Tracking</li>
+                            <li><i class="fas fa-check"></i> Investment Tracking</li>
+                            <li><i class="fas fa-check"></i> Priority Support</li>
+                        </ul>
+                        <a href="/auth/register" class="btn btn-primary-custom w-100">Start Free Trial</a>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4">
+                    <div class="pricing-card">
+                        <div class="pricing-header">
+                            <h4 class="pricing-name">Family</h4>
+                            <div class="pricing-price">$15</div>
+                            <div class="pricing-period">per month</div>
+                        </div>
+                        <ul class="pricing-features">
+                            <li><i class="fas fa-check"></i> Everything in Pro</li>
+                            <li><i class="fas fa-check"></i> Up to 5 Users</li>
+                            <li><i class="fas fa-check"></i> Shared Budgets</li>
+                            <li><i class="fas fa-check"></i> Family Goals</li>
+                            <li><i class="fas fa-check"></i> Dedicated Support</li>
+                        </ul>
+                        <a href="/auth/register" class="btn btn-outline-primary w-100">Start Free Trial</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq-section">
+        <div class="container">
+            <h2 class="section-title">Frequently Asked Questions</h2>
+            <p class="section-subtitle">
+                Get answers to the most common questions about FinMate
+            </p>
+            
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="accordion" id="faqAccordion">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingOne">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                    Is my financial data secure?
+                                </button>
+                            </h2>
+                            <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Yes, absolutely. We use bank-level 256-bit encryption and never store your banking credentials on our servers. Your data is protected with the same security measures used by financial institutions.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingTwo">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                    How does the AI budget optimization work?
+                                </button>
+                            </h2>
+                            <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Our AI analyzes your spending patterns, income, and financial goals to create personalized budget recommendations. It learns from your habits and suggests adjustments to help you save more while maintaining your lifestyle.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingThree">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                    Can I cancel my subscription anytime?
+                                </button>
+                            </h2>
+                            <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Yes, you can cancel your subscription at any time with no cancellation fees. If you cancel during your trial period, you won't be charged.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingFour">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                                    What banks and financial institutions do you support?
+                                </button>
+                            </h2>
+                            <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    We support thousands of financial institutions across the United States, Canada, and Europe. If your bank isn't listed, you can manually add accounts and transactions.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- CTA Section -->
     <section class="cta-section">
         <div class="container">
             <div class="cta-content">
                 <h2 class="cta-title">Ready to Transform Your Financial Life?</h2>
-                <p class="cta-subtitle">
+                <p class="cta-subtitle" style="color: black;">
                     Join thousands of users who have saved an average of 20% on their monthly expenses 
                     and achieved their financial goals faster with FinMate.
                 </p>

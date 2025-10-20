@@ -19,7 +19,7 @@ router.get('/', (req, res) => {
     }
   } else {
     // Not logged in - redirect to login
-    res.redirect('/auth/login');
+      res.render('index', { title: 'Welcome to FinMate' });
   }
 });
 
