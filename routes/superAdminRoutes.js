@@ -95,7 +95,7 @@ router.get('/dashboard', async (req, res) => {
       SELECT u.id, u.username, u.email, u.first_name, u.last_name, u.created_at, r.name as role_name
       FROM users u 
       LEFT JOIN roles r ON u.role_id = r.id 
-      WHERE u.is_active = 1
+
       ORDER BY u.created_at DESC 
       LIMIT 5
     `);
