@@ -16,12 +16,12 @@ const dbConfig = {
   connectionLimit: 5, // Reduced for serverless
   queueLimit: 0,
   // Only use SSL if CA path is provided or if explicitly requested
-  ssl: (isProduction && process.env.DB_SSL === 'true') || fs.existsSync(process.env.DB_CA_PATH)
+  ssl: (isProduction && process.env.DB_SSL === 'true') || (process.env.DB_CA_PATH && fs.existsSync(process.env.DB_CA_PATH))
     ? {
-      ca: fs.existsSync(process.env.DB_CA_PATH)
+      ca: (process.env.DB_CA_PATH && fs.existsSync(process.env.DB_CA_PATH))
         ? fs.readFileSync(process.env.DB_CA_PATH).toString()
         : undefined,
-      rejectUnauthorized: fs.existsSync(process.env.DB_CA_PATH)
+      rejectUnauthorized: false
     }
     : false
 };
