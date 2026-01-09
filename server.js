@@ -42,17 +42,17 @@ app.use((req, res, next) => {
 // Route loader helper
 const loadRoute = (routePath, routeName) => {
   try {
-    delete require.cache[require.resolve(routePath)];
-    const route = require(routePath);
+    const absolutePath = path.resolve(__dirname, routePath);
+    const route = require(absolutePath);
     console.log(`✅ ${routeName} loaded`);
     return route;
   } catch (error) {
     console.error(`❌ Failed to load ${routeName}:`, error.message);
     const express = require('express');
     const fallback = express.Router();
-    fallback.get('*', (req, res) => res.status(500).json({ 
-      error: `Route ${routeName} failed`, 
-      message: error.message 
+    fallback.get('*', (req, res) => res.status(500).json({
+      error: `Route ${routeName} failed`,
+      message: error.message
     }));
     return fallback;
   }
@@ -65,7 +65,7 @@ app.use('/admin', loadRoute('./routes/adminRoutes', 'Admin'));
 app.use('/team-leader', loadRoute('./routes/teamLeaderRoutes', 'Team Leader'));
 app.use('/team-member', loadRoute('./routes/teamMemberRoutes', 'Team Member'));
 app.use('/user', loadRoute('./routes/individualUserRoutes', 'Individual User'));
-app.use('/', loadRoute('./routes/dashboardRoutes', 'Dashboard'));
+app.use('/', loadRoute('./routes/indexRoutes', 'Dashboard'));
 
 // Root route
 app.get('/', (req, res) => res.render('index', { title: 'Welcome to FinMate' }));
