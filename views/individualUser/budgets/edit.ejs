@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,25 +17,19 @@
             --light: #f8f9fc;
             --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
-        
+
         body {
             background-color: #f8f9fc;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.6;
         }
-        
-        .sidebar {
-            background: var(--gradient);
-            min-height: 100vh;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-        }
-        
+
+
         .main-content {
             background-color: #f8f9fc;
             min-height: 100vh;
         }
-        
+
         .page-header {
             background: #fff;
             border-radius: 15px;
@@ -43,19 +38,19 @@
             box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
             border-left: 4px solid var(--primary);
         }
-        
+
         .page-header h1 {
             color: var(--dark);
             font-weight: 700;
             margin: 0;
         }
-        
+
         .page-header .subtitle {
             color: #6c757d;
             font-size: 1.1rem;
             margin-top: 0.5rem;
         }
-        
+
         .budget-card {
             border: none;
             border-radius: 15px;
@@ -63,12 +58,12 @@
             transition: transform 0.3s, box-shadow 0.3s;
             overflow: hidden;
         }
-        
+
         .budget-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 0.5rem 2rem 0 rgba(58, 59, 69, 0.2);
         }
-        
+
         .budget-card .card-header {
             background: linear-gradient(135deg, var(--primary), #2e59d9);
             color: white;
@@ -77,17 +72,17 @@
             font-weight: 600;
             font-size: 1.25rem;
         }
-        
+
         .budget-card .card-body {
             padding: 2rem;
         }
-        
+
         .form-label {
             font-weight: 600;
             color: var(--dark);
             margin-bottom: 0.5rem;
         }
-        
+
         .form-control {
             border: 2px solid #e3e6f0;
             border-radius: 10px;
@@ -95,12 +90,12 @@
             font-size: 1rem;
             transition: all 0.3s;
         }
-        
+
         .form-control:focus {
             border-color: var(--primary);
             box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
         }
-        
+
         .input-group-text {
             background-color: #f8f9fc;
             border: 2px solid #e3e6f0;
@@ -108,11 +103,11 @@
             color: var(--dark);
             font-weight: 500;
         }
-        
-        .form-control:focus + .input-group-text {
+
+        .form-control:focus+.input-group-text {
             border-color: var(--primary);
         }
-        
+
         .btn {
             border-radius: 10px;
             padding: 0.75rem 1.5rem;
@@ -120,43 +115,43 @@
             transition: all 0.3s;
             border: none;
         }
-        
+
         .btn-primary {
             background: linear-gradient(135deg, var(--primary), #2e59d9);
             box-shadow: 0 2px 4px rgba(78, 115, 223, 0.3);
         }
-        
+
         .btn-primary:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(78, 115, 223, 0.4);
         }
-        
+
         .btn-secondary {
             background: linear-gradient(135deg, #6c757d, #5a6268);
             box-shadow: 0 2px 4px rgba(108, 117, 125, 0.3);
         }
-        
+
         .btn-secondary:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(108, 117, 125, 0.4);
         }
-        
+
         .alert {
             border-radius: 10px;
             border: none;
             box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
         }
-        
+
         .alert-danger {
             background: linear-gradient(135deg, #e74a3b, #e02d1b);
             color: white;
         }
-        
+
         .alert-warning {
             background: linear-gradient(135deg, #f6c23e, #f4b619);
             color: white;
         }
-        
+
         .form-section {
             background: #fff;
             padding: 1.5rem;
@@ -164,7 +159,7 @@
             margin-bottom: 1.5rem;
             box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
         }
-        
+
         .form-section-title {
             color: var(--primary);
             font-weight: 600;
@@ -174,84 +169,72 @@
             align-items: center;
             gap: 0.5rem;
         }
-        
+
         .currency-input {
             position: relative;
         }
-        
+
         .currency-input .input-group-text {
             border-right: none;
             border-top-right-radius: 0;
             border-bottom-right-radius: 0;
         }
-        
+
         .currency-input .form-control {
             border-left: none;
             border-top-left-radius: 0;
             border-bottom-left-radius: 0;
         }
-        
+
         .action-buttons {
             display: flex;
             gap: 1rem;
             flex-wrap: wrap;
         }
-        
+
         @media (max-width: 768px) {
-            .sidebar {
-                min-height: auto;
-                position: fixed;
-                top: 0;
-                left: -100%;
-                width: 280px;
-                z-index: 1000;
-                transition: left 0.3s ease;
-            }
-            
-            .sidebar.show {
-                left: 0;
-            }
-            
+
             .page-header {
                 padding: 1.5rem;
                 margin-top: 1rem;
             }
-            
+
             .budget-card .card-body {
                 padding: 1.5rem;
             }
-            
+
             .action-buttons {
                 flex-direction: column;
             }
-            
+
             .action-buttons .btn {
                 width: 100%;
             }
         }
-        
+
         /* Animation */
         @keyframes fadeInUp {
             from {
                 opacity: 0;
                 transform: translateY(20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
         }
-        
+
         .fade-in-up {
             animation: fadeInUp 0.5s ease-out;
         }
-        
+
         /* Loading state */
         .loading {
             position: relative;
             overflow: hidden;
         }
-        
+
         .loading::after {
             content: '';
             position: absolute;
@@ -259,22 +242,27 @@
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
             animation: loading 1.5s infinite;
         }
-        
+
         @keyframes loading {
-            0% { left: -100%; }
-            100% { left: 100%; }
+            0% {
+                left: -100%;
+            }
+
+            100% {
+                left: 100%;
+            }
         }
-        
+
         /* Icon styles */
         .form-icon {
             width: 20px;
             text-align: center;
             color: var(--primary);
         }
-        
+
         .current-budget-info {
             background: linear-gradient(135deg, #f8f9fc, #e9ecef);
             border-radius: 10px;
@@ -282,210 +270,205 @@
             margin-bottom: 1.5rem;
             border-left: 4px solid var(--primary);
         }
-        
+
         .current-budget-info h5 {
             color: var(--dark);
             margin-bottom: 0.5rem;
         }
-        
+
         .current-budget-info p {
             margin: 0;
             color: #6c757d;
         }
     </style>
 </head>
+
 <body>
     <div class="container-fluid">
         <div class="row">
             <!-- Sidebar -->
             <%- include('../../partials/sidebar', { activePage: 'budgets' }) %>
 
-            <!-- Main content -->
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
-                <!-- Mobile Header -->
-                <div class="d-md-none d-flex align-items-center py-3 border-bottom bg-white">
-                    <button class="btn btn-primary me-3" type="button" data-bs-toggle="collapse" data-bs-target=".sidebar">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                    <h5 class="mb-0">Edit Budget</h5>
-                </div>
+                <!-- Main content -->
+                <main class="main-content px-md-4">
 
-                <!-- Page Header -->
-                <div class="page-header fade-in-up">
-                    <div class="d-flex justify-content-between align-items-center flex-wrap">
-                        <div>
-                            <h1 class="h2 mb-2">
-                                <i class="fas fa-edit me-2 text-primary"></i>
-                                Edit Budget
-                            </h1>
-                            <p class="subtitle mb-0">Update your budget amount and category</p>
-                        </div>
-                        <a href="/user/budgets" class="btn btn-outline-primary d-none d-md-block">
-                            <i class="fas fa-arrow-left me-2"></i>Back to Budgets
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Success/Error Messages -->
-                <% if (error) { %>
-                    <div class="alert alert-danger alert-dismissible fade show fade-in-up" role="alert">
-                        <div class="d-flex align-items-center">
-                            <i class="fas fa-exclamation-circle me-2"></i>
+                    <!-- Page Header -->
+                    <div class="page-header fade-in-up">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap">
                             <div>
-                                <strong>Error!</strong> <%= error %>
+                                <h1 class="h2 mb-2">
+                                    <i class="fas fa-edit me-2 text-primary"></i>
+                                    Edit Budget
+                                </h1>
+                                <p class="subtitle mb-0">Update your budget amount and category</p>
                             </div>
+                            <a href="/user/budgets" class="btn btn-outline-primary d-none d-md-block">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Budgets
+                            </a>
                         </div>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
-                <% } %>
 
-                <% if (success && message) { %>
-                    <div class="alert alert-success alert-dismissible fade show fade-in-up" role="alert">
-                        <div class="d-flex align-items-center">
-                            <i class="fas fa-check-circle me-2"></i>
-                            <div>
-                                <strong>Success!</strong> <%= message %>
-                            </div>
-                        </div>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                <% } %>
-
-                <!-- Budget Form -->
-                <div class="row justify-content-center fade-in-up">
-                    <div class="col-lg-8 col-xl-6">
-                        <% if (budget) { %>
-                            <div class="card budget-card">
-                                <div class="card-header">
-                                    <div class="d-flex align-items-center">
-                                        <i class="fas fa-money-bill-wave me-2"></i>
-                                        Budget Details
-                                    </div>
+                    <!-- Success/Error Messages -->
+                    <% if (error) { %>
+                        <div class="alert alert-danger alert-dismissible fade show fade-in-up" role="alert">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-exclamation-circle me-2"></i>
+                                <div>
+                                    <strong>Error!</strong>
+                                    <%= error %>
                                 </div>
-                                <div class="card-body">
-                                    <!-- Current Budget Information -->
-                                    <div class="current-budget-info">
-                                        <h5>
-                                            <i class="fas fa-file-alt me-2 text-primary"></i>
-                                            Current Budget: <%= budget.name %>
-                                        </h5>
-                                        <p class="mb-0">
-                                            You are editing the "<strong><%= budget.name %></strong>" budget. 
-                                            Update the amount and category below.
-                                        </p>
-                                    </div>
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                        <% } %>
 
-                                    <form action="/user/budgets/update/<%= budget.id %>" method="POST" id="budgetForm">
-                                        <!-- Amount & Category -->
-                                        <div class="form-section">
-                                            <div class="form-section-title">
-                                                <i class="fas fa-chart-bar"></i>
-                                                Financial Details
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-md-6 mb-3">
-                                                    <label for="budgetAmount" class="form-label">
-                                                        <i class="fas fa-money-bill-wave form-icon"></i>
-                                                        Budget Amount
-                                                    </label>
-                                                    <div class="currency-input">
-                                                        <div class="input-group">
-                                                            <span class="input-group-text">Ksh</span>
-                                                            <input type="number" 
-                                                                   step="0.01" 
-                                                                   min="0.01"
-                                                                   class="form-control" 
-                                                                   id="budgetAmount"
-                                                                   name="amount" 
-                                                                   value="<%= budget.amount %>" 
-                                                                   placeholder="0.00"
-                                                                   required>
+                            <% if (success && message) { %>
+                                <div class="alert alert-success alert-dismissible fade show fade-in-up" role="alert">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-check-circle me-2"></i>
+                                        <div>
+                                            <strong>Success!</strong>
+                                            <%= message %>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                                <% } %>
+
+                                    <!-- Budget Form -->
+                                    <div class="row justify-content-center fade-in-up">
+                                        <div class="col-lg-8 col-xl-6">
+                                            <% if (budget) { %>
+                                                <div class="card budget-card">
+                                                    <div class="card-header">
+                                                        <div class="d-flex align-items-center">
+                                                            <i class="fas fa-money-bill-wave me-2"></i>
+                                                            Budget Details
                                                         </div>
                                                     </div>
-                                                    <div class="form-text">Total allocated amount for this budget</div>
-                                                </div>
-                                                <div class="col-md-6 mb-3">
-                                                    <label for="budgetCategory" class="form-label">
-                                                        <i class="fas fa-folder form-icon"></i>
-                                                        Category
-                                                    </label>
-                                                    <input type="text" 
-                                                           class="form-control" 
-                                                           id="budgetCategory"
-                                                           name="category" 
-                                                           value="<%= budget.category %>"
-                                                           placeholder="e.g., Groceries, Entertainment">
-                                                    <div class="form-text">Optional: Categorize your budget</div>
-                                                </div>
-                                            </div>
-                                        </div>
+                                                    <div class="card-body">
+                                                        <!-- Current Budget Information -->
+                                                        <div class="current-budget-info">
+                                                            <h5>
+                                                                <i class="fas fa-file-alt me-2 text-primary"></i>
+                                                                Current Budget: <%= budget.name %>
+                                                            </h5>
+                                                            <p class="mb-0">
+                                                                You are editing the "<strong>
+                                                                    <%= budget.name %>
+                                                                </strong>" budget.
+                                                                Update the amount and category below.
+                                                            </p>
+                                                        </div>
 
-                                        <!-- Action Buttons -->
-                                        <div class="form-section">
-                                            <div class="action-buttons">
-                                                <button type="submit" class="btn btn-primary btn-lg flex-fill">
-                                                    <i class="fas fa-save me-2"></i>
-                                                    Update Budget
-                                                </button>
-                                                <a href="/user/budgets" class="btn btn-secondary btn-lg flex-fill">
-                                                    <i class="fas fa-times me-2"></i>
-                                                    Cancel
-                                                </a>
-                                            </div>
-                                            <div class="text-center mt-3">
-                                                <a href="/user/budgets" class="btn btn-outline-primary d-md-none">
-                                                    <i class="fas fa-arrow-left me-2"></i>Back to Budgets
-                                                </a>
-                                            </div>
+                                                        <form action="/user/budgets/update/<%= budget.id %>"
+                                                            method="POST" id="budgetForm">
+                                                            <!-- Amount & Category -->
+                                                            <div class="form-section">
+                                                                <div class="form-section-title">
+                                                                    <i class="fas fa-chart-bar"></i>
+                                                                    Financial Details
+                                                                </div>
+                                                                <div class="row">
+                                                                    <div class="col-md-6 mb-3">
+                                                                        <label for="budgetAmount" class="form-label">
+                                                                            <i
+                                                                                class="fas fa-money-bill-wave form-icon"></i>
+                                                                            Budget Amount
+                                                                        </label>
+                                                                        <div class="currency-input">
+                                                                            <div class="input-group">
+                                                                                <span
+                                                                                    class="input-group-text">Ksh</span>
+                                                                                <input type="number" step="0.01"
+                                                                                    min="0.01" class="form-control"
+                                                                                    id="budgetAmount" name="amount"
+                                                                                    value="<%= budget.amount %>"
+                                                                                    placeholder="0.00" required>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="form-text">Total allocated amount
+                                                                            for this budget</div>
+                                                                    </div>
+                                                                    <div class="col-md-6 mb-3">
+                                                                        <label for="budgetCategory" class="form-label">
+                                                                            <i class="fas fa-folder form-icon"></i>
+                                                                            Category
+                                                                        </label>
+                                                                        <input type="text" class="form-control"
+                                                                            id="budgetCategory" name="category"
+                                                                            value="<%= budget.category %>"
+                                                                            placeholder="e.g., Groceries, Entertainment">
+                                                                        <div class="form-text">Optional: Categorize your
+                                                                            budget</div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Action Buttons -->
+                                                            <div class="form-section">
+                                                                <div class="action-buttons">
+                                                                    <button type="submit"
+                                                                        class="btn btn-primary btn-lg flex-fill">
+                                                                        <i class="fas fa-save me-2"></i>
+                                                                        Update Budget
+                                                                    </button>
+                                                                    <a href="/user/budgets"
+                                                                        class="btn btn-secondary btn-lg flex-fill">
+                                                                        <i class="fas fa-times me-2"></i>
+                                                                        Cancel
+                                                                    </a>
+                                                                </div>
+                                                                <div class="text-center mt-3">
+                                                                    <a href="/user/budgets"
+                                                                        class="btn btn-outline-primary d-md-none">
+                                                                        <i class="fas fa-arrow-left me-2"></i>Back to
+                                                                        Budgets
+                                                                    </a>
+                                                                </div>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                                <% } else { %>
+                                                    <div class="card budget-card">
+                                                        <div class="card-body text-center py-5">
+                                                            <i
+                                                                class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                                                            <h4 class="text-dark">Budget Not Found</h4>
+                                                            <p class="text-muted mb-4">The budget you're trying to edit
+                                                                doesn't exist or you don't have permission to access it.
+                                                            </p>
+                                                            <a href="/user/budgets" class="btn btn-primary">
+                                                                <i class="fas fa-arrow-left me-2"></i>Back to Budgets
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                    <% } %>
                                         </div>
-                                    </form>
-                                </div>
-                            </div>
-                        <% } else { %>
-                            <div class="card budget-card">
-                                <div class="card-body text-center py-5">
-                                    <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
-                                    <h4 class="text-dark">Budget Not Found</h4>
-                                    <p class="text-muted mb-4">The budget you're trying to edit doesn't exist or you don't have permission to access it.</p>
-                                    <a href="/user/budgets" class="btn btn-primary">
-                                        <i class="fas fa-arrow-left me-2"></i>Back to Budgets
-                                    </a>
-                                </div>
-                            </div>
-                        <% } %>
-                    </div>
-                </div>
-            </main>
+                                    </div>
+                </main>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Mobile menu toggle
-            var sidebar = document.querySelector('.sidebar');
-            var menuToggle = document.querySelector('[data-bs-toggle="collapse"]');
-            
-            if (menuToggle && sidebar) {
-                menuToggle.addEventListener('click', function() {
-                    sidebar.classList.toggle('show');
-                });
-            }
+        document.addEventListener('DOMContentLoaded', function () {
 
             // Form validation and enhancement
             const form = document.getElementById('budgetForm');
             if (form) {
-                form.addEventListener('submit', function(e) {
+                form.addEventListener('submit', function (e) {
                     const amountInput = document.getElementById('budgetAmount');
                     const amount = parseFloat(amountInput.value);
-                    
+
                     if (amount <= 0) {
                         e.preventDefault();
                         alert('Please enter a valid budget amount greater than 0.');
                         amountInput.focus();
                         return;
                     }
-                    
+
                     // Add loading state
                     const submitBtn = form.querySelector('button[type="submit"]');
                     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Updating...';
@@ -494,9 +477,9 @@
             }
 
             // Auto-dismiss alerts after 5 seconds
-            setTimeout(function() {
+            setTimeout(function () {
                 var alerts = document.querySelectorAll('.alert');
-                alerts.forEach(function(alert) {
+                alerts.forEach(function (alert) {
                     var bsAlert = new bootstrap.Alert(alert);
                     bsAlert.close();
                 });
@@ -505,14 +488,15 @@
             // Enhance input focus
             const inputs = document.querySelectorAll('.form-control');
             inputs.forEach(input => {
-                input.addEventListener('focus', function() {
+                input.addEventListener('focus', function () {
                     this.parentElement.classList.add('focused');
                 });
-                input.addEventListener('blur', function() {
+                input.addEventListener('blur', function () {
                     this.parentElement.classList.remove('focused');
                 });
             });
         });
     </script>
 </body>
+
 </html>

@@ -319,7 +319,8 @@
                                                                 class="text-xs font-weight-bold text-danger text-uppercase mb-1">
                                                                 Daily Expenses</div>
                                                             <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                                                Ksh <%= data.dailyExpenses ? data.dailyExpenses.toFixed(2) : '0.00' %>
+                                                                Ksh <%= data.dailyExpenses ?
+                                                                    data.dailyExpenses.toFixed(2) : '0.00' %>
                                                             </div>
                                                             <div class="text-xs text-muted">
                                                                 Spent today
@@ -341,7 +342,8 @@
                                                                         </div>
                                                                     </div>
                                                                     <small class="text-muted">
-                                                                        <%= dailyProgress.toFixed(1) %>% of Ksh <%= data.dailyExpenseLimit.toFixed(2) %>
+                                                                        <%= dailyProgress.toFixed(1) %>% of Ksh <%=
+                                                                                data.dailyExpenseLimit.toFixed(2) %>
                                                                                 daily limit
                                                                     </small>
                                                                 </div>
@@ -365,7 +367,8 @@
                                                                 class="text-xs font-weight-bold text-primary text-uppercase mb-1">
                                                                 Total Expenses (Month)</div>
                                                             <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                                                Ksh <%= data.totalExpenses ? data.totalExpenses.toFixed(2) : '0.00' %>
+                                                                Ksh <%= data.totalExpenses ?
+                                                                    data.totalExpenses.toFixed(2) : '0.00' %>
                                                             </div>
                                                             <div class="text-xs text-muted">
                                                                 Current month spending
@@ -534,7 +537,9 @@
                                                                                 <%= transaction.description %>
                                                                             </td>
                                                                             <td class="text-danger fw-bold">
-                                                                                Ksh <%= parseFloat(transaction.amount).toFixed(2) %>
+                                                                                Ksh <%=
+                                                                                    parseFloat(transaction.amount).toFixed(2)
+                                                                                    %>
                                                                             </td>
                                                                             <td>
                                                                                 <% if (transaction.created_at) { %>
@@ -554,7 +559,9 @@
                                                                     <tr>
                                                                         <td><strong>Total Today:</strong></td>
                                                                         <td class="fw-bold text-danger">
-                                                                            <strong>Ksh <%= data.dailyExpenses ? data.dailyExpenses.toFixed(2) : '0.00' %></strong>
+                                                                            <strong>Ksh <%= data.dailyExpenses ?
+                                                                                    data.dailyExpenses.toFixed(2)
+                                                                                    : '0.00' %></strong>
                                                                         </td>
                                                                         <td></td>
                                                                     </tr>
@@ -610,10 +617,16 @@
                                                                                 <%= transaction.description %>
                                                                             </td>
                                                                             <td class="text-danger fw-bold">
-                                                                                Ksh <%= parseFloat(transaction.amount).toFixed(2) %>
+                                                                                Ksh <%=
+                                                                                    parseFloat(transaction.amount).toFixed(2)
+                                                                                    %>
                                                                             </td>
                                                                             <td>
-                                                                                <%= new Date(transaction.date || transaction.created_at).toLocaleDateString('en-US', { weekday: 'short' , year: 'numeric' , month: 'short' , day: 'numeric' }) %>
+                                                                                <%= new Date(transaction.date ||
+                                                                                    transaction.created_at).toLocaleDateString('en-US',
+                                                                                    { weekday: 'short' , year: 'numeric'
+                                                                                    , month: 'short' , day: 'numeric' })
+                                                                                    %>
                                                                             </td>
                                                                         </tr>
                                                                         <% }); %>
@@ -665,7 +678,9 @@
                                                                     <span class="fw-bold">
                                                                         <%= budget.category %>
                                                                     </span>
-                                                                    <span class="text-muted small">Ksh <%= spent.toFixed(2) %> / Ksh <%= amount.toFixed(2) %></span>
+                                                                    <span class="text-muted small">Ksh <%=
+                                                                            spent.toFixed(2) %> / Ksh <%=
+                                                                                amount.toFixed(2) %></span>
                                                                 </div>
                                                                 <div class="progress mb-2" style="height: 12px;">
                                                                     <div class="progress-bar <%= progressClass %>"
@@ -683,7 +698,8 @@
                                                                     <small
                                                                         class="<%= remaining < 0 ? 'status-over-budget' : 'status-under-budget' %>">
                                                                         Ksh <%= Math.abs(remaining).toFixed(2) %>
-                                                                            <%= remaining >= 0 ? 'remaining' : 'over budget' %>
+                                                                            <%= remaining>= 0 ? 'remaining' : 'over
+                                                                                budget' %>
                                                                     </small>
                                                                 </div>
                                                             </div>
@@ -752,10 +768,12 @@
                                                                             </div>
 
                                                                             <div class="mb-2">
-                                                                                <span class="h5 text-primary">Ksh <%= currentAmount.toFixed(2) %>
+                                                                                <span class="h5 text-primary">Ksh <%=
+                                                                                        currentAmount.toFixed(2) %>
                                                                                 </span>
                                                                                 <span class="text-muted"> of </span>
-                                                                                <span class="h6">Ksh <%= targetAmount.toFixed(2) %>
+                                                                                <span class="h6">Ksh <%=
+                                                                                        targetAmount.toFixed(2) %>
                                                                                 </span>
                                                                             </div>
 

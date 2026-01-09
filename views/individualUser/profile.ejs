@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,60 +18,19 @@
             --light: #f8f9fc;
             --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
-        
+
         body {
             background-color: #f8f9fc;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        
-        .sidebar {
-            background: var(--gradient);
-            min-height: 100vh;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-        }
-        
-        .sidebar .nav-link {
-            color: rgba(255,255,255,0.9);
-            padding: 12px 20px;
-            margin: 2px 0;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            position: relative;
-            font-weight: 500;
-        }
-        
-        .sidebar .nav-link:hover {
-            background: rgba(255,255,255,0.15);
-            transform: translateX(5px);
-            color: #fff;
-        }
-        
-        .sidebar .nav-link.active {
-            background: rgba(255,255,255,0.2);
-            color: #fff;
-            font-weight: 600;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        
-        .sidebar .nav-link.active::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 3px;
-            height: 60%;
-            background: #fff;
-            border-radius: 0 2px 2px 0;
-        }
-        
+
+
         .sidebar-footer {
-            background: rgba(0,0,0,0.1);
+            background: rgba(0, 0, 0, 0.1);
             margin: 0 -12px;
             padding: 15px 12px;
         }
-        
+
         .page-header {
             background: #fff;
             border-radius: 10px;
@@ -78,7 +38,7 @@
             margin-bottom: 2rem;
             box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
         }
-        
+
         .profile-card {
             border-radius: 12px;
             transition: transform 0.3s, box-shadow 0.3s;
@@ -86,23 +46,23 @@
             box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
             overflow: hidden;
         }
-        
+
         .profile-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 0.5rem 2rem 0 rgba(58, 59, 69, 0.2);
         }
-        
+
         .profile-header {
             background: var(--gradient);
             color: white;
             border-radius: 12px 12px 0 0;
             padding: 2rem;
         }
-        
+
         .avatar {
             width: 120px;
             height: 120px;
-            background: rgba(255,255,255,0.2);
+            background: rgba(255, 255, 255, 0.2);
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -111,7 +71,7 @@
             margin: 0 auto;
             border: 4px solid white;
         }
-        
+
         .stat-card {
             border-radius: 10px;
             transition: transform 0.3s, box-shadow 0.3s;
@@ -120,70 +80,84 @@
             overflow: hidden;
             height: 100%;
         }
-        
+
         .stat-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 0.5rem 2rem 0 rgba(58, 59, 69, 0.2);
         }
-        
-        .border-left-primary { border-left: 4px solid var(--primary) !important; }
-        .border-left-success { border-left: 4px solid var(--success) !important; }
-        .border-left-warning { border-left: 4px solid var(--warning) !important; }
-        .border-left-info { border-left: 4px solid var(--info) !important; }
-        .border-left-danger { border-left: 4px solid var(--danger) !important; }
-        
+
+        .border-left-primary {
+            border-left: 4px solid var(--primary) !important;
+        }
+
+        .border-left-success {
+            border-left: 4px solid var(--success) !important;
+        }
+
+        .border-left-warning {
+            border-left: 4px solid var(--warning) !important;
+        }
+
+        .border-left-info {
+            border-left: 4px solid var(--info) !important;
+        }
+
+        .border-left-danger {
+            border-left: 4px solid var(--danger) !important;
+        }
+
         .btn {
             border-radius: 8px;
             font-weight: 500;
             transition: all 0.3s;
         }
-        
+
         .btn-primary {
             background: var(--primary);
             border-color: var(--primary);
         }
-        
+
         .btn-success {
             background: var(--success);
             border-color: var(--success);
         }
-        
+
         .btn-warning {
             background: var(--warning);
             border-color: var(--warning);
         }
-        
+
         .btn-info {
             background: var(--info);
             border-color: var(--info);
         }
-        
+
         .btn-danger {
             background: var(--danger);
             border-color: var(--danger);
         }
-        
+
         .badge {
             font-size: 0.7em;
             padding: 4px 8px;
         }
-        
+
         .text-xs {
             font-size: 0.75rem;
         }
-        
+
         .text-gray-800 {
             color: var(--dark) !important;
         }
-        
+
         .text-gray-300 {
             color: #dddfeb !important;
         }
-        
+
         .font-weight-bold {
             font-weight: 700 !important;
         }
-        
+
         .quick-action-card {
             transition: all 0.3s;
             border-radius: 10px;
@@ -191,50 +165,33 @@
             box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
             height: 100%;
         }
-        
+
         .quick-action-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 0.5rem 2rem 0 rgba(58, 59, 69, 0.2);
         }
-        
+
         /* Mobile responsiveness */
-        @media (max-width: 768px) {
-            .sidebar {
-                min-height: auto;
-                position: fixed;
-                top: 0;
-                left: -100%;
-                width: 280px;
-                z-index: 1000;
-                transition: left 0.3s ease;
-            }
-            
-            .sidebar.show {
-                left: 0;
-            }
-            
-            .sidebar .nav-link {
-                padding: 15px 20px;
-            }
-        }
-        
+
         /* Animation for cards */
         @keyframes fadeInUp {
             from {
                 opacity: 0;
                 transform: translateY(20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
         }
-        
+
         .fade-in-up {
             animation: fadeInUp 0.5s ease-out;
         }
     </style>
 </head>
+
 <body>
     <div class="container-fluid">
         <div class="row">
@@ -244,17 +201,11 @@
             </div>
 
             <!-- Main Content -->
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
-                <!-- Mobile Header -->
-                <div class="d-md-none d-flex align-items-center py-3 border-bottom bg-white mb-4">
-                    <button class="btn btn-primary me-3" type="button" data-bs-toggle="collapse" data-bs-target=".sidebar">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                    <h5 class="mb-0">Profile</h5>
-                </div>
+            <main class="main-content px-md-4 py-4">
 
                 <!-- Page Header -->
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 page-header">
+                <div
+                    class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 page-header">
                     <h1 class="h2">
                         <i class="fas fa-user-circle me-2 text-primary"></i>
                         My Profile
@@ -266,225 +217,222 @@
                 </div>
 
                 <!-- Alerts -->
-                <% if (typeof success !== 'undefined' && success) { %>
+                <% if (typeof success !=='undefined' && success) { %>
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
                         <i class="fas fa-check-circle me-2"></i>
                         <%= success %>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
-                <% } %>
-                
-                <% if (typeof error !== 'undefined' && error) { %>
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <i class="fas fa-exclamation-circle me-2"></i>
-                        <%= error %>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                <% } %>
+                    <% } %>
 
-                <div class="row">
-                    <!-- Profile Information -->
-                    <div class="col-lg-8">
-                        <div class="card profile-card mb-4 fade-in-up">
-                            <div class="profile-header text-center">
-                                <div class="avatar mb-3">
-                                    <i class="fas fa-user"></i>
-                                </div>
-                                <h3 class="mb-1"><%= user.username %></h3>
-                                <p class="mb-0 opacity-75">
-                                    <i class="fas fa-envelope me-1"></i>
-                                    <%= user.email %>
-                                </p>
+                        <% if (typeof error !=='undefined' && error) { %>
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <i class="fas fa-exclamation-circle me-2"></i>
+                                <%= error %>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                             </div>
-                            <div class="card-body">
-                                <h5 class="card-title mb-4">
-                                    <i class="fas fa-info-circle me-2 text-primary"></i>
-                                    Account Information
-                                </h5>
-                                
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label text-muted small">Username</label>
-                                        <div class="form-control bg-light">
-                                            <strong><%= user.username %></strong>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label text-muted small">Email Address</label>
-                                        <div class="form-control bg-light">
-                                            <strong><%= user.email %></strong>
-                                        </div>
-                                    </div>
-                                </div>
+                            <% } %>
 
                                 <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label text-muted small">User Role</label>
-                                        <div class="form-control bg-light">
-                                            <span class="badge bg-primary">
-                                                <i class="fas fa-user me-1"></i>
-                                                <%= user.role %>
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label text-muted small">Member Since</label>
-                                        <div class="form-control bg-light">
-                                            <strong>
-                                                <% if (user.createdAt) { %>
-                                                    <%= new Date(user.createdAt).toLocaleDateString() %>
-                                                <% } else { %>
-                                                    Recent
-                                                <% } %>
-                                            </strong>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Account Statistics -->
-                                <h5 class="card-title mt-5 mb-4">
-                                    <i class="fas fa-chart-bar me-2 text-primary"></i>
-                                    Account Statistics
-                                </h5>
-
-                                <div class="row">
-                                    <div class="col-md-4 mb-3">
-                                        <div class="card stat-card border-left-primary">
-                                            <div class="card-body">
-                                                <div class="text-primary mb-2">
-                                                    <i class="fas fa-receipt fa-2x"></i>
+                                    <!-- Profile Information -->
+                                    <div class="col-lg-8">
+                                        <div class="card profile-card mb-4 fade-in-up">
+                                            <div class="profile-header text-center">
+                                                <div class="avatar mb-3">
+                                                    <i class="fas fa-user"></i>
                                                 </div>
-                                                <div class="text-primary fw-bold fs-4">0</div>
-                                                <div class="text-muted small">Total Expenses</div>
+                                                <h3 class="mb-1">
+                                                    <%= user.username %>
+                                                </h3>
+                                                <p class="mb-0 opacity-75">
+                                                    <i class="fas fa-envelope me-1"></i>
+                                                    <%= user.email %>
+                                                </p>
+                                            </div>
+                                            <div class="card-body">
+                                                <h5 class="card-title mb-4">
+                                                    <i class="fas fa-info-circle me-2 text-primary"></i>
+                                                    Account Information
+                                                </h5>
+
+                                                <div class="row">
+                                                    <div class="col-md-6 mb-3">
+                                                        <label class="form-label text-muted small">Username</label>
+                                                        <div class="form-control bg-light">
+                                                            <strong>
+                                                                <%= user.username %>
+                                                            </strong>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6 mb-3">
+                                                        <label class="form-label text-muted small">Email Address</label>
+                                                        <div class="form-control bg-light">
+                                                            <strong>
+                                                                <%= user.email %>
+                                                            </strong>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col-md-6 mb-3">
+                                                        <label class="form-label text-muted small">User Role</label>
+                                                        <div class="form-control bg-light">
+                                                            <span class="badge bg-primary">
+                                                                <i class="fas fa-user me-1"></i>
+                                                                <%= user.role %>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6 mb-3">
+                                                        <label class="form-label text-muted small">Member Since</label>
+                                                        <div class="form-control bg-light">
+                                                            <strong>
+                                                                <% if (user.createdAt) { %>
+                                                                    <%= new Date(user.createdAt).toLocaleDateString() %>
+                                                                        <% } else { %>
+                                                                            Recent
+                                                                            <% } %>
+                                                            </strong>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Account Statistics -->
+                                                <h5 class="card-title mt-5 mb-4">
+                                                    <i class="fas fa-chart-bar me-2 text-primary"></i>
+                                                    Account Statistics
+                                                </h5>
+
+                                                <div class="row">
+                                                    <div class="col-md-4 mb-3">
+                                                        <div class="card stat-card border-left-primary">
+                                                            <div class="card-body">
+                                                                <div class="text-primary mb-2">
+                                                                    <i class="fas fa-receipt fa-2x"></i>
+                                                                </div>
+                                                                <div class="text-primary fw-bold fs-4">0</div>
+                                                                <div class="text-muted small">Total Expenses</div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4 mb-3">
+                                                        <div class="card stat-card border-left-success">
+                                                            <div class="card-body">
+                                                                <div class="text-success mb-2">
+                                                                    <i class="fas fa-wallet fa-2x"></i>
+                                                                </div>
+                                                                <div class="text-success fw-bold fs-4">0</div>
+                                                                <div class="text-muted small">Active Budgets</div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4 mb-3">
+                                                        <div class="card stat-card border-left-info">
+                                                            <div class="card-body">
+                                                                <div class="text-info mb-2">
+                                                                    <i class="fas fa-piggy-bank fa-2x"></i>
+                                                                </div>
+                                                                <div class="text-info fw-bold fs-4">0</div>
+                                                                <div class="text-muted small">Savings Goals</div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-md-4 mb-3">
-                                        <div class="card stat-card border-left-success">
+
+                                    <!-- Quick Actions -->
+                                    <div class="col-lg-4">
+                                        <div class="card profile-card mb-4 fade-in-up">
+                                            <div class="card-header">
+                                                <h5 class="card-title mb-0">
+                                                    <i class="fas fa-bolt me-2 text-warning"></i>
+                                                    Quick Actions
+                                                </h5>
+                                            </div>
                                             <div class="card-body">
-                                                <div class="text-success mb-2">
-                                                    <i class="fas fa-wallet fa-2x"></i>
+                                                <div class="d-grid gap-2">
+                                                    <a href="/user/dashboard" class="btn btn-primary btn-lg">
+                                                        <i class="fas fa-tachometer-alt me-2"></i>
+                                                        Go to Dashboard
+                                                    </a>
+                                                    <a href="/user/expenses/add" class="btn btn-outline-primary">
+                                                        <i class="fas fa-plus-circle me-2"></i>
+                                                        Add New Expense
+                                                    </a>
+                                                    <a href="/user/budgets/add" class="btn btn-outline-success">
+                                                        <i class="fas fa-wallet me-2"></i>
+                                                        Create Budget
+                                                    </a>
+                                                    <a href="/user/savings/add" class="btn btn-outline-info">
+                                                        <i class="fas fa-bullseye me-2"></i>
+                                                        Set Savings Goal
+                                                    </a>
                                                 </div>
-                                                <div class="text-success fw-bold fs-4">0</div>
-                                                <div class="text-muted small">Active Budgets</div>
+
+                                                <hr class="my-4">
+
+                                                <!-- Account Management -->
+                                                <h6 class="text-muted mb-3">
+                                                    <i class="fas fa-cog me-2"></i>
+                                                    Account Management
+                                                </h6>
+                                                <div class="d-grid gap-2">
+                                                    <button class="btn btn-outline-warning">
+                                                        <i class="fas fa-edit me-2"></i>
+                                                        Edit Profile (Coming Soon)
+                                                    </button>
+                                                    <button class="btn btn-outline-secondary">
+                                                        <i class="fas fa-lock me-2"></i>
+                                                        Change Password (Coming Soon)
+                                                    </button>
+                                                    <a href="/logout" class="btn btn-outline-danger">
+                                                        <i class="fas fa-sign-out-alt me-2"></i>
+                                                        Logout
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- System Status -->
+                                        <div class="card profile-card fade-in-up">
+                                            <div class="card-header">
+                                                <h5 class="card-title mb-0">
+                                                    <i class="fas fa-shield-alt me-2 text-success"></i>
+                                                    Account Status
+                                                </h5>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="d-flex align-items-center mb-3">
+                                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                                    <span class="flex-grow-1">Account Active</span>
+                                                </div>
+                                                <div class="d-flex align-items-center mb-3">
+                                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                                    <span class="flex-grow-1">Email Verified</span>
+                                                </div>
+                                                <div class="d-flex align-items-center">
+                                                    <i class="fas fa-user text-primary me-2"></i>
+                                                    <span class="flex-grow-1">Individual User Account</span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-md-4 mb-3">
-                                        <div class="card stat-card border-left-info">
-                                            <div class="card-body">
-                                                <div class="text-info mb-2">
-                                                    <i class="fas fa-piggy-bank fa-2x"></i>
-                                                </div>
-                                                <div class="text-info fw-bold fs-4">0</div>
-                                                <div class="text-muted small">Savings Goals</div>
-                                            </div>
-                                        </div>
-                                    </div>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Quick Actions -->
-                    <div class="col-lg-4">
-                        <div class="card profile-card mb-4 fade-in-up">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">
-                                    <i class="fas fa-bolt me-2 text-warning"></i>
-                                    Quick Actions
-                                </h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="d-grid gap-2">
-                                    <a href="/user/dashboard" class="btn btn-primary btn-lg">
-                                        <i class="fas fa-tachometer-alt me-2"></i>
-                                        Go to Dashboard
-                                    </a>
-                                    <a href="/user/expenses/add" class="btn btn-outline-primary">
-                                        <i class="fas fa-plus-circle me-2"></i>
-                                        Add New Expense
-                                    </a>
-                                    <a href="/user/budgets/add" class="btn btn-outline-success">
-                                        <i class="fas fa-wallet me-2"></i>
-                                        Create Budget
-                                    </a>
-                                    <a href="/user/savings/add" class="btn btn-outline-info">
-                                        <i class="fas fa-bullseye me-2"></i>
-                                        Set Savings Goal
-                                    </a>
-                                </div>
-
-                                <hr class="my-4">
-
-                                <!-- Account Management -->
-                                <h6 class="text-muted mb-3">
-                                    <i class="fas fa-cog me-2"></i>
-                                    Account Management
-                                </h6>
-                                <div class="d-grid gap-2">
-                                    <button class="btn btn-outline-warning">
-                                        <i class="fas fa-edit me-2"></i>
-                                        Edit Profile (Coming Soon)
-                                    </button>
-                                    <button class="btn btn-outline-secondary">
-                                        <i class="fas fa-lock me-2"></i>
-                                        Change Password (Coming Soon)
-                                    </button>
-                                    <a href="/logout" class="btn btn-outline-danger">
-                                        <i class="fas fa-sign-out-alt me-2"></i>
-                                        Logout
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- System Status -->
-                        <div class="card profile-card fade-in-up">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">
-                                    <i class="fas fa-shield-alt me-2 text-success"></i>
-                                    Account Status
-                                </h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="d-flex align-items-center mb-3">
-                                    <i class="fas fa-check-circle text-success me-2"></i>
-                                    <span class="flex-grow-1">Account Active</span>
-                                </div>
-                                <div class="d-flex align-items-center mb-3">
-                                    <i class="fas fa-check-circle text-success me-2"></i>
-                                    <span class="flex-grow-1">Email Verified</span>
-                                </div>
-                                <div class="d-flex align-items-center">
-                                    <i class="fas fa-user text-primary me-2"></i>
-                                    <span class="flex-grow-1">Individual User Account</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </main>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Mobile sidebar toggle
-        document.addEventListener('DOMContentLoaded', function() {
-            var sidebar = document.querySelector('.sidebar');
-            var menuToggle = document.querySelector('[data-bs-toggle="collapse"]');
-            
-            if (menuToggle && sidebar) {
-                menuToggle.addEventListener('click', function() {
-                    sidebar.classList.toggle('show');
-                });
-            }
 
-            // Auto-dismiss alerts
-            setTimeout(function() {
+        // Auto-dismiss alerts
+        document.addEventListener('DOMContentLoaded', function () {
+            setTimeout(function () {
                 const alerts = document.querySelectorAll('.alert');
-                alerts.forEach(function(alert) {
+                alerts.forEach(function (alert) {
                     const bsAlert = new bootstrap.Alert(alert);
                     bsAlert.close();
                 });
@@ -492,4 +440,5 @@
         });
     </script>
 </body>
+
 </html>

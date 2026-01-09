@@ -1,48 +1,103 @@
-// Global sidebar toggle logic for mobile/tablet across roles
-(function() {
-    function initSidebarToggle() {
-        const toggleBtn = document.getElementById('sidebarToggle') || document.getElementById('mobileSidebarToggle');
-        const sidebar = document.querySelector('.sidebar');
-        if (!sidebar) return;
+// Unified sidebar/hamburger toggle handler
+(function () {
+    function safeGet(idOrSelector) {
+        if (!idOrSelector) return null;
+        if (idOrSelector[0] === '#' ) return document.getElementById(idOrSelector.slice(1));
+        return document.querySelector(idOrSelector);
+    }
 
-        let overlay = document.querySelector('.sidebar-overlay');
-        if (!overlay) {
-            overlay = document.createElement('div');
-            overlay.className = 'sidebar-overlay';
-            document.body.appendChild(overlay);
+    function createIfMissingOverlay(selector, className) {
+        let el = null;
+        if (!selector) el = document.querySelector('.' + className) || document.querySelector('#' + className);
+        else el = document.getElementById(selector) || document.querySelector(selector);
+        if (!el) {
+            el = document.createElement('div');
+            el.className = className;
+            document.body.appendChild(el);
+        }
+        return el;
+    }
+
+    function wireToggle(options) {
+        // options: { toggles: [], sidebarSelectors: [], overlaySelectors: [], openClassSidebar, openClassOverlay, overlayActiveClass }
+        const toggleBtn = options.toggles.map(id => document.getElementById(id)).find(Boolean);
+        const sidebar = options.sidebarSelectors.map(s => safeGet(s)).find(Boolean);
+        let overlay = options.overlaySelectors.map(s => safeGet(s)).find(Boolean);
+
+        if (!sidebar && !toggleBtn) return;
+
+        if (!overlay && options.overlayCreate) {
+            overlay = createIfMissingOverlay(options.overlayCreate, options.overlayClass || 'sidebar-overlay');
         }
 
-        function openSidebar() {
-            sidebar.classList.add('show');
-            overlay.classList.add('show');
-            document.body.classList.add('sidebar-open');
+        function open() {
+            if (sidebar && options.openClassSidebar) sidebar.classList.add(options.openClassSidebar);
+            if (overlay && options.openClassOverlay) overlay.classList.add(options.openClassOverlay);
+            if (options.bodyClass) document.body.classList.add(options.bodyClass);
         }
-        function closeSidebar() {
-            sidebar.classList.remove('show');
-            overlay.classList.remove('show');
-            document.body.classList.remove('sidebar-open');
+        function close() {
+            if (sidebar && options.openClassSidebar) sidebar.classList.remove(options.openClassSidebar);
+            if (overlay && options.openClassOverlay) overlay.classList.remove(options.openClassOverlay);
+            if (options.bodyClass) document.body.classList.remove(options.bodyClass);
         }
-        function toggleSidebar() {
-            if (sidebar.classList.contains('show')) closeSidebar(); else openSidebar();
+        function toggle() {
+            const isOpen = sidebar && options.openClassSidebar && sidebar.classList.contains(options.openClassSidebar);
+            if (isOpen) close(); else open();
         }
 
         if (toggleBtn) {
-            toggleBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                toggleSidebar();
+            toggleBtn.addEventListener('click', function (e) {
+                if (e) e.preventDefault();
+                toggle();
             });
         }
-        overlay.addEventListener('click', closeSidebar);
-        window.addEventListener('resize', function() {
-            if (window.innerWidth >= 992) closeSidebar();
+
+        if (overlay) overlay.addEventListener('click', close);
+        window.addEventListener('resize', function () {
+            if (window.innerWidth >= 992) close();
         });
     }
 
-    if (document.readyState === 'complete' || document.readyState === 'interactive') {
-        initSidebarToggle();
-    } else {
-        document.addEventListener('DOMContentLoaded', initSidebarToggle);
+    function init() {
+        // Admin sidebar (admin-sidebar.ejs)
+        wireToggle({
+            toggles: ['mobileMenuToggle'],
+            sidebarSelectors: ['#adminSidebar', '.admin-sidebar'],
+            overlaySelectors: ['#sidebarOverlay', '.sidebar-overlay'],
+            overlayCreate: 'sidebarOverlay',
+            overlayClass: 'sidebar-overlay',
+            openClassSidebar: 'mobile-open',
+            openClassOverlay: 'active',
+            bodyClass: 'sidebar-open'
+        });
+
+        // Generic mobile sidebar used in main sidebar partial
+        wireToggle({
+            toggles: ['mobileSidebarToggle', 'sidebarToggle'],
+            sidebarSelectors: ['#mobileSidebar', '.mobile-sidebar'],
+            overlaySelectors: ['#mobileSidebarOverlay', '.mobile-sidebar-overlay'],
+            overlayCreate: 'mobileSidebarOverlay',
+            overlayClass: 'mobile-sidebar-overlay',
+            openClassSidebar: 'mobile-open',
+            openClassOverlay: 'show',
+            bodyClass: 'sidebar-open'
+        });
+
+        // Fallback for elements that rely on .sidebar + .sidebar-overlay + 'show'
+        wireToggle({
+            toggles: ['sidebarToggle'],
+            sidebarSelectors: ['.sidebar', '#sidebar', '.admin-sidebar'],
+            overlaySelectors: ['.sidebar-overlay', '#sidebarOverlay'],
+            overlayCreate: 'sidebarOverlay',
+            overlayClass: 'sidebar-overlay',
+            openClassSidebar: 'show',
+            openClassOverlay: 'show',
+            bodyClass: 'sidebar-open'
+        });
     }
+
+    if (document.readyState === 'complete' || document.readyState === 'interactive') init();
+    else document.addEventListener('DOMContentLoaded', init);
 })();
 
 

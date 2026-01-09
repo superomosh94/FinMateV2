@@ -12,16 +12,24 @@
                 <i class="fas fa-wallet me-2"></i>FinMate
             </h5>
             <div class="dropdown">
-                <button class="btn btn-outline-light dropdown-toggle" type="button" id="mobileUserDropdown" data-bs-toggle="dropdown">
+                <button class="btn btn-outline-light dropdown-toggle" type="button" id="mobileUserDropdown"
+                    data-bs-toggle="dropdown">
                     <i class="fas fa-user"></i>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end">
-                    <li><span class="dropdown-item-text"><small>Logged in as:</small><br><strong><%= user.username %></strong></span></li>
-                    <li><hr class="dropdown-divider"></li>
+                    <li><span class="dropdown-item-text"><small>Logged in as:</small><br><strong>
+                                <%= user.username %>
+                            </strong></span></li>
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
                     <li><a class="dropdown-item" href="/user/profile"><i class="fas fa-user me-2"></i>Profile</a></li>
                     <li><a class="dropdown-item" href="/user/settings"><i class="fas fa-cog me-2"></i>Settings</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item text-danger" href="/auth/logout"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+                    <li><a class="dropdown-item text-danger" href="/auth/logout"><i
+                                class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
                 </ul>
             </div>
         </div>
@@ -68,7 +76,8 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link <%= currentPage === 'upcoming-expenses' ? 'active' : '' %>" href="/user/upcoming-expenses">
+                <a class="nav-link <%= currentPage === 'upcoming-expenses' ? 'active' : '' %>"
+                    href="/user/upcoming-expenses">
                     <i class="fas fa-calendar-check me-2"></i>Upcoming Expenses
                 </a>
             </li>
@@ -88,8 +97,12 @@
             <div class="d-flex align-items-center">
                 <div class="flex-grow-1">
                     <small class="text-muted">Logged in as:</small>
-                    <div class="fw-bold"><%= user.username %></div>
-                    <small class="text-muted"><%= user.role %></small>
+                    <div class="fw-bold">
+                        <%= user.username %>
+                    </div>
+                    <small class="text-muted">
+                        <%= user.role %>
+                    </small>
                 </div>
                 <a href="/auth/logout" class="btn btn-sm btn-outline-light">
                     <i class="fas fa-sign-out-alt"></i>
@@ -97,6 +110,10 @@
             </div>
         </div>
     </aside>
+    <!-- Mobile Floating Toggle Button (Bottom) -->
+    <button class="btn mobile-fab-toggle d-lg-none" type="button" id="mobileSidebarToggleFAB" title="Open Menu">
+        <i class="fas fa-bars"></i>
+    </button>
 </nav>
 
 <!-- ==================== -->
@@ -104,16 +121,21 @@
 <!-- ==================== -->
 <nav class="desktop-nav d-none d-lg-block">
     <aside class="desktop-sidebar">
-        <div class="desktop-sidebar-header mb-4 text-center">
-            <h5 class="mb-0">
-                <i class="fas fa-wallet me-2"></i>FinMate
-            </h5>
+        <div class="desktop-sidebar-header mb-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <button class="btn btn-outline-light btn-sm" id="desktopSidebarToggle" title="Toggle Sidebar">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h5 class="mb-0 sidebar-title">
+                    <i class="fas fa-wallet me-2"></i><span class="sidebar-text">FinMate</span>
+                </h5>
+            </div>
         </div>
 
         <ul class="nav nav-pills flex-column">
             <li class="nav-item">
                 <a class="nav-link <%= currentPage === 'dashboard' ? 'active' : '' %>" href="/user/dashboard">
-                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                    <i class="fas fa-tachometer-alt me-2"></i><span class="sidebar-text">Dashboard</span>
                 </a>
             </li>
             <li class="nav-item">
@@ -138,12 +160,13 @@
             </li>
 
             <li class="nav-item">
-    <a class="nav-link <%= currentPage === 'analytics' ? 'active' : '' %>" href="/user/analytics">
-        <i class="fas fa-chart-bar"></i> Analytics
-    </a>
-</li>
+                <a class="nav-link <%= currentPage === 'analytics' ? 'active' : '' %>" href="/user/analytics">
+                    <i class="fas fa-chart-bar"></i> Analytics
+                </a>
+            </li>
             <li class="nav-item">
-                <a class="nav-link <%= currentPage === 'upcoming-expenses' ? 'active' : '' %>" href="/user/upcoming-expenses">
+                <a class="nav-link <%= currentPage === 'upcoming-expenses' ? 'active' : '' %>"
+                    href="/user/upcoming-expenses">
                     <i class="fas fa-calendar-check me-2"></i>Upcoming Expenses
                 </a>
             </li>
@@ -160,595 +183,664 @@
         </ul>
 
         <div class="desktop-sidebar-footer mt-auto pt-3 border-top">
-            <div class="d-flex align-items-center">
-                <div class="flex-grow-1">
-                    <small class="text-muted">Logged in as:</small>
-                    <div class="fw-bold"><%= user.username %></div>
-                    <small class="text-muted"><%= user.role %></small>
+            <div class="user-info mb-2 sidebar-text">
+                <small class="text-muted">Logged in as:</small>
+                <div class="fw-bold">
+                    <%= user.username %>
                 </div>
-                <a href="/auth/logout" class="btn btn-sm btn-outline-light">
-                    <i class="fas fa-sign-out-alt"></i>
-                </a>
+                <small class="text-muted">
+                    <%= user.role %>
+                </small>
             </div>
+            <a href="/auth/logout" class="btn btn-danger btn-sm w-100 logout-btn">
+                <i class="fas fa-sign-out-alt me-2"></i><span class="sidebar-text">Logout</span>
+            </a>
         </div>
     </aside>
 </nav>
 
 <style>
-/* ==========================================================================
+    /* ==========================================================================
    BASE STYLES & RESET
    ========================================================================== */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
 
-:root {
-    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    --sidebar-width: 250px;
-    --sidebar-width-lg: 280px;
-    --mobile-header-height: 60px;
-    --transition: all 0.3s ease-in-out;
-}
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --sidebar-width: 250px;
+        --sidebar-width-lg: 280px;
+        --mobile-header-height: 60px;
+        --transition: all 0.3s ease-in-out;
+    }
 
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    overflow-x: hidden;
-}
+    html,
+    body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        overflow-x: hidden;
+    }
 
-body.sidebar-open {
-    overflow: hidden;
-}
+    body {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        background-color: #f8f9fa;
+    }
 
-/* ==========================================================================
+    body.sidebar-open {
+        overflow: hidden;
+    }
+
+    /* ==========================================================================
    MOBILE NAVIGATION STYLES
    ========================================================================== */
-.mobile-nav {
-    position: relative;
-    z-index: 1100;
-}
+    .mobile-nav {
+        position: relative;
+        z-index: 1100;
+    }
 
-/* Mobile Header */
-.mobile-header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: var(--mobile-header-height);
-    background: var(--primary-gradient) !important;
-    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.15);
-    backdrop-filter: blur(10px);
-    z-index: 1100;
-}
+    /* Mobile Header */
+    .mobile-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: var(--mobile-header-height);
+        background: var(--primary-gradient) !important;
+        box-shadow: 0 2px 20px rgba(0, 0, 0, 0.15);
+        backdrop-filter: blur(10px);
+        z-index: 1100;
+    }
 
-.mobile-header h5 {
-    font-weight: 600;
-    font-size: 1.1rem;
-}
+    .mobile-header h5 {
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
 
-/* Mobile Sidebar */
-.mobile-sidebar {
-    position: fixed;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100vh;
-    background: var(--primary-gradient);
-    z-index: 1200;
-    transition: var(--transition);
-    display: flex;
-    flex-direction: column;
-    padding: 1.5rem;
-    overflow-y: auto;
-    overflow-x: hidden;
-}
+    /* Mobile Sidebar */
+    .mobile-sidebar {
+        position: fixed;
+        top: 0;
+        left: -100%;
+        width: min(300px, 85%);
+        height: 100vh;
+        background: var(--primary-gradient);
+        z-index: 1200;
+        transition: var(--transition);
+        display: flex;
+        flex-direction: column;
+        padding: 1.5rem;
+        overflow-y: auto;
+        overflow-x: hidden;
+        box-shadow: 10px 0 30px rgba(0, 0, 0, 0.3);
+    }
 
-.mobile-sidebar.mobile-open {
-    left: 0;
-}
+    .mobile-sidebar.mobile-open {
+        left: 0;
+    }
 
-/* Mobile Sidebar Overlay */
-.mobile-sidebar-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    z-index: 1150;
-    opacity: 0;
-    visibility: hidden;
-    transition: var(--transition);
-    backdrop-filter: blur(3px);
-}
+    /* Mobile Sidebar Overlay */
+    .mobile-sidebar-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 1150;
+        opacity: 0;
+        visibility: hidden;
+        transition: var(--transition);
+        backdrop-filter: blur(3px);
+    }
 
-.mobile-sidebar-overlay.show {
-    opacity: 1;
-    visibility: visible;
-}
+    .mobile-sidebar-overlay.show {
+        opacity: 1;
+        visibility: visible;
+    }
 
-/* Mobile Navigation Links */
-.mobile-sidebar .nav-link {
-    color: rgba(255, 255, 255, 0.95);
-    padding: 1.25rem 1.5rem;
-    margin: 0.5rem 0;
-    border-radius: 16px;
-    font-size: 1.15rem;
-    font-weight: 500;
-    transition: var(--transition);
-    border: none;
-    position: relative;
-    display: flex;
-    align-items: center;
-    text-decoration: none;
-}
+    /* Mobile Navigation Links */
+    .mobile-sidebar .nav-link {
+        color: rgba(255, 255, 255, 0.95);
+        padding: 1.25rem 1.5rem;
+        margin: 0.5rem 0;
+        border-radius: 16px;
+        font-size: 1.15rem;
+        font-weight: 500;
+        transition: var(--transition);
+        border: none;
+        position: relative;
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+    }
 
-.mobile-sidebar .nav-link:hover {
-    background: rgba(255, 255, 255, 0.15);
-    color: #ffffff;
-    transform: translateX(12px);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-}
+    .mobile-sidebar .nav-link:hover {
+        background: rgba(255, 255, 255, 0.15);
+        color: #ffffff;
+        transform: translateX(12px);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    }
 
-.mobile-sidebar .nav-link.active {
-    background: rgba(255, 255, 255, 0.25);
-    color: #ffffff;
-    font-weight: 600;
-    transform: translateX(12px);
-    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.2);
-}
+    .mobile-sidebar .nav-link.active {
+        background: rgba(255, 255, 255, 0.25);
+        color: #ffffff;
+        font-weight: 600;
+        transform: translateX(12px);
+        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.2);
+    }
 
-.mobile-sidebar .nav-link i {
-    width: 24px;
-    text-align: center;
-    margin-right: 12px;
-    font-size: 1.2rem;
-}
+    .mobile-sidebar .nav-link i {
+        width: 24px;
+        text-align: center;
+        margin-right: 12px;
+        font-size: 1.2rem;
+    }
 
-/* Mobile Sidebar Header */
-.mobile-sidebar-header {
-    padding-top: 1rem;
-    margin-bottom: 2rem;
-}
+    /* Mobile Sidebar Header */
+    .mobile-sidebar-header {
+        padding-top: 1rem;
+        margin-bottom: 2rem;
+    }
 
-.mobile-sidebar-header h5 {
-    color: #ffffff;
-    font-weight: 700;
-    font-size: 1.4rem;
-}
+    .mobile-sidebar-header h5 {
+        color: #ffffff;
+        font-weight: 700;
+        font-size: 1.4rem;
+    }
 
-/* Mobile Sidebar Footer */
-.mobile-sidebar-footer {
-    background: rgba(0, 0, 0, 0.25);
-    border-radius: 16px;
-    padding: 1.5rem;
-    margin: 2rem -1.5rem -1.5rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
-}
+    /* Mobile Sidebar Footer */
+    .mobile-sidebar-footer {
+        background: rgba(0, 0, 0, 0.25);
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin: 2rem -1.5rem -1.5rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+    }
 
-/* Close Button */
-#mobileSidebarClose {
-    border: none;
-    background: rgba(255, 255, 255, 0.15);
-    border-radius: 50%;
-    width: 44px;
-    height: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: var(--transition);
-    backdrop-filter: blur(10px);
-}
+    /* Mobile Floating Toggle Button */
+    .mobile-fab-toggle {
+        position: fixed;
+        bottom: 25px;
+        right: 25px;
+        width: 60px;
+        height: 60px;
+        background: var(--primary-gradient);
+        border: none;
+        border-radius: 50%;
+        color: white;
+        font-size: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        z-index: 1050;
+        transition: var(--transition);
+        padding: 0;
+    }
 
-#mobileSidebarClose:hover {
-    background: rgba(255, 255, 255, 0.25);
-    transform: rotate(90deg) scale(1.1);
-}
+    .mobile-fab-toggle:hover {
+        transform: scale(1.1);
+        color: white;
+        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
+    }
 
-/* ==========================================================================
+    .mobile-fab-toggle:active {
+        transform: scale(0.95);
+    }
+
+    /* Close Button */
+    #mobileSidebarClose {
+        border: none;
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 50%;
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: var(--transition);
+        backdrop-filter: blur(10px);
+    }
+
+    #mobileSidebarClose:hover {
+        background: rgba(255, 255, 255, 0.25);
+        transform: rotate(90deg) scale(1.1);
+    }
+
+    /* ==========================================================================
    DESKTOP NAVIGATION STYLES
    ========================================================================== */
-.desktop-sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: var(--sidebar-width);
-    height: 100vh;
-    background: var(--primary-gradient);
-    padding: 2rem 1.5rem;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 4px 0 30px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
-    transition: var(--transition);
-}
+    .desktop-sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: var(--sidebar-width);
+        height: 100vh;
+        background: var(--primary-gradient);
+        padding: 2rem 1.5rem;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 4px 0 30px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+        transition: var(--transition);
+    }
 
-/* Desktop Navigation Links */
-.desktop-sidebar .nav-link {
-    color: rgba(255, 255, 255, 0.9);
-    padding: 0.875rem 1rem;
-    margin: 0.25rem 0;
-    border-radius: 12px;
-    transition: var(--transition);
-    border: none;
-    font-weight: 500;
-    position: relative;
-    text-decoration: none;
-    font-size: 0.95rem;
-}
+    .desktop-sidebar.collapsed {
+        width: 80px;
+        padding: 2rem 0.75rem;
+    }
 
-.desktop-sidebar .nav-link:hover {
-    background: rgba(255, 255, 255, 0.15);
-    color: #ffffff;
-    transform: translateX(8px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-}
+    .desktop-sidebar.collapsed .sidebar-text,
+    .desktop-sidebar.collapsed .sidebar-title span,
+    .desktop-sidebar.collapsed .user-info {
+        display: none;
+    }
 
-.desktop-sidebar .nav-link.active {
-    background: rgba(255, 255, 255, 0.25);
-    color: #ffffff;
-    font-weight: 600;
-    transform: translateX(8px);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-}
+    .desktop-sidebar.collapsed .nav-link {
+        justify-content: center;
+        padding: 0.875rem;
+        margin: 0.25rem auto;
+        transform: none !important;
+    }
 
-.desktop-sidebar .nav-link i {
-    width: 20px;
-    text-align: center;
-    margin-right: 10px;
-    font-size: 1rem;
-}
+    .desktop-sidebar.collapsed .nav-link i {
+        margin-right: 0;
+        font-size: 1.25rem;
+    }
 
-/* Desktop Sidebar Header */
-.desktop-sidebar-header {
-    padding: 1rem 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-    margin-bottom: 1.5rem;
-}
+    .desktop-sidebar.collapsed .desktop-sidebar-header {
+        justify-content: center;
+    }
 
-.desktop-sidebar-header h5 {
-    color: #ffffff;
-    font-weight: 700;
-    font-size: 1.3rem;
-}
+    .desktop-sidebar.collapsed .logout-btn {
+        padding: 0.5rem;
+    }
 
-/* Desktop Sidebar Footer */
-.desktop-sidebar-footer {
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 12px;
-    padding: 1.25rem;
-    margin-top: auto;
-    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
-}
+    .main-content.sidebar-collapsed {
+        margin-left: 80px !important;
+    }
 
-/* ==========================================================================
+    /* Desktop Navigation Links */
+    .desktop-sidebar .nav-link {
+        color: rgba(255, 255, 255, 0.9);
+        padding: 0.875rem 1rem;
+        margin: 0.25rem 0;
+        border-radius: 12px;
+        transition: var(--transition);
+        border: none;
+        font-weight: 500;
+        position: relative;
+        text-decoration: none;
+        font-size: 0.95rem;
+    }
+
+    .desktop-sidebar .nav-link:hover {
+        background: rgba(255, 255, 255, 0.15);
+        color: #ffffff;
+        transform: translateX(8px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .desktop-sidebar .nav-link.active {
+        background: rgba(255, 255, 255, 0.25);
+        color: #ffffff;
+        font-weight: 600;
+        transform: translateX(8px);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .desktop-sidebar .nav-link i {
+        width: 20px;
+        text-align: center;
+        margin-right: 10px;
+        font-size: 1rem;
+    }
+
+    /* Desktop Sidebar Header */
+    .desktop-sidebar-header {
+        padding: 1rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+        margin-bottom: 1.5rem;
+    }
+
+    .desktop-sidebar-header h5 {
+        color: #ffffff;
+        font-weight: 700;
+        font-size: 1.3rem;
+    }
+
+    /* Desktop Sidebar Footer */
+    .desktop-sidebar-footer {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 12px;
+        padding: 1.25rem;
+        margin-top: auto;
+        border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+    }
+
+    /* ==========================================================================
    COMMON STYLES
    ========================================================================== */
-/* Active State Indicator */
-.nav-link.active::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 4px;
-    height: 70%;
-    background: #ffffff;
-    border-radius: 0 4px 4px 0;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-}
+    /* Active State Indicator */
+    .nav-link.active::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 4px;
+        height: 70%;
+        background: #ffffff;
+        border-radius: 0 4px 4px 0;
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    }
 
-/* Dropdown Menu Styling */
-.dropdown-menu {
-    border: none;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-    border-radius: 12px;
-    overflow: hidden;
-}
+    /* Dropdown Menu Styling */
+    .dropdown-menu {
+        border: none;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        border-radius: 12px;
+        overflow: hidden;
+    }
 
-/* ==========================================================================
+    /* ==========================================================================
    RESPONSIVE MEDIA QUERIES
    ========================================================================== */
 
-/* Extra Small Devices (Phones, 0px - 575.98px) */
-@media (max-width: 575.98px) {
-    .mobile-sidebar {
-        padding: 1.25rem;
-    }
-    
-    .mobile-sidebar .nav-link {
-        padding: 1.1rem 1.25rem;
-        font-size: 1.1rem;
-        margin: 0.4rem 0;
-    }
-    
-    .mobile-header {
-        padding: 0.75rem 1rem;
-    }
-    
-    .mobile-header h5 {
-        font-size: 1rem;
-    }
-    
-    .main-content {
-        padding-top: var(--mobile-header-height);
-    }
-}
+    /* Extra Small Devices (Phones, 0px - 575.98px) */
+    @media (max-width: 575.98px) {
+        .mobile-sidebar {
+            padding: 1.25rem;
+        }
 
-/* Small Devices (Landscape Phones, 576px - 767.98px) */
-@media (min-width: 576px) and (max-width: 767.98px) {
-    .mobile-sidebar {
-        width: 380px;
-        left: -380px;
-    }
-    
-    .mobile-sidebar.mobile-open {
-        left: 0;
-    }
-    
-    .mobile-sidebar-overlay.show {
-        background: rgba(0, 0, 0, 0.7);
-    }
-}
+        .mobile-sidebar .nav-link {
+            padding: 1.1rem 1.25rem;
+            font-size: 1.1rem;
+            margin: 0.4rem 0;
+        }
 
-/* Medium Devices (Tablets, 768px - 991.98px) */
-@media (min-width: 768px) and (max-width: 991.98px) {
-    .mobile-sidebar {
-        width: 320px;
-        left: -320px;
-    }
-    
-    .mobile-sidebar.mobile-open {
-        left: 0;
-    }
-    
-    .mobile-sidebar .nav-link {
-        padding: 1rem 1.25rem;
-        font-size: 1.05rem;
-    }
-}
+        .mobile-header {
+            padding: 0.75rem 1rem;
+        }
 
-/* Large Devices (Desktops, 992px - 1199.98px) */
-@media (min-width: 992px) {
-    .mobile-nav {
-        display: none !important;
-    }
-    
-    .desktop-nav {
-        display: block !important;
-    }
-    
-    .main-content {
-        margin-left: var(--sidebar-width);
-        transition: margin-left 0.3s ease;
-    }
-}
+        .mobile-header h5 {
+            font-size: 1rem;
+        }
 
-/* Extra Large Devices (Large Desktops, 1200px and up) */
-@media (min-width: 1200px) {
-    .desktop-sidebar {
-        width: var(--sidebar-width-lg);
+        .main-content {
+            padding-top: var(--mobile-header-height) !important;
+        }
     }
-    
-    .main-content {
-        margin-left: var(--sidebar-width-lg);
-    }
-    
-    .desktop-sidebar .nav-link {
-        padding: 1rem 1.25rem;
-        font-size: 1rem;
-    }
-}
 
-/* XXL Devices (Extra Large Screens, 1400px and up) */
-@media (min-width: 1400px) {
-    .desktop-sidebar {
-        width: 300px;
-    }
-    
-    .main-content {
-        margin-left: 300px;
-    }
-}
+    /* Small Devices (Landscape Phones, 576px - 767.98px) */
+    @media (min-width: 576px) and (max-width: 767.98px) {
+        .mobile-sidebar {
+            width: 320px;
+            left: -320px;
+        }
 
-/* ==========================================================================
+        .mobile-sidebar.mobile-open {
+            left: 0;
+        }
+    }
+
+    /* Medium Devices (Tablets, 768px - 991.98px) */
+    @media (min-width: 768px) and (max-width: 991.98px) {
+        .mobile-sidebar {
+            width: 320px;
+            left: -320px;
+        }
+
+        .mobile-sidebar.mobile-open {
+            left: 0;
+        }
+
+        .mobile-sidebar .nav-link {
+            padding: 1rem 1.25rem;
+            font-size: 1.05rem;
+        }
+    }
+
+    /* Large Devices (Desktops, 992px - 1199.98px) */
+    @media (min-width: 992px) {
+        .mobile-nav {
+            display: none !important;
+        }
+
+        .desktop-nav {
+            display: block !important;
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            transition: margin-left 0.3s ease;
+        }
+    }
+
+    /* Extra Large Devices (Large Desktops, 1200px and up) */
+    @media (min-width: 1200px) {
+        .desktop-sidebar {
+            width: var(--sidebar-width-lg);
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width-lg);
+        }
+
+        .desktop-sidebar .nav-link {
+            padding: 1rem 1.25rem;
+            font-size: 1rem;
+        }
+    }
+
+    /* XXL Devices (Extra Large Screens, 1400px and up) */
+    @media (min-width: 1400px) {
+        .desktop-sidebar {
+            width: 300px;
+        }
+
+        .main-content {
+            margin-left: 300px;
+        }
+    }
+
+    /* ==========================================================================
    MOBILE DROPDOWN SPECIFIC STYLES
    ========================================================================== */
-@media (max-width: 991.98px) {
-    .dropdown-menu {
-        background: var(--primary-gradient);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        backdrop-filter: blur(20px);
-        margin-top: 0.5rem;
-    }
-    
-    .dropdown-item {
-        color: rgba(255, 255, 255, 0.9);
-        padding: 0.75rem 1rem;
-        transition: var(--transition);
-        border-radius: 8px;
-        margin: 0.1rem 0.5rem;
-        width: auto;
-    }
-    
-    .dropdown-item:hover {
-        background: rgba(255, 255, 255, 0.15);
-        color: #ffffff;
-        transform: translateX(5px);
-    }
-    
-    .dropdown-item-text {
-        color: rgba(255, 255, 255, 0.8);
-    }
-    
-    .dropdown-divider {
-        border-color: rgba(255, 255, 255, 0.2);
-        margin: 0.5rem 0;
-    }
-}
+    @media (max-width: 991.98px) {
+        .dropdown-menu {
+            background: var(--primary-gradient);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(20px);
+            margin-top: 0.5rem;
+        }
 
-/* ==========================================================================
+        .dropdown-item {
+            color: rgba(255, 255, 255, 0.9);
+            padding: 0.75rem 1rem;
+            transition: var(--transition);
+            border-radius: 8px;
+            margin: 0.1rem 0.5rem;
+            width: auto;
+        }
+
+        .dropdown-item:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            transform: translateX(5px);
+        }
+
+        .dropdown-item-text {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .dropdown-divider {
+            border-color: rgba(255, 255, 255, 0.2);
+            margin: 0.5rem 0;
+        }
+    }
+
+    /* ==========================================================================
    MAIN CONTENT ADJUSTMENTS
    ========================================================================== */
-.main-content {
-    min-height: 100vh;
-    background-color: #f8f9fa;
-    transition: all 0.3s ease;
-}
-
-/* Print Styles */
-@media print {
-    .mobile-nav,
-    .desktop-nav {
-        display: none !important;
-    }
-    
     .main-content {
-        margin-left: 0 !important;
-        padding-top: 0 !important;
+        min-height: 100vh;
+        background-color: #f8f9fa;
+        transition: all 0.3s ease;
+        padding-top: 0;
     }
-}
 
-/* High Contrast Mode Support */
-@media (prefers-contrast: high) {
-    .mobile-sidebar,
-    .desktop-sidebar {
-        background: #1a1a1a;
+    /* Fixed Header Compensation for Mobile */
+    @media (max-width: 991.98px) {
+        .main-content {
+            padding-top: var(--mobile-header-height) !important;
+        }
     }
-    
-    .nav-link.active {
-        background: #333333;
-    }
-}
 
-/* Reduced Motion Support */
-@media (prefers-reduced-motion: reduce) {
-    * {
-        transition-duration: 0.01ms !important;
-        animation-duration: 0.01ms !important;
+    /* Print Styles */
+    @media print {
+
+        .mobile-nav,
+        .desktop-nav {
+            display: none !important;
+        }
+
+        .main-content {
+            margin-left: 0 !important;
+            padding-top: 0 !important;
+        }
     }
-}
+
+    /* High Contrast Mode Support */
+    @media (prefers-contrast: high) {
+
+        .mobile-sidebar,
+        .desktop-sidebar {
+            background: #1a1a1a;
+        }
+
+        .nav-link.active {
+            background: #333333;
+        }
+    }
+
+    /* Reduced Motion Support */
+    @media (prefers-reduced-motion: reduce) {
+        * {
+            transition-duration: 0.01ms !important;
+            animation-duration: 0.01ms !important;
+        }
+    }
 </style>
 
 <script>
-// Enhanced Mobile Sidebar Manager with Error Handling
-class MobileSidebarManager {
-    constructor() {
-        this.sidebar = document.getElementById('mobileSidebar');
-        this.overlay = document.getElementById('mobileSidebarOverlay');
-        this.toggleBtn = document.getElementById('mobileSidebarToggle');
-        this.closeBtn = document.getElementById('mobileSidebarClose');
-        
-        this.isOpen = false;
-        this.init();
-    }
-    
-    init() {
-        // Check if all required elements exist
-        if (!this.sidebar || !this.overlay || !this.toggleBtn || !this.closeBtn) {
-            console.error('Mobile sidebar: Required elements not found');
-            return;
-        }
-        
-        console.log('Mobile sidebar: Initializing...');
-        
-        // Event Listeners
-        this.toggleBtn.addEventListener('click', (e) => this.handleToggle(e));
-        this.closeBtn.addEventListener('click', (e) => this.handleClose(e));
-        this.overlay.addEventListener('click', (e) => this.handleOverlayClick(e));
-        
-        // Navigation links
-        document.querySelectorAll('.mobile-sidebar .nav-link').forEach(link => {
-            link.addEventListener('click', () => this.handleNavLinkClick());
-        });
-        
-        // Keyboard and resize events
-        document.addEventListener('keydown', (e) => this.handleKeydown(e));
-        window.addEventListener('resize', () => this.handleResize());
-        
-        console.log('Mobile sidebar: Initialized successfully');
-    }
-    
-    handleToggle(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        this.toggle();
-    }
-    
-    handleClose(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        this.close();
-    }
-    
-    handleOverlayClick(e) {
-        if (e.target === this.overlay) {
-            this.close();
-        }
-    }
-    
-    handleNavLinkClick() {
-        if (window.innerWidth < 992) {
-            this.close();
-        }
-    }
-    
-    handleKeydown(e) {
-        if (e.key === 'Escape' && this.isOpen) {
-            this.close();
-        }
-    }
-    
-    handleResize() {
-        if (window.innerWidth >= 992 && this.isOpen) {
-            this.close();
-        }
-    }
-    
-    open() {
-        this.sidebar.classList.add('mobile-open');
-        this.overlay.classList.add('show');
-        document.body.classList.add('sidebar-open');
-        document.body.style.overflow = 'hidden';
-        this.isOpen = true;
-        
-        console.log('Mobile sidebar: Opened');
-    }
-    
-    close() {
-        this.sidebar.classList.remove('mobile-open');
-        this.overlay.classList.remove('show');
-        document.body.classList.remove('sidebar-open');
-        document.body.style.overflow = '';
-        this.isOpen = false;
-        
-        console.log('Mobile sidebar: Closed');
-    }
-    
-    toggle() {
-        if (this.isOpen) {
-            this.close();
-        } else {
-            this.open();
-        }
-    }
-}
+    // Enhanced Navigation Manager
+    class NavigationManager {
+        constructor() {
+            // Mobile elements
+            this.mobileSidebar = document.getElementById('mobileSidebar');
+            this.mobileOverlay = document.getElementById('mobileSidebarOverlay');
+            this.mobileToggleBtn = document.getElementById('mobileSidebarToggle');
+            this.mobileToggleFAB = document.getElementById('mobileSidebarToggleFAB');
+            this.mobileCloseBtn = document.getElementById('mobileSidebarClose');
 
-// Initialize when DOM is ready
-document.addEventListener('DOMContentLoaded', function() {
-    new MobileSidebarManager();
-    
-    // Log initialization details
-    console.log('FinMate Navigation System:');
-    console.log('- Mobile navigation:', document.getElementById('mobileSidebar') ? '✓ Loaded' : '✗ Missing');
-    console.log('- Desktop navigation:', document.querySelector('.desktop-sidebar') ? '✓ Loaded' : '✗ Missing');
-    console.log('- Current breakpoint:', window.innerWidth >= 992 ? 'Desktop' : 'Mobile');
-    console.log('- Screen size:', `${window.innerWidth} x ${window.innerHeight}`);
-});
+            // Desktop elements
+            this.desktopSidebar = document.querySelector('.desktop-sidebar');
+            this.desktopToggleBtn = document.getElementById('desktopSidebarToggle');
+            this.mainContent = document.querySelector('.main-content');
 
-// Fallback initialization for various ready states
-if (document.readyState === 'interactive' || document.readyState === 'complete') {
-    new MobileSidebarManager();
-}
+            this.isMobileOpen = false;
+            this.isDesktopCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+
+            this.init();
+        }
+
+        init() {
+            // Desktop toggle logic
+            if (this.desktopToggleBtn && this.desktopSidebar && this.mainContent) {
+                // Apply initial state
+                if (this.isDesktopCollapsed) {
+                    this.desktopSidebar.classList.add('collapsed');
+                    this.mainContent.classList.add('sidebar-collapsed');
+                }
+
+                this.desktopToggleBtn.addEventListener('click', () => {
+                    this.isDesktopCollapsed = !this.isDesktopCollapsed;
+                    this.desktopSidebar.classList.toggle('collapsed');
+                    this.mainContent.classList.toggle('sidebar-collapsed');
+                    localStorage.setItem('sidebarCollapsed', this.isDesktopCollapsed);
+                });
+            }
+
+            // Mobile toggle logic
+            if (this.mobileSidebar && this.mobileOverlay && this.mobileToggleBtn && this.mobileCloseBtn) {
+                this.mobileToggleBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.openMobile();
+                });
+
+                if (this.mobileToggleFAB) {
+                    this.mobileToggleFAB.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        this.openMobile();
+                    });
+                }
+
+                this.mobileCloseBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.closeMobile();
+                });
+                this.mobileOverlay.addEventListener('click', () => this.closeMobile());
+
+                // Navigation links
+                document.querySelectorAll('.mobile-sidebar .nav-link').forEach(link => {
+                    link.addEventListener('click', () => this.closeMobile());
+                });
+            }
+
+            // Keyboard and resize events
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    this.closeMobile();
+                }
+            });
+
+            window.addEventListener('resize', () => {
+                if (window.innerWidth >= 992 && this.isMobileOpen) {
+                    this.closeMobile();
+                }
+            });
+        }
+
+        openMobile() {
+            this.mobileSidebar.classList.add('mobile-open');
+            this.mobileOverlay.classList.add('show');
+            document.body.classList.add('sidebar-open');
+            this.isMobileOpen = true;
+        }
+
+        closeMobile() {
+            if (this.mobileSidebar) this.mobileSidebar.classList.remove('mobile-open');
+            if (this.mobileOverlay) this.mobileOverlay.classList.remove('show');
+            document.body.classList.remove('sidebar-open');
+            this.isMobileOpen = false;
+        }
+    }
+
+    // Initialize when DOM is ready
+    document.addEventListener('DOMContentLoaded', function () {
+        new NavigationManager();
+    });
+
+    // Fallback initialization
+    if (document.readyState === 'interactive' || document.readyState === 'complete') {
+        new NavigationManager();
+    }
 </script>

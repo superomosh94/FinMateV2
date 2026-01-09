@@ -1,526 +1,604 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= title %></title>
+    <title>
+        <%= title %>
+    </title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        .sidebar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
-        }
-        .sidebar .nav-link {
-            color: rgba(255,255,255,0.9);
-            padding: 12px 20px;
-            margin: 2px 0;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            position: relative;
-            font-weight: 500;
-        }
-        .sidebar .nav-link:hover {
-            background: rgba(255,255,255,0.15);
-            transform: translateX(5px);
-            color: #fff;
-        }
-        .sidebar .nav-link.active {
-            background: rgba(255,255,255,0.2);
-            color: #fff;
-            font-weight: 600;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        .sidebar .nav-link.active::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 3px;
-            height: 60%;
-            background: #fff;
-            border-radius: 0 2px 2px 0;
-        }
         .sidebar-footer {
-            background: rgba(0,0,0,0.1);
+            background: rgba(0, 0, 0, 0.1);
             margin: 0 -12px;
             padding: 15px 12px;
         }
+
         .stat-card {
             border-radius: 10px;
             transition: transform 0.3s;
         }
+
         .stat-card:hover {
             transform: translateY(-5px);
         }
-        .border-left-primary { border-left: 4px solid #4e73df !important; }
-        .border-left-success { border-left: 4px solid #1cc88a !important; }
-        .border-left-warning { border-left: 4px solid #f6c23e !important; }
-        .border-left-info { border-left: 4px solid #36b9cc !important; }
-        .border-left-danger { border-left: 4px solid #e74a3b !important; }
+
+        .border-left-primary {
+            border-left: 4px solid #4e73df !important;
+        }
+
+        .border-left-success {
+            border-left: 4px solid #1cc88a !important;
+        }
+
+        .border-left-warning {
+            border-left: 4px solid #f6c23e !important;
+        }
+
+        .border-left-info {
+            border-left: 4px solid #36b9cc !important;
+        }
+
+        .border-left-danger {
+            border-left: 4px solid #e74a3b !important;
+        }
+
         .progress {
             height: 10px;
             border-radius: 5px;
         }
+
         .card {
             border: none;
             border-radius: 10px;
             box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
         }
+
         .card-header {
             background: #fff;
             border-bottom: 1px solid #e3e6f0;
             font-weight: 600;
         }
+
         .empty-state {
             padding: 3rem 1rem;
             text-align: center;
             color: #6c757d;
         }
+
         .empty-state i {
             font-size: 3rem;
             margin-bottom: 1rem;
             opacity: 0.5;
         }
+
         .badge {
             font-size: 0.7em;
             padding: 4px 8px;
         }
+
         .savings-goal-card {
             transition: transform 0.3s, box-shadow 0.3s;
         }
+
         .savings-goal-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 0.5rem 2rem rgba(58, 59, 69, 0.2) !important;
         }
+
         .savings-goal-card.completed {
             border-left: 4px solid #1cc88a !important;
         }
+
         .goal-progress {
             height: 15px;
             border-radius: 8px;
         }
+
         .goal-actions .btn {
             font-size: 0.8rem;
             padding: 0.375rem 0.75rem;
         }
+
         /* Mobile responsiveness */
-        @media (max-width: 768px) {
-            .sidebar {
-                min-height: auto;
-                position: fixed;
-                top: 0;
-                left: -100%;
-                width: 280px;
-                z-index: 1000;
-                transition: left 0.3s ease;
-            }
-            .sidebar.show {
-                left: 0;
-            }
-            .sidebar .nav-link {
-                padding: 15px 20px;
-            }
-        }
     </style>
 </head>
+
 <body>
     <div class="container-fluid">
         <div class="row">
             <!-- Sidebar -->
-            <%- include('../../partials/sidebar', { user: user, currentPage: currentPage, notificationCount: notificationCount }) %>
+            <%- include('../../partials/sidebar', { user: user, currentPage: currentPage, notificationCount:
+                notificationCount }) %>
 
-            <!-- Main content -->
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-                <!-- Mobile Header with Menu Toggle -->
-                <div class="d-md-none d-flex align-items-center py-3 border-bottom">
-                    <button class="btn btn-primary me-3" type="button" data-bs-toggle="collapse" data-bs-target=".sidebar">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                    <h5 class="mb-0">Savings Goals</h5>
-                </div>
+                <!-- Main content -->
+                <main class="main-content px-md-4">
 
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2">
-                        <i class="fas fa-piggy-bank me-2 text-primary"></i>
-                        Savings Goals
-                    </h1>
-                    <div class="btn-toolbar mb-2 mb-md-0">
-                        <a href="/user/savings/add" class="btn btn-primary">
-                            <i class="fas fa-plus-circle me-1"></i>
-                            New Goal
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Alerts -->
-                <% if (typeof success !== 'undefined' && success) { %>
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <i class="fas fa-check-circle me-2"></i>
-                        <%= message %>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                <% } %>
-                
-                <% if (typeof error !== 'undefined' && error) { %>
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <i class="fas fa-exclamation-circle me-2"></i>
-                        <%= error %>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                <% } %>
-
-                <!-- Quick Actions -->
-                <div class="row mb-4">
-                    <div class="col-12">
-                        <div class="card shadow">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">
-                                    <i class="fas fa-bolt me-2"></i>Quick Actions
-                                </h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="row text-center">
-                                    <div class="col-md-3 col-sm-6 mb-3">
-                                        <a href="/user/savings/add" class="btn btn-primary btn-lg w-100 py-3">
-                                            <i class="fas fa-plus-circle fa-2x mb-2"></i><br>
-                                            Create Goal
-                                        </a>
-                                    </div>
-                                    <div class="col-md-3 col-sm-6 mb-3">
-                                        <a href="/user/expenses" class="btn btn-success btn-lg w-100 py-3">
-                                            <i class="fas fa-receipt fa-2x mb-2"></i><br>
-                                            View Expenses
-                                        </a>
-                                    </div>
-                                    <div class="col-md-3 col-sm-6 mb-3">
-                                        <a href="/user/reports" class="btn btn-info btn-lg w-100 py-3">
-                                            <i class="fas fa-chart-bar fa-2x mb-2"></i><br>
-                                            View Reports
-                                        </a>
-                                    </div>
-                                    <div class="col-md-3 col-sm-6 mb-3">
-                                        <a href="/user/dashboard" class="btn btn-secondary btn-lg w-100 py-3">
-                                            <i class="fas fa-tachometer-alt fa-2x mb-2"></i><br>
-                                            Dashboard
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Stats -->
-                <div class="row mb-4">
-                    <div class="col-xl-3 col-md-6 mb-4">
-                        <div class="card border-left-primary shadow h-100 py-2 stat-card">
-                            <div class="card-body">
-                                <div class="row no-gutters align-items-center">
-                                    <div class="col mr-2">
-                                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                            Total Goals</div>
-                                        <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                            <%= savings ? savings.length : 0 %>
-                                        </div>
-                                    </div>
-                                    <div class="col-auto">
-                                        <i class="fas fa-bullseye fa-2x text-gray-300"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-xl-3 col-md-6 mb-4">
-                        <div class="card border-left-success shadow h-100 py-2 stat-card">
-                            <div class="card-body">
-                                <div class="row no-gutters align-items-center">
-                                    <div class="col mr-2">
-                                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                            Total Saved</div>
-                                        <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                            <% 
-                                                // FIXED: Parse amounts as numbers
-                                                const totalSaved = savings ? savings.reduce((sum, saving) => sum + (parseFloat(saving.current_amount) || 0), 0) : 0;
-                                            %>
-                                            Ksh <%= (parseFloat(totalSaved) || 0).toFixed(2) %>
-                                        </div>
-                                    </div>
-                                    <div class="col-auto">
-                                        <i class="fas fa-piggy-bank fa-2x text-gray-300"></i>
-                                    </div>
-                                </div>
-                            </div>
+                    <div
+                        class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h1 class="h2">
+                            <i class="fas fa-piggy-bank me-2 text-primary"></i>
+                            Savings Goals
+                        </h1>
+                        <div class="btn-toolbar mb-2 mb-md-0">
+                            <a href="/user/savings/add" class="btn btn-primary">
+                                <i class="fas fa-plus-circle me-1"></i>
+                                New Goal
+                            </a>
                         </div>
                     </div>
 
-                    <div class="col-xl-3 col-md-6 mb-4">
-                        <div class="card border-left-warning shadow h-100 py-2 stat-card">
-                            <div class="card-body">
-                                <div class="row no-gutters align-items-center">
-                                    <div class="col mr-2">
-                                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                            Total Target</div>
-                                        <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                            <% 
-                                                // FIXED: Parse amounts as numbers
-                                                const totalTarget = savings ? savings.reduce((sum, saving) => sum + (parseFloat(saving.target_amount) || 0), 0) : 0;
-                                            %>
-                                            Ksh <%= (parseFloat(totalTarget) || 0).toFixed(2) %>
-                                        </div>
-                                    </div>
-                                    <div class="col-auto">
-                                        <i class="fas fa-bullseye fa-2x text-gray-300"></i>
-                                    </div>
-                                </div>
-                            </div>
+                    <!-- Alerts -->
+                    <% if (typeof success !=='undefined' && success) { %>
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle me-2"></i>
+                            <%= message %>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>
-                    </div>
+                        <% } %>
 
-                    <div class="col-xl-3 col-md-6 mb-4">
-                        <div class="card border-left-info shadow h-100 py-2 stat-card">
-                            <div class="card-body">
-                                <div class="row no-gutters align-items-center">
-                                    <div class="col mr-2">
-                                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                                            Overall Progress</div>
-                                        <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                            <%
-                                                const overallProgress = totalTarget > 0 ? (totalSaved / totalTarget) * 100 : 0;
-                                            %>
-                                            <%= (parseFloat(overallProgress) || 0).toFixed(1) %>%
-                                        </div>
-                                    </div>
-                                    <div class="col-auto">
-                                        <i class="fas fa-chart-line fa-2x text-gray-300"></i>
-                                    </div>
+                            <% if (typeof error !=='undefined' && error) { %>
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    <i class="fas fa-exclamation-circle me-2"></i>
+                                    <%= error %>
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Savings Goals -->
-                <div class="row mb-4">
-                    <div class="col-12">
-                        <div class="card shadow">
-                            <div class="card-header d-flex justify-content-between align-items-center">
-                                <h5 class="card-title mb-0">
-                                    <i class="fas fa-bullseye me-2"></i>Your Savings Goals
-                                </h5>
-                                <a href="/user/savings/add" class="btn btn-sm btn-primary">
-                                    <i class="fas fa-plus me-1"></i>Add Goal
-                                </a>
-                            </div>
-                            <div class="card-body">
-                                <% if (savings && savings.length > 0) { %>
-                                    <div class="row">
-                                        <% savings.forEach((saving, index) => { 
-                                            // FIXED: Parse amounts as numbers
-                                            const currentAmount = parseFloat(saving.current_amount) || 0;
-                                            const targetAmount = parseFloat(saving.target_amount) || 0;
-                                            const progress = targetAmount > 0 ? (currentAmount / targetAmount) * 100 : 0;
-                                            const progressPercentage = Math.min(progress, 100);
-                                            const isCompleted = currentAmount >= targetAmount;
-                                            const daysRemaining = saving.target_date ? Math.ceil((new Date(saving.target_date) - new Date()) / (1000 * 60 * 60 * 24)) : null;
-                                            const progressClass = progressPercentage >= 100 ? 'bg-success' : progressPercentage >= 75 ? 'bg-info' : progressPercentage >= 50 ? 'bg-primary' : 'bg-warning';
-                                        %>
-                                            <div class="col-lg-6 mb-4">
-                                                <div class="card savings-goal-card h-100 <%= isCompleted ? 'completed' : '' %>">
-                                                    <div class="card-body">
-                                                        <div class="d-flex justify-content-between align-items-start mb-3">
-                                                            <h5 class="card-title mb-0">
-                                                                <i class="fas fa-<%= isCompleted ? 'trophy' : 'bullseye' %> me-2 text-primary"></i>
-                                                                <%= saving.name %>
-                                                            </h5>
-                                                            <% if (isCompleted) { %>
-                                                                <span class="badge bg-success">
-                                                                    <i class="fas fa-check me-1"></i>Completed
-                                                                </span>
-                                                            <% } %>
-                                                        </div>
-                                                        
-                                                        <% if (saving.description) { %>
-                                                            <p class="card-text text-muted mb-3"><%= saving.description %></p>
-                                                        <% } %>
-                                                        
-                                                        <div class="mb-3">
-                                                            <div class="d-flex justify-content-between mb-1">
-                                                                <span class="fw-bold">Ksh <%= currentAmount.toFixed(2) %></span>
-                                                                <span class="text-muted">Ksh <%= targetAmount.toFixed(2) %></span>
-                                                            </div>
-                                                            <div class="progress goal-progress">
-                                                                <div class="progress-bar <%= progressClass %>" 
-                                                                     role="progressbar" 
-                                                                     style="width: <%= progressPercentage %>%"
-                                                                     aria-valuenow="<%= progressPercentage %>" 
-                                                                     aria-valuemin="0" 
-                                                                     aria-valuemax="100">
-                                                                </div>
-                                                            </div>
-                                                            <div class="d-flex justify-content-between mt-1">
-                                                                <small class="text-muted"><%= Math.round(progressPercentage) %>% complete</small>
-                                                                <% if (daysRemaining && daysRemaining > 0 && !isCompleted) { %>
-                                                                    <small class="text-warning">
-                                                                        <i class="fas fa-clock me-1"></i><%= daysRemaining %> days
-                                                                    </small>
-                                                                <% } %>
-                                                            </div>
-                                                        </div>
-                                                        
-                                                        <% if (!isCompleted) { %>
-                                                            <form action="/user/savings/add-amount/<%= saving.id %>" method="POST" class="mb-3">
-                                                                <div class="input-group">
-                                                                    <span class="input-group-text">Ksh</span>
-                                                                    <input type="number" 
-                                                                           step="0.01" 
-                                                                           min="0.01" 
-                                                                           max="<%= (targetAmount - currentAmount).toFixed(2) %>"
-                                                                           class="form-control" 
-                                                                           name="amount" 
-                                                                           placeholder="Enter amount"
-                                                                           required>
-                                                                    <button type="submit" class="btn btn-success">
-                                                                        <i class="fas fa-plus me-1"></i>Add
-                                                                    </button>
-                                                                </div>
-                                                                <div class="form-text text-center">
-                                                                    Remaining: <strong>Ksh <%= (targetAmount - currentAmount).toFixed(2) %></strong>
-                                                                </div>
-                                                            </form>
-                                                        <% } else { %>
-                                                            <div class="alert alert-success text-center py-2 mb-3">
-                                                                <i class="fas fa-check-circle me-2"></i>
-                                                                <strong>Goal Achieved!</strong>
-                                                            </div>
-                                                        <% } %>
-                                                        
-                                                        <div class="d-flex justify-content-between text-muted small mb-3">
-                                                            <% if (saving.target_date) { %>
-                                                                <span>
-                                                                    <i class="fas fa-calendar me-1"></i>
-                                                                    <%= new Date(saving.target_date).toLocaleDateString() %>
-                                                                </span>
-                                                            <% } %>
-                                                            <% if (saving.created_at) { %>
-                                                                <span>
-                                                                    <i class="fas fa-clock me-1"></i>
-                                                                    <%= new Date(saving.created_at).toLocaleDateString() %>
-                                                                </span>
-                                                            <% } %>
-                                                        </div>
-                                                        
-                                                        <div class="goal-actions d-flex gap-2">
-                                                            <a href="/user/savings/edit/<%= saving.id %>" 
-                                                               class="btn btn-outline-primary btn-sm flex-fill">
-                                                                <i class="fas fa-edit me-1"></i>Edit
-                                                            </a>
-                                                            <button type="button" 
-                                                                    class="btn btn-outline-info btn-sm flex-fill"
-                                                                    data-bs-toggle="modal" 
-                                                                    data-bs-target="#detailsModal<%= saving.id %>">
-                                                                <i class="fas fa-chart-line me-1"></i>Details
-                                                            </button>
-                                                            <form action="/user/savings/delete/<%= saving.id %>" method="POST" class="flex-fill">
-                                                                <button type="submit" 
-                                                                        class="btn btn-outline-danger btn-sm w-100"
-                                                                        onclick="return confirm('Are you sure you want to delete \"<%= saving.name %>\"? This action cannot be undone.')">
-                                                                    <i class="fas fa-trash me-1"></i>Delete
-                                                                </button>
-                                                            </form>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <!-- Details Modal -->
-                                            <div class="modal fade" id="detailsModal<%= saving.id %>" tabindex="-1" aria-labelledby="detailsModalLabel<%= saving.id %>" aria-hidden="true">
-                                                <div class="modal-dialog modal-dialog-centered">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header">
-                                                            <h5 class="modal-title" id="detailsModalLabel<%= saving.id %>">Goal Details</h5>
-                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            <div class="text-center mb-4">
-                                                                <h5 class="fw-bold"><%= saving.name %></h5>
-                                                                <% if (saving.description) { %>
-                                                                    <p class="text-muted"><%= saving.description %></p>
-                                                                <% } %>
-                                                            </div>
-                                                            
-                                                            <div class="row text-center">
-                                                                <div class="col-6 mb-3">
-                                                                    <div class="text-muted small">Saved</div>
-                                                                    <div class="fw-bold h5">Ksh <%= currentAmount.toFixed(2) %></div>
-                                                                </div>
-                                                                <div class="col-6 mb-3">
-                                                                    <div class="text-muted small">Target</div>
-                                                                    <div class="fw-bold h5">Ksh <%= targetAmount.toFixed(2) %></div>
-                                                                </div>
-                                                                <div class="col-6 mb-3">
-                                                                    <div class="text-muted small">Progress</div>
-                                                                    <div class="fw-bold h5"><%= Math.round(progressPercentage) %>%</div>
-                                                                </div>
-                                                                <div class="col-6 mb-3">
-                                                                    <div class="text-muted small">Status</div>
-                                                                    <span class="badge <%= isCompleted ? 'bg-success' : 'bg-primary' %>">
-                                                                        <%= isCompleted ? 'Completed' : 'Active' %>
-                                                                    </span>
-                                                                </div>
-                                                                <% if (saving.target_date) { %>
-                                                                    <div class="col-12 pt-3 border-top">
-                                                                        <div class="text-muted small">Target Date</div>
-                                                                        <div class="fw-bold"><%= new Date(saving.target_date).toLocaleDateString() %></div>
-                                                                    </div>
-                                                                <% } %>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        <% }) %>
-                                    </div>
-                                <% } else { %>
-                                    <!-- Empty State -->
-                                    <div class="empty-state">
-                                        <i class="fas fa-piggy-bank"></i>
-                                        <h5>No Savings Goals Yet</h5>
-                                        <p class="mb-3">Start building your financial future by creating your first savings goal</p>
-                                        <a href="/user/savings/add" class="btn btn-primary">
-                                            <i class="fas fa-plus me-1"></i>
-                                            Create First Goal
-                                        </a>
-                                    </div>
                                 <% } %>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </main>
+
+                                    <!-- Quick Actions -->
+                                    <div class="row mb-4">
+                                        <div class="col-12">
+                                            <div class="card shadow">
+                                                <div class="card-header">
+                                                    <h5 class="card-title mb-0">
+                                                        <i class="fas fa-bolt me-2"></i>Quick Actions
+                                                    </h5>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="row text-center">
+                                                        <div class="col-md-3 col-sm-6 mb-3">
+                                                            <a href="/user/savings/add"
+                                                                class="btn btn-primary btn-lg w-100 py-3">
+                                                                <i class="fas fa-plus-circle fa-2x mb-2"></i><br>
+                                                                Create Goal
+                                                            </a>
+                                                        </div>
+                                                        <div class="col-md-3 col-sm-6 mb-3">
+                                                            <a href="/user/expenses"
+                                                                class="btn btn-success btn-lg w-100 py-3">
+                                                                <i class="fas fa-receipt fa-2x mb-2"></i><br>
+                                                                View Expenses
+                                                            </a>
+                                                        </div>
+                                                        <div class="col-md-3 col-sm-6 mb-3">
+                                                            <a href="/user/reports"
+                                                                class="btn btn-info btn-lg w-100 py-3">
+                                                                <i class="fas fa-chart-bar fa-2x mb-2"></i><br>
+                                                                View Reports
+                                                            </a>
+                                                        </div>
+                                                        <div class="col-md-3 col-sm-6 mb-3">
+                                                            <a href="/user/dashboard"
+                                                                class="btn btn-secondary btn-lg w-100 py-3">
+                                                                <i class="fas fa-tachometer-alt fa-2x mb-2"></i><br>
+                                                                Dashboard
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Stats -->
+                                    <div class="row mb-4">
+                                        <div class="col-xl-3 col-md-6 mb-4">
+                                            <div class="card border-left-primary shadow h-100 py-2 stat-card">
+                                                <div class="card-body">
+                                                    <div class="row no-gutters align-items-center">
+                                                        <div class="col mr-2">
+                                                            <div
+                                                                class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                                                Total Goals</div>
+                                                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                                                <%= savings ? savings.length : 0 %>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-auto">
+                                                            <i class="fas fa-bullseye fa-2x text-gray-300"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-xl-3 col-md-6 mb-4">
+                                            <div class="card border-left-success shadow h-100 py-2 stat-card">
+                                                <div class="card-body">
+                                                    <div class="row no-gutters align-items-center">
+                                                        <div class="col mr-2">
+                                                            <div
+                                                                class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                                                Total Saved</div>
+                                                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                                                <% // FIXED: Parse amounts as numbers const
+                                                                    totalSaved=savings ? savings.reduce((sum, saving)=>
+                                                                    sum + (parseFloat(saving.current_amount) || 0), 0) :
+                                                                    0;
+                                                                    %>
+                                                                    Ksh <%= (parseFloat(totalSaved) || 0).toFixed(2) %>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-auto">
+                                                            <i class="fas fa-piggy-bank fa-2x text-gray-300"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-xl-3 col-md-6 mb-4">
+                                            <div class="card border-left-warning shadow h-100 py-2 stat-card">
+                                                <div class="card-body">
+                                                    <div class="row no-gutters align-items-center">
+                                                        <div class="col mr-2">
+                                                            <div
+                                                                class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                                                Total Target</div>
+                                                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                                                <% // FIXED: Parse amounts as numbers const
+                                                                    totalTarget=savings ? savings.reduce((sum, saving)=>
+                                                                    sum + (parseFloat(saving.target_amount) || 0), 0) :
+                                                                    0;
+                                                                    %>
+                                                                    Ksh <%= (parseFloat(totalTarget) || 0).toFixed(2) %>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-auto">
+                                                            <i class="fas fa-bullseye fa-2x text-gray-300"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-xl-3 col-md-6 mb-4">
+                                            <div class="card border-left-info shadow h-100 py-2 stat-card">
+                                                <div class="card-body">
+                                                    <div class="row no-gutters align-items-center">
+                                                        <div class="col mr-2">
+                                                            <div
+                                                                class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                                                Overall Progress</div>
+                                                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                                                <% const overallProgress=totalTarget> 0 ? (totalSaved /
+                                                                    totalTarget) * 100 : 0;
+                                                                    %>
+                                                                    <%= (parseFloat(overallProgress) || 0).toFixed(1) %>
+                                                                        %
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-auto">
+                                                            <i class="fas fa-chart-line fa-2x text-gray-300"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Savings Goals -->
+                                    <div class="row mb-4">
+                                        <div class="col-12">
+                                            <div class="card shadow">
+                                                <div
+                                                    class="card-header d-flex justify-content-between align-items-center">
+                                                    <h5 class="card-title mb-0">
+                                                        <i class="fas fa-bullseye me-2"></i>Your Savings Goals
+                                                    </h5>
+                                                    <a href="/user/savings/add" class="btn btn-sm btn-primary">
+                                                        <i class="fas fa-plus me-1"></i>Add Goal
+                                                    </a>
+                                                </div>
+                                                <div class="card-body">
+                                                    <% if (savings && savings.length> 0) { %>
+                                                        <div class="row">
+                                                            <% savings.forEach((saving, index)=> {
+                                                                // FIXED: Parse amounts as numbers
+                                                                const currentAmount = parseFloat(saving.current_amount)
+                                                                || 0;
+                                                                const targetAmount = parseFloat(saving.target_amount) ||
+                                                                0;
+                                                                const progress = targetAmount > 0 ? (currentAmount /
+                                                                targetAmount) * 100 : 0;
+                                                                const progressPercentage = Math.min(progress, 100);
+                                                                const isCompleted = currentAmount >= targetAmount;
+                                                                const daysRemaining = saving.target_date ?
+                                                                Math.ceil((new Date(saving.target_date) - new Date()) /
+                                                                (1000 * 60 * 60 * 24)) : null;
+                                                                const progressClass = progressPercentage >= 100 ?
+                                                                'bg-success' : progressPercentage >= 75 ? 'bg-info' :
+                                                                progressPercentage >= 50 ? 'bg-primary' : 'bg-warning';
+                                                                %>
+                                                                <div class="col-lg-6 mb-4">
+                                                                    <div
+                                                                        class="card savings-goal-card h-100 <%= isCompleted ? 'completed' : '' %>">
+                                                                        <div class="card-body">
+                                                                            <div
+                                                                                class="d-flex justify-content-between align-items-start mb-3">
+                                                                                <h5 class="card-title mb-0">
+                                                                                    <i
+                                                                                        class="fas fa-<%= isCompleted ? 'trophy' : 'bullseye' %> me-2 text-primary"></i>
+                                                                                    <%= saving.name %>
+                                                                                </h5>
+                                                                                <% if (isCompleted) { %>
+                                                                                    <span class="badge bg-success">
+                                                                                        <i
+                                                                                            class="fas fa-check me-1"></i>Completed
+                                                                                    </span>
+                                                                                    <% } %>
+                                                                            </div>
+
+                                                                            <% if (saving.description) { %>
+                                                                                <p class="card-text text-muted mb-3">
+                                                                                    <%= saving.description %>
+                                                                                </p>
+                                                                                <% } %>
+
+                                                                                    <div class="mb-3">
+                                                                                        <div
+                                                                                            class="d-flex justify-content-between mb-1">
+                                                                                            <span class="fw-bold">Ksh
+                                                                                                <%= currentAmount.toFixed(2)
+                                                                                                    %>
+                                                                                            </span>
+                                                                                            <span class="text-muted">Ksh
+                                                                                                <%= targetAmount.toFixed(2)
+                                                                                                    %>
+                                                                                            </span>
+                                                                                        </div>
+                                                                                        <div
+                                                                                            class="progress goal-progress">
+                                                                                            <div class="progress-bar <%= progressClass %>"
+                                                                                                role="progressbar"
+                                                                                                style="width: <%= progressPercentage %>%"
+                                                                                                aria-valuenow="<%= progressPercentage %>"
+                                                                                                aria-valuemin="0"
+                                                                                                aria-valuemax="100">
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div
+                                                                                            class="d-flex justify-content-between mt-1">
+                                                                                            <small class="text-muted">
+                                                                                                <%= Math.round(progressPercentage)
+                                                                                                    %>% complete
+                                                                                            </small>
+                                                                                            <% if (daysRemaining &&
+                                                                                                daysRemaining> 0 &&
+                                                                                                !isCompleted) { %>
+                                                                                                <small
+                                                                                                    class="text-warning">
+                                                                                                    <i
+                                                                                                        class="fas fa-clock me-1"></i>
+                                                                                                    <%= daysRemaining %>
+                                                                                                        days
+                                                                                                </small>
+                                                                                                <% } %>
+                                                                                        </div>
+                                                                                    </div>
+
+                                                                                    <% if (!isCompleted) { %>
+                                                                                        <form
+                                                                                            action="/user/savings/add-amount/<%= saving.id %>"
+                                                                                            method="POST" class="mb-3">
+                                                                                            <div class="input-group">
+                                                                                                <span
+                                                                                                    class="input-group-text">Ksh</span>
+                                                                                                <input type="number"
+                                                                                                    step="0.01"
+                                                                                                    min="0.01"
+                                                                                                    max="<%= (targetAmount - currentAmount).toFixed(2) %>"
+                                                                                                    class="form-control"
+                                                                                                    name="amount"
+                                                                                                    placeholder="Enter amount"
+                                                                                                    required>
+                                                                                                <button type="submit"
+                                                                                                    class="btn btn-success">
+                                                                                                    <i
+                                                                                                        class="fas fa-plus me-1"></i>Add
+                                                                                                </button>
+                                                                                            </div>
+                                                                                            <div
+                                                                                                class="form-text text-center">
+                                                                                                Remaining: <strong>Ksh
+                                                                                                    <%= (targetAmount -
+                                                                                                        currentAmount).toFixed(2)
+                                                                                                        %>
+                                                                                                </strong>
+                                                                                            </div>
+                                                                                        </form>
+                                                                                        <% } else { %>
+                                                                                            <div
+                                                                                                class="alert alert-success text-center py-2 mb-3">
+                                                                                                <i
+                                                                                                    class="fas fa-check-circle me-2"></i>
+                                                                                                <strong>Goal
+                                                                                                    Achieved!</strong>
+                                                                                            </div>
+                                                                                            <% } %>
+
+                                                                                                <div
+                                                                                                    class="d-flex justify-content-between text-muted small mb-3">
+                                                                                                    <% if
+                                                                                                        (saving.target_date)
+                                                                                                        { %>
+                                                                                                        <span>
+                                                                                                            <i
+                                                                                                                class="fas fa-calendar me-1"></i>
+                                                                                                            <%= new
+                                                                                                                Date(saving.target_date).toLocaleDateString()
+                                                                                                                %>
+                                                                                                        </span>
+                                                                                                        <% } %>
+                                                                                                            <% if
+                                                                                                                (saving.created_at)
+                                                                                                                { %>
+                                                                                                                <span>
+                                                                                                                    <i
+                                                                                                                        class="fas fa-clock me-1"></i>
+                                                                                                                    <%= new
+                                                                                                                        Date(saving.created_at).toLocaleDateString()
+                                                                                                                        %>
+                                                                                                                </span>
+                                                                                                                <% } %>
+                                                                                                </div>
+
+                                                                                                <div
+                                                                                                    class="goal-actions d-flex gap-2">
+                                                                                                    <a href="/user/savings/edit/<%= saving.id %>"
+                                                                                                        class="btn btn-outline-primary btn-sm flex-fill">
+                                                                                                        <i
+                                                                                                            class="fas fa-edit me-1"></i>Edit
+                                                                                                    </a>
+                                                                                                    <button
+                                                                                                        type="button"
+                                                                                                        class="btn btn-outline-info btn-sm flex-fill"
+                                                                                                        data-bs-toggle="modal"
+                                                                                                        data-bs-target="#detailsModal<%= saving.id %>">
+                                                                                                        <i
+                                                                                                            class="fas fa-chart-line me-1"></i>Details
+                                                                                                    </button>
+                                                                                                    <form
+                                                                                                        action="/user/savings/delete/<%= saving.id %>"
+                                                                                                        method="POST"
+                                                                                                        class="flex-fill">
+                                                                                                        <button
+                                                                                                            type="submit"
+                                                                                                            class="btn btn-outline-danger btn-sm w-100"
+                                                                                                            onclick="return confirm('Are you sure you want to delete \'<%= saving.name %>\'? This action cannot be undone.')">
+                                                                                                            <i
+                                                                                                                class="fas fa-trash me-1"></i>Delete
+                                                                                                        </button>
+                                                                                                    </form>
+                                                                                                </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                                <!-- Details Modal -->
+                                                                <div class="modal fade"
+                                                                    id="detailsModal<%= saving.id %>" tabindex="-1"
+                                                                    aria-labelledby="detailsModalLabel<%= saving.id %>"
+                                                                    aria-hidden="true">
+                                                                    <div class="modal-dialog modal-dialog-centered">
+                                                                        <div class="modal-content">
+                                                                            <div class="modal-header">
+                                                                                <h5 class="modal-title"
+                                                                                    id="detailsModalLabel<%= saving.id %>">
+                                                                                    Goal Details</h5>
+                                                                                <button type="button" class="btn-close"
+                                                                                    data-bs-dismiss="modal"
+                                                                                    aria-label="Close"></button>
+                                                                            </div>
+                                                                            <div class="modal-body">
+                                                                                <div class="text-center mb-4">
+                                                                                    <h5 class="fw-bold">
+                                                                                        <%= saving.name %>
+                                                                                    </h5>
+                                                                                    <% if (saving.description) { %>
+                                                                                        <p class="text-muted">
+                                                                                            <%= saving.description %>
+                                                                                        </p>
+                                                                                        <% } %>
+                                                                                </div>
+
+                                                                                <div class="row text-center">
+                                                                                    <div class="col-6 mb-3">
+                                                                                        <div class="text-muted small">
+                                                                                            Saved</div>
+                                                                                        <div class="fw-bold h5">Ksh <%=
+                                                                                                currentAmount.toFixed(2)
+                                                                                                %>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div class="col-6 mb-3">
+                                                                                        <div class="text-muted small">
+                                                                                            Target</div>
+                                                                                        <div class="fw-bold h5">Ksh <%=
+                                                                                                targetAmount.toFixed(2)
+                                                                                                %>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div class="col-6 mb-3">
+                                                                                        <div class="text-muted small">
+                                                                                            Progress</div>
+                                                                                        <div class="fw-bold h5">
+                                                                                            <%= Math.round(progressPercentage)
+                                                                                                %>%
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div class="col-6 mb-3">
+                                                                                        <div class="text-muted small">
+                                                                                            Status</div>
+                                                                                        <span
+                                                                                            class="badge <%= isCompleted ? 'bg-success' : 'bg-primary' %>">
+                                                                                            <%= isCompleted
+                                                                                                ? 'Completed' : 'Active'
+                                                                                                %>
+                                                                                        </span>
+                                                                                    </div>
+                                                                                    <% if (saving.target_date) { %>
+                                                                                        <div
+                                                                                            class="col-12 pt-3 border-top">
+                                                                                            <div
+                                                                                                class="text-muted small">
+                                                                                                Target Date</div>
+                                                                                            <div class="fw-bold">
+                                                                                                <%= new
+                                                                                                    Date(saving.target_date).toLocaleDateString()
+                                                                                                    %>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <% } %>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <% }) %>
+                                                        </div>
+                                                        <% } else { %>
+                                                            <!-- Empty State -->
+                                                            <div class="empty-state">
+                                                                <i class="fas fa-piggy-bank"></i>
+                                                                <h5>No Savings Goals Yet</h5>
+                                                                <p class="mb-3">Start building your financial future by
+                                                                    creating your first savings goal</p>
+                                                                <a href="/user/savings/add" class="btn btn-primary">
+                                                                    <i class="fas fa-plus me-1"></i>
+                                                                    Create First Goal
+                                                                </a>
+                                                            </div>
+                                                            <% } %>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                </main>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Mobile menu toggle
-        document.addEventListener('DOMContentLoaded', function() {
-            var sidebar = document.querySelector('.sidebar');
-            var menuToggle = document.querySelector('[data-bs-toggle="collapse"]');
-            
-            if (menuToggle && sidebar) {
-                menuToggle.addEventListener('click', function() {
-                    sidebar.classList.toggle('show');
-                });
-            }
+        document.addEventListener('DOMContentLoaded', function () {
+
 
             // Auto-dismiss alerts after 5 seconds
-            setTimeout(function() {
+            setTimeout(function () {
                 var alerts = document.querySelectorAll('.alert');
-                alerts.forEach(function(alert) {
+                alerts.forEach(function (alert) {
                     var bsAlert = new bootstrap.Alert(alert);
                     bsAlert.close();
                 });
@@ -528,18 +606,18 @@
 
             // Form validation for add amount
             const forms = document.querySelectorAll('form[action*="add-amount"]');
-            forms.forEach(function(form) {
-                form.addEventListener('submit', function(e) {
+            forms.forEach(function (form) {
+                form.addEventListener('submit', function (e) {
                     const amountInput = form.querySelector('input[name="amount"]');
                     const maxAmount = parseFloat(amountInput.getAttribute('max'));
                     const amount = parseFloat(amountInput.value);
-                    
+
                     if (amount > maxAmount) {
                         e.preventDefault();
                         alert('Amount cannot exceed remaining target: Ksh ' + maxAmount.toFixed(2));
                         amountInput.focus();
                     }
-                    
+
                     if (amount <= 0) {
                         e.preventDefault();
                         alert('Amount must be greater than 0');
@@ -547,7 +625,8 @@
                     }
                 });
             });
-        }));
+        });
     </script>
 </body>
+
 </html>
