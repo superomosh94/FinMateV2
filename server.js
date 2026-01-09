@@ -39,33 +39,14 @@ app.use((req, res, next) => {
   next();
 });
 
-// Route loader helper
-const loadRoute = (routePath, routeName) => {
-  try {
-    const absolutePath = path.resolve(__dirname, routePath);
-    const route = require(absolutePath);
-    console.log(`✅ ${routeName} loaded`);
-    return route;
-  } catch (error) {
-    console.error(`❌ Failed to load ${routeName}:`, error.message);
-    const express = require('express');
-    const fallback = express.Router();
-    fallback.get('*', (req, res) => res.status(500).json({
-      error: `Route ${routeName} failed`,
-      message: error.message
-    }));
-    return fallback;
-  }
-};
-
 // Load routes
-app.use('/auth', loadRoute('./routes/authRoutes', 'Auth'));
-app.use('/super-admin', loadRoute('./routes/superAdminRoutes', 'Super Admin'));
-app.use('/admin', loadRoute('./routes/adminRoutes', 'Admin'));
-app.use('/team-leader', loadRoute('./routes/teamLeaderRoutes', 'Team Leader'));
-app.use('/team-member', loadRoute('./routes/teamMemberRoutes', 'Team Member'));
-app.use('/user', loadRoute('./routes/individualUserRoutes', 'Individual User'));
-app.use('/', loadRoute('./routes/indexRoutes', 'Dashboard'));
+app.use('/auth', require('./routes/authRoutes'));
+app.use('/super-admin', require('./routes/superAdminRoutes'));
+app.use('/admin', require('./routes/adminRoutes'));
+app.use('/team-leader', require('./routes/teamLeaderRoutes'));
+app.use('/team-member', require('./routes/teamMemberRoutes'));
+app.use('/user', require('./routes/individualUserRoutes'));
+app.use('/', require('./routes/indexRoutes'));
 
 // Root route
 app.get('/', (req, res) => res.render('index', { title: 'Welcome to FinMate' }));
