@@ -13,19 +13,16 @@ const dbConfig = {
   database: process.env.DB_NAME || (isProduction ? '' : 'finmate_local'),
   port: process.env.DB_PORT || 3306,
   waitForConnections: true,
-  connectionLimit: 10,
+  connectionLimit: 5, // Reduced for serverless
   queueLimit: 0,
-  ssl: isProduction
+  // Only use SSL if CA path is provided or if explicitly requested
+  ssl: (isProduction && process.env.DB_SSL === 'true') || fs.existsSync(process.env.DB_CA_PATH)
     ? {
-        // Use Aiven CA certificate if available
-        ca: fs.existsSync(process.env.DB_CA_PATH)
-          ? fs.readFileSync(process.env.DB_CA_PATH).toString()
-          : undefined,
-        // fallback for self-signed certs
-        rejectUnauthorized: fs.existsSync(process.env.DB_CA_PATH)
-          ? true
-          : false
-      }
+      ca: fs.existsSync(process.env.DB_CA_PATH)
+        ? fs.readFileSync(process.env.DB_CA_PATH).toString()
+        : undefined,
+      rejectUnauthorized: fs.existsSync(process.env.DB_CA_PATH)
+    }
     : false
 };
 

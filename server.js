@@ -67,26 +67,27 @@ app.use((req, res) => {
 // Port binding
 const PORT = process.env.PORT || 3000;
 
-// Start server after DB connection
-(async () => {
+// Log environment
+console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+console.log(`🔌 DB Host: ${process.env.DB_HOST || 'localhost'}`);
+
+// Start server
+const server = app.listen(PORT, async () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+
+  // Attempt DB connection in the background
   try {
-    // For Aiven SSL: load CA if provided
-    if (process.env.DB_CA_PATH && fs.existsSync(process.env.DB_CA_PATH)) {
-      process.env.DB_SSL_CA = fs.readFileSync(process.env.DB_CA_PATH, 'utf8');
+    await db.testConnection();
+    console.log('✅ Database connection test successful');
+
+    // Only init if explicitly requested or in non-production to avoid timeouts
+    if (process.env.INIT_DB === 'true' || !process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
+      await db.initDatabase();
+      console.log('✅ Database initialized');
     }
-
-    await db.getConnection();
-    console.log('✅ Database connected');
-    await db.initDatabase();
-    console.log('✅ Database initialized');
-
-    app.listen(PORT, () => {
-      // console.log(`🚀 Server running on port ${PORT}`);
-    });
   } catch (err) {
-    console.error('❌ Database connection failed:', err.message);
-    process.exit(1);
+    console.error('⚠️ Post-startup DB check failed:', err.message);
   }
-})();
+});
 
 module.exports = app;
